@@ -86,6 +86,8 @@ Base on latest JetBrains and Googles latest arch patterns for KMP
 - use coroutines for state management
   - do game physics in background thread
   - render ui in main thread
+- use Compose Multiplatform
+  - make sure all @Composable have previews using @Preview
 - use MaterialTheme
   - prefer dark background with light text
   - give everything a retro look and feel
