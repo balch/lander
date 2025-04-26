@@ -134,6 +134,11 @@ Create random moon terrain with landing pads:
 - Use efficient rendering techniques
 - Implement frame rate limiting
 
+### Cross-Platform Testing
+- Test on all target platforms
+- Adjust controls for different input methods
+- Ensure consistent performance
+
 ## Resources and References
 
 ### Learning Resources
