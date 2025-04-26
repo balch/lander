@@ -91,7 +91,20 @@ Base on latest JetBrains and Googles latest arch patterns for KMP
 - use MaterialTheme
   - prefer dark background with light text
   - give everything a retro look and feel
-
+- organize the `commonMain` package structure to contain feature and core modules
+  - `core` package contains other packages shared by features
+  - `features` package contain screen specific package folder  
+  - see example below
+```
+com.balch.lander/
+  ├── core/
+  │   ├── game/
+  │   ├── ui/
+  │   └── utils/
+  ├── features/
+  │   └── start/
+  │   └── play/
+ ```
 ### 4. Input Handling
 Implement platform-specific input handling:
 - show on screen controls to handle left, right, and up thrust

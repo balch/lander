@@ -1,11 +1,11 @@
-package com.balch.lander.viewmodel
+package com.balch.lander.screens.startscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.balch.lander.model.GameConfig
-import com.balch.lander.model.GravityLevel
-import com.balch.lander.model.LandingPadSize
-import com.balch.lander.model.ThrustStrength
+import com.balch.lander.GameConfig
+import com.balch.lander.GravityLevel
+import com.balch.lander.LandingPadSize
+import com.balch.lander.ThrustStrength
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

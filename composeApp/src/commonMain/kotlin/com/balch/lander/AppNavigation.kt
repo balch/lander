@@ -1,8 +1,10 @@
-package com.balch.lander.ui.screens
+package com.balch.lander
 
 import androidx.compose.runtime.*
-import com.balch.lander.viewmodel.GameViewModel
-import com.balch.lander.viewmodel.StartScreenViewModel
+import com.balch.lander.screens.gamescreen.GameScreen
+import com.balch.lander.screens.gamescreen.GameViewModel
+import com.balch.lander.screens.startscreen.StartScreen
+import com.balch.lander.screens.startscreen.StartScreenViewModel
 import org.koin.compose.koinInject
 
 /**

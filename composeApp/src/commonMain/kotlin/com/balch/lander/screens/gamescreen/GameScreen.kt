@@ -1,4 +1,4 @@
-package com.balch.lander.ui.screens
+package com.balch.lander.screens.gamescreen
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -13,12 +13,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.balch.lander.model.GameStatus
-import com.balch.lander.viewmodel.GameScreenState
 import kotlin.math.abs
 
 /**
@@ -114,7 +113,7 @@ fun GameScreen(
                 drawRect(
                     color = landerColor,
                     topLeft = Offset(landerX - landerSize / 2, landerY - landerSize / 2),
-                    size = androidx.compose.ui.geometry.Size(landerSize, landerSize)
+                    size = Size(landerSize, landerSize)
                 )
 
                 // Lander legs
@@ -137,7 +136,7 @@ fun GameScreen(
                     drawRect(
                         color = Color.Red,
                         topLeft = Offset(landerX - landerSize / 4, landerY + landerSize / 2),
-                        size = androidx.compose.ui.geometry.Size(landerSize / 2, landerSize / 2)
+                        size = Size(landerSize / 2, landerSize / 2)
                     )
                 }
             }

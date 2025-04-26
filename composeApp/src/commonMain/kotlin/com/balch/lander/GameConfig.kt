@@ -1,4 +1,4 @@
-package com.balch.lander.model
+package com.balch.lander
 
 /**
  * Configuration options for the Lunar Lander game.

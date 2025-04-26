@@ -1,5 +1,9 @@
-package com.balch.lander.model
+package com.balch.lander.screens.gamescreen.gameplay
 
+import com.balch.lander.LandingPadSize
+import com.balch.lander.screens.gamescreen.LandingPad
+import com.balch.lander.screens.gamescreen.Terrain
+import com.balch.lander.screens.gamescreen.Vector2D
 import kotlin.random.Random
 
 /**
@@ -71,10 +75,12 @@ class TerrainGenerator {
                     points.add(Vector2D(padEndX, padY))
                     
                     // Register the landing pad
-                    landingPads.add(LandingPad(
-                        start = Vector2D(padStartX, padY),
-                        end = Vector2D(padEndX, padY)
-                    ))
+                    landingPads.add(
+                        LandingPad(
+                            start = Vector2D(padStartX, padY),
+                            end = Vector2D(padEndX, padY)
+                        )
+                    )
                     
                     // Skip to the end of the landing pad
                     continue

@@ -1,10 +1,9 @@
-package com.balch.lander.di
+package com.balch.lander
 
-import com.balch.lander.model.GameConfig
-import com.balch.lander.model.PhysicsEngine
-import com.balch.lander.model.TerrainGenerator
-import com.balch.lander.viewmodel.GameViewModel
-import com.balch.lander.viewmodel.StartScreenViewModel
+import com.balch.lander.screens.gamescreen.GameViewModel
+import com.balch.lander.screens.gamescreen.gameplay.PhysicsEngine
+import com.balch.lander.screens.gamescreen.gameplay.TerrainGenerator
+import com.balch.lander.screens.startscreen.StartScreenViewModel
 import org.koin.dsl.module
 
 /**

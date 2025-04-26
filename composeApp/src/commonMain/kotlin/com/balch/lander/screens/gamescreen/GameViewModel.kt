@@ -1,9 +1,12 @@
-package com.balch.lander.viewmodel
+package com.balch.lander.screens.gamescreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.balch.lander.common.utils.TimeUtil
-import com.balch.lander.model.*
+import com.balch.lander.GameConfig
+import com.balch.lander.core.TimeUtil
+import com.balch.lander.screens.gamescreen.gameplay.ControlInputs
+import com.balch.lander.screens.gamescreen.gameplay.PhysicsEngine
+import com.balch.lander.screens.gamescreen.gameplay.TerrainGenerator
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

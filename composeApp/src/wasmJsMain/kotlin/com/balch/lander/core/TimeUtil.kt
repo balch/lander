@@ -1,4 +1,4 @@
-package com.balch.lander.common.utils
+package com.balch.lander.core
 
 /**
  * WebAssembly/JavaScript implementation of TimeUtil.
@@ -6,10 +6,10 @@ package com.balch.lander.common.utils
 actual object TimeUtil {
     // Start time for relative calculations
     private var startTime = 0L
-    
+
     // Counter for incremental time
     private var counter = 0L
-    
+
     /**
      * Gets the current time in milliseconds.
      * For WebAssembly, we use a simple counter that increments with each call.

@@ -1,4 +1,4 @@
-package com.balch.lander.ui.screens
+package com.balch.lander.screens.startscreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,10 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.balch.lander.model.GravityLevel
-import com.balch.lander.model.LandingPadSize
-import com.balch.lander.model.ThrustStrength
-import com.balch.lander.viewmodel.StartScreenState
+import com.balch.lander.GravityLevel
+import com.balch.lander.LandingPadSize
+import com.balch.lander.ThrustStrength
 
 /**
  * Start Screen for the Lunar Lander game.

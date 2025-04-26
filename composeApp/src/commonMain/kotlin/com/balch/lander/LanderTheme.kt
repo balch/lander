@@ -1,4 +1,4 @@
-package com.balch.lander.ui.theme
+package com.balch.lander
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors

@@ -1,5 +1,6 @@
-package com.balch.lander.model
+package com.balch.lander.screens.gamescreen
 
+import com.balch.lander.GameConfig
 import kotlin.math.abs
 
 /**

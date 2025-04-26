@@ -1,4 +1,4 @@
-package com.balch.lander.common.utils
+package com.balch.lander.core
 
 /**
  * Platform-agnostic utility for handling time.
