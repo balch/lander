@@ -45,7 +45,7 @@ Lunar Lander is a classic arcade game where players control a spacecraft and att
       1. Rotate Left
       2. Rotate Right
       3. Thrust
-      4small button on the bottom right of the screen
+      4. Small button on the bottom right of the screen
    4. Game Play Behavior
       1. start at top center of screen
       2. lander descent is based on selected gravity
@@ -62,7 +62,7 @@ Lunar Lander is a classic arcade game where players control a spacecraft and att
          4. Show Nav button for Restart to Back to Start Screen
       7. If the Lander Crashes
          1. Show crash animation
-         2. play chras audio
+         2. play crash audio
          3. show a random message suggesting the user needs to learn to navigate better
          4. Show Nav button for Restart to Back to Start Screen
 
@@ -98,12 +98,12 @@ Implement platform-specific input handling:
 - implement platform specific keyboard handling for thrust
   - space key maps to up thrust
   - left key maps to rotate left
-  - right key mape to rotate right
+  - right key maps to rotate right
 
 ### 5. Terrain Generation
 Create random moon terrain with landing pads:
 - landing pad size is based on user config option
-- terrain scrolls on to screen as user get close the edge
+- terrain scrolls on to screen as user gets close to the edge
 
 ## Asset Requirements
 
