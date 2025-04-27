@@ -424,7 +424,7 @@ fun StartScreenPreview() {
     MaterialTheme(colors = darkColors()) {
         Box(
             modifier = Modifier
-                .width(1080.dp)
+                .width(640.dp)
                 .height(340.dp)
                 .background(Color.White.copy(alpha = 0.5f))
         ) {
