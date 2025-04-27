@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.balch.lander.GameConfig
 import com.balch.lander.screens.gamescreen.gameplay.ControlInputs
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.abs
 
 /**
@@ -142,7 +143,7 @@ fun DrawScope.drawLander(landerState: LanderState) {
     // Draw lander
     val landerX = landerState.position.x / 1000f * size.width
     val landerY = landerState.position.y / 1000f * size.height
-    val landerSize = 20f
+    val landerSize = 25f
 
     // Determine lander color based on game state
     val landerColor = when {
@@ -419,6 +420,66 @@ fun GameOverMessage(
                     }
                 }
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun LanderPreview() {
+    val landerState = LanderState()
+
+    MaterialTheme(colors = darkColors()) {
+        Canvas(modifier = Modifier
+            .width(20.dp)
+            .height(20.dp)
+            .offset(10.dp, 10.dp)) {
+            drawLander(landerState)
+        }
+    }
+}
+
+@Preview
+@Composable
+fun StarsPreview() {
+    val config = GameConfig()
+
+    MaterialTheme(colors = darkColors()) {
+        Canvas(modifier = Modifier
+            .width(600.dp)
+            .height(350.dp)
+        ) {
+            drawStars(config)
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ControlPadPreview() {
+    val landerState = LanderState()
+
+    MaterialTheme(colors = darkColors()) {
+        Box(modifier = Modifier
+            .width(600.dp)
+            .height(350.dp)
+        ) {
+            drawControlPanel(landerState, {  })
+        }
+    }
+}
+
+@Preview
+@Composable
+fun InfoPanelPreview() {
+    val landerState = LanderState()
+
+    MaterialTheme(colors = darkColors()) {
+        Box(modifier = Modifier
+            .width(600.dp)
+            .height(350.dp)
+        ) {
+            drawInfoPanel(landerState, 60)
         }
     }
 }
