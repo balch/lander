@@ -85,32 +85,6 @@ class StartScreenViewModel : ViewModel() {
             }
         }
     }
-    
-    /**
-     * Starts the game with the current configuration.
-     */
-    fun startGame() {
-        viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    navigateToGame = true
-                )
-            }
-        }
-    }
-    
-    /**
-     * Resets the navigation flag after navigation is handled.
-     */
-    fun onGameNavigated() {
-        viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    navigateToGame = false
-                )
-            }
-        }
-    }
 }
 
 /**
@@ -121,9 +95,4 @@ data class StartScreenState(
      * Current game configuration.
      */
     val gameConfig: GameConfig = GameConfig(),
-    
-    /**
-     * Whether to navigate to the game screen.
-     */
-    val navigateToGame: Boolean = false
 )

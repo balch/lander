@@ -17,20 +17,17 @@ fun AppNavigation() {
     val startScreenViewModel = koinInject<StartScreenViewModel>()
     val gameViewModel = koinInject<GameViewModel>()
 
-    // Collect UI states
-    val startScreenState by startScreenViewModel.uiState.collectAsState()
-    val gameScreenState by gameViewModel.uiState.collectAsState()
-
-    // Track current screen
-    var currentScreen by remember {
+    // Track current screen using the sealed interface Screen
+    var currentScreen: Screen by remember {
         // Start with the Start Screen
         mutableStateOf(Screen.StartScreen)
     }
 
-    // Handle navigation
+    // Handle navigation based on current screen
     when (currentScreen) {
         Screen.StartScreen -> {
-            // Show Start Screen
+            // Collect UI state only when on this screen for better performance
+            val startScreenState by startScreenViewModel.uiState.collectAsState()
             StartScreen(
                 uiState = startScreenState,
                 onFuelLevelChanged = startScreenViewModel::updateFuelLevel,
@@ -38,25 +35,15 @@ fun AppNavigation() {
                 onLandingPadSizeChanged = startScreenViewModel::updateLandingPadSize,
                 onThrustStrengthChanged = startScreenViewModel::updateThrustStrength,
                 onStartGameClicked = {
-                    startScreenViewModel.startGame()
+                    // Direct navigation to GameScreen with config passed as parameter
+                    currentScreen = Screen.GameScreen(startScreenViewModel.uiState.value.gameConfig)
                 }
             )
-
-            // Navigate to Game Screen if requested
-            if (startScreenState.navigateToGame) {
-                // Start game with the configured options
-                gameViewModel.startGame(startScreenState.gameConfig)
-
-                // Reset navigation flag
-                startScreenViewModel.onGameNavigated()
-
-                // Update current screen
-                currentScreen = Screen.GameScreen
-            }
         }
 
-        Screen.GameScreen -> {
-            // Show Game Screen
+        is Screen.GameScreen -> {
+            val config = (currentScreen as Screen.GameScreen).config
+            val gameScreenState by gameViewModel.uiState.collectAsState()
             GameScreen(
                 uiState = gameScreenState,
                 onThrustPressed = { gameViewModel.setThrust(true) },
@@ -65,26 +52,30 @@ fun AppNavigation() {
                 onRotateLeftReleased = { gameViewModel.setRotateLeft(false) },
                 onRotateRightPressed = { gameViewModel.setRotateRight(true) },
                 onRotateRightReleased = { gameViewModel.setRotateRight(false) },
-                onRestartClicked = { gameViewModel.restartGame() },
-                onBackToStartClicked = { gameViewModel.navigateToStartScreen() }
+                onRestartClicked = { config },
+                onBackToStartClicked = { currentScreen = Screen.StartScreen }
             )
 
-            // Navigate back to Start Screen if requested
-            if (gameScreenState.navigateToStartScreen) {
-                // Reset navigation flag
-                gameViewModel.onStartScreenNavigated()
-
-                // Update current screen
-                currentScreen = Screen.StartScreen
+            // Use LaunchedEffect to start the game when this screen is shown or config changes
+            LaunchedEffect(config) {
+                gameViewModel.startGame(config)
             }
         }
     }
 }
 
 /**
- * Enum representing the screens in the application.
+ * Sealed interface representing the screens in the application.
  */
-enum class Screen {
-    StartScreen,
-    GameScreen
+sealed interface Screen {
+    /**
+     * Start screen with game configuration options
+     */
+    data object StartScreen: Screen
+
+    /**
+     * Game screen that requires game configuration
+     * @param config The game configuration to use for this game session
+     */
+    data class GameScreen(val config: GameConfig): Screen
 }

@@ -8,13 +8,9 @@ import com.balch.lander.screens.gamescreen.gameplay.ControlInputs
 import com.balch.lander.screens.gamescreen.gameplay.PhysicsEngine
 import com.balch.lander.screens.gamescreen.gameplay.TerrainGenerator
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.*
 import kotlin.random.Random
 
 /**
@@ -22,151 +18,23 @@ import kotlin.random.Random
  * Handles game logic, physics, and state during gameplay.
  */
 class GameViewModel(
-    private val terrainGenerator: TerrainGenerator
+    private val terrainGenerator: TerrainGenerator,
 ) : ViewModel() {
 
-    // State for the Game Screen
-    private val _uiState = MutableStateFlow(GameScreenState())
-    val uiState: StateFlow<GameScreenState> = _uiState.asStateFlow()
+    // State flows for different components
+    private val startGameIntentFlow = MutableSharedFlow<GameConfig>(
+        replay = 1, extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
 
-    // Physics engine
-    private var physicsEngine: PhysicsEngine? = null
-
-    // Game loop job
-    private var gameLoopJob: Job? = null
-
-    // Last update time
-    private var lastUpdateTime = 0L
-
-    // Control inputs
-    private val controlInputs = ControlInputs()
-
-    /**
-     * Starts a new game with the given configuration.
-     * @param config Game configuration
-     */
-    fun startGame(config: GameConfig) {
-        // Create physics engine with the given configuration
-        physicsEngine = PhysicsEngine(config)
-
-        // Generate terrain
-        val screenWidth = 1000f // Default screen width in game units
-        val screenHeight = 1000f // Default screen height in game units
-        val terrain = terrainGenerator.generateTerrain(
-            width = screenWidth,
-            height = screenHeight,
-            landingPadSize = config.landingPadSize,
-            seed = Random.nextLong()
-        )
-
-        // Calculate initial fuel based on config
-        val initialFuel = 100f + config.fuelLevel * 100f // 100-200 units of fuel
-
-        // Create initial game state
-        val initialState = GameState(
-            position = Vector2D(screenWidth / 2, 50f), // Start at top center
-            velocity = Vector2D(0f, 0f),
-            rotation = 0f,
-            fuel = initialFuel,
-            initialFuel = initialFuel,
-            terrain = terrain,
-            config = config
-        )
-
-        // Update UI state
-        _uiState.update { currentState ->
-            currentState.copy(
-                gameState = initialState,
-                isGameRunning = true,
-                successMessages = getSuccessMessages(),
-                failureMessages = getFailureMessages()
-            )
-        }
-
-        // Start game loop
-        startGameLoop()
-    }
-
-    /**
-     * Starts the game loop.
-     */
-    private fun startGameLoop() {
-        // Cancel existing game loop if any
-        gameLoopJob?.cancel()
-
-        // Initialize last update time
-        lastUpdateTime = TimeUtil.currentTimeMillis()
-
-        // Start new game loop
-        gameLoopJob = viewModelScope.launch(Dispatchers.Default) {
-            while (true) {
-                // Calculate delta time
-                val currentTime = TimeUtil.currentTimeMillis()
-                val deltaTime = (currentTime - lastUpdateTime) / 1000f
-                lastUpdateTime = currentTime
-
-                // Update game state
-                updateGameState(deltaTime)
-
-                // Delay to maintain frame rate (60 FPS)
-                delay(16) // ~60 FPS
-            }
-        }
-    }
-
-    /**
-     * Updates the game state based on physics and controls.
-     * @param deltaTime Time elapsed since last update in seconds
-     */
-    private fun updateGameState(deltaTime: Float) {
-        val currentState = _uiState.value.gameState
-        val physicsEngine = physicsEngine ?: return
-
-        // Skip update if game is not in playing state
-        if (currentState.status != GameStatus.PLAYING) {
-            return
-        }
-
-        // Update game state using physics engine
-        val newState = physicsEngine.update(currentState, deltaTime, controlInputs)
-
-        // Check if game status has changed
-        val statusChanged = currentState.status != newState.status
-
-        // Calculate FPS from deltaTime
-        val currentFps = if (deltaTime > 0) (1f / deltaTime).toInt() else 0
-
-        // Update UI state
-        _uiState.update { currentUiState ->
-            currentUiState.copy(
-                gameState = newState,
-                showSuccessMessage = statusChanged && newState.status == GameStatus.LANDED,
-                showFailureMessage = statusChanged && newState.status == GameStatus.CRASHED,
-                selectedMessage = if (statusChanged) {
-                    when (newState.status) {
-                        GameStatus.LANDED -> currentUiState.successMessages.random()
-                        GameStatus.CRASHED -> currentUiState.failureMessages.random()
-                        else -> ""
-                    }
-                } else {
-                    currentUiState.selectedMessage
-                },
-                fps = currentFps
-            )
-        }
-
-        // Stop game loop if game is over
-        if (statusChanged && newState.status != GameStatus.PLAYING) {
-            gameLoopJob?.cancel()
-        }
-    }
+    private val controlInputsFlow = MutableStateFlow(ControlInputs())
 
     /**
      * Sets the thrust control input.
      * @param isThrusting Whether thrust is active
      */
     fun setThrust(isThrusting: Boolean) {
-        controlInputs.thrust = isThrusting
+        controlInputsFlow.tryEmit(ControlInputs(thrust = isThrusting))
     }
 
     /**
@@ -174,7 +42,7 @@ class GameViewModel(
      * @param isRotatingLeft Whether rotating left is active
      */
     fun setRotateLeft(isRotatingLeft: Boolean) {
-        controlInputs.rotateLeft = isRotatingLeft
+        controlInputsFlow.tryEmit(ControlInputs(rotateLeft = isRotatingLeft))
     }
 
     /**
@@ -182,124 +50,198 @@ class GameViewModel(
      * @param isRotatingRight Whether rotating right is active
      */
     fun setRotateRight(isRotatingRight: Boolean) {
-        controlInputs.rotateRight = isRotatingRight
+        controlInputsFlow.tryEmit(ControlInputs(rotateRight = isRotatingRight))
     }
 
-    /**
-     * Restarts the game with the same configuration.
-     */
-    fun restartGame() {
-        val config = _uiState.value.gameState.config
-        startGame(config)
-    }
+    // UI state derived from game state and UI state flow
+    val uiState: StateFlow<GameScreenState> =
+        startGameIntentFlow
+            .transformLatest { config ->
+                emit(GameScreenState.Loading)
 
-    /**
-     * Navigates back to the start screen.
-     */
-    fun navigateToStartScreen() {
-        // Cancel game loop
-        gameLoopJob?.cancel()
+                val terrain = generateTerrain(config)
 
-        // Update UI state
-        _uiState.update { currentState ->
-            currentState.copy(
-                isGameRunning = false,
-                navigateToStartScreen = true
+                val environmentState = GameEnvironmentState(
+                    terrain = terrain,
+                    config = config
+                )
+
+                val landerState = initialLanderState(config)
+
+                val initialGameState = GameScreenState.Playing(landerState, environmentState)
+                emit(initialGameState)
+                emitAll(startGameLoop(config, initialGameState))
+            }
+            .flowOn(Dispatchers.Default)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = GameScreenState.Loading
             )
-        }
+
+    fun startGame(config: GameConfig) {
+        startGameIntentFlow.tryEmit(config)
     }
 
-    /**
-     * Resets the navigation flag after navigation is handled.
-     */
-    fun onStartScreenNavigated() {
-        _uiState.update { currentState ->
-            currentState.copy(
-                navigateToStartScreen = false
-            )
-        }
-    }
-
-    /**
-     * Gets a list of success messages.
-     */
-    private fun getSuccessMessages(): List<String> {
-        return listOf(
-            "Perfect landing! NASA would be proud.",
-            "Touchdown! The Eagle has landed.",
-            "Smooth as silk! You're a natural.",
-            "Landing confirmed. Mission accomplished!",
-            "That's one small step for a lander...",
-            "Houston, we have a successful landing!"
+    private fun initialLanderState(config: GameConfig): LanderState {
+        val initialFuel = 100f + config.fuelLevel * 100f // 100-200 units of fuel
+        return LanderState(
+            position = Vector2D(config.screenWidth / 2, 50f), // Start at top center
+            velocity = Vector2D(0f, 0f),
+            rotation = 0f,
+            fuel = initialFuel,
+            initialFuel = initialFuel
         )
     }
 
-    /**
-     * Gets a list of failure messages.
-     */
-    private fun getFailureMessages(): List<String> {
-        return listOf(
-            "Houston, we have a problem.",
-            "That's going to leave a mark...",
-            "The lander is now a permanent lunar feature.",
-            "Let's call that a 'rapid unscheduled disassembly'.",
-            "Maybe try landing gear down next time?",
-            "The moon claims another victim."
+    private fun generateTerrain(config: GameConfig): Terrain =
+        terrainGenerator.generateTerrain(
+            width = config.screenWidth,
+            height = config.screenHeight,
+            landingPadSize = config.landingPadSize,
+            seed = Random.nextLong()
         )
+
+    /**
+     * Starts the game loop.
+     */
+    private fun startGameLoop(
+        config: GameConfig,
+        initialGameState: GameScreenState,
+    ): Flow<GameScreenState> =
+        flow {
+            val physicsEngine = PhysicsEngine(config)
+
+            // Initialize last update time
+            var lastUpdateTime = TimeUtil.currentTimeMillis()
+            var currentGameState = initialGameState
+            var controlInputs = ControlInputs()
+
+            while (currentGameState !is GameScreenState.GameOver) {
+                // Calculate delta time
+                val currentTime = TimeUtil.currentTimeMillis()
+                val deltaTime = (currentTime - lastUpdateTime) / 1000f
+                lastUpdateTime = currentTime
+
+                // Update game state
+                currentGameState = updatedGameState(
+                    physicsEngine = physicsEngine,
+                    deltaTime = deltaTime,
+                    currentGameState = currentGameState,
+                    controlInputs = controlInputs,
+                )
+
+                emit(currentGameState)
+
+                controlInputs = merge(
+                    controlInputsFlow.drop(1),
+                    flow {
+                        // Delay to maintain frame rate (60 FPS)
+                        delay(16)
+                        controlInputs
+                    }
+                ).first()
+            }
+        }
+}
+
+// Gets a list of success messages
+private val successMessages: List<String> =
+    listOf(
+        "Perfect landing! NASA would be proud.",
+        "Touchdown! The Eagle has landed.",
+        "Smooth as silk! You're a natural.",
+        "Landing confirmed. Mission accomplished!",
+        "That's one small step for a lander...",
+        "Houston, we have a successful landing!"
+    )
+
+// Gets a list of failure messages
+private val failureMessages: List<String> =
+    listOf(
+        "Houston, we have a problem.",
+        "That's going to leave a mark...",
+        "The lander is now a permanent lunar feature.",
+        "Let's call that a 'rapid unscheduled disassembly'.",
+        "Maybe try landing gear down next time?",
+        "The moon claims another victim."
+    )
+
+/**
+ * Updates the game state based on physics and controls.
+ * @param deltaTime Time elapsed since last update in seconds
+ */
+private fun updatedGameState(
+    physicsEngine: PhysicsEngine,
+    deltaTime: Float,
+    currentGameState: GameScreenState,
+    controlInputs: ControlInputs,
+): GameScreenState {
+
+    // Skip update if game is not in playing state
+    if (currentGameState !is GameScreenState.Playing) {
+        return currentGameState
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        gameLoopJob?.cancel()
+    // Update game state using physics engine
+    val newLanderState = physicsEngine.update(
+        landerState = currentGameState.landerState,
+        deltaTime = deltaTime,
+        controls = controlInputs,
+        terrain = currentGameState.environmentState.terrain
+    )
+
+
+    // Check if lander has landed or crashed
+    return when (newLanderState.status) {
+        GameStatus.PLAYING -> GameScreenState.Playing(
+            landerState = newLanderState,
+            environmentState = currentGameState.environmentState,
+            fps = if (deltaTime > 0) (1f / deltaTime).toInt() else 0
+        )
+
+        GameStatus.LANDED -> GameScreenState.GameOver(true, successMessages.random())
+        GameStatus.CRASHED -> GameScreenState.GameOver(false, failureMessages.random())
     }
 }
+
 
 /**
  * UI state for the Game Screen.
  */
-data class GameScreenState(
-    /**
-     * Current game state.
-     */
-    val gameState: GameState = GameState(),
+sealed interface GameScreenState {
 
-    /**
-     * Whether the game is currently running.
-     */
-    val isGameRunning: Boolean = false,
+    data object Loading : GameScreenState
+    data class Playing(
+        /**
+         * The dynamic state of the lander that changes with the game loop.
+         */
+        val landerState: LanderState = LanderState(),
 
-    /**
-     * Whether to navigate back to the start screen.
-     */
-    val navigateToStartScreen: Boolean = false,
+        /**
+         * The static state of the game environment that is generated at game start.
+         */
+        val environmentState: GameEnvironmentState = GameEnvironmentState(),
 
-    /**
-     * Whether to show the success message.
-     */
-    val showSuccessMessage: Boolean = false,
+        /**
+         * Current frames per second.
+         */
+        val fps: Int = 0
+    ) : GameScreenState
 
-    /**
-     * Whether to show the failure message.
-     */
-    val showFailureMessage: Boolean = false,
+    data object NavigateToStartScreen : GameScreenState
 
-    /**
-     * List of success messages.
-     */
-    val successMessages: List<String> = emptyList(),
+    data class GameOver(
+        val isSuccess: Boolean,
+        val message: String,
+        /**
+         * The dynamic state of the lander that changes with the game loop.
+         */
+        val landerState: LanderState = LanderState(),
 
-    /**
-     * List of failure messages.
-     */
-    val failureMessages: List<String> = emptyList(),
-
-    /**
-     * Currently selected message to display.
-     */
-    val selectedMessage: String = "",
-
-    /**
-     * Current frames per second.
-     */
-    val fps: Int = 0
-)
+        /**
+         * The static state of the game environment that is generated at game start.
+         */
+        val environmentState: GameEnvironmentState = GameEnvironmentState(),
+    ) : GameScreenState
+}

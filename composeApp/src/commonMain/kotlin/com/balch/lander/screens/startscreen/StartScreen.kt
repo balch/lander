@@ -417,8 +417,7 @@ fun StartScreenPreview() {
             gravity = GravityLevel.MEDIUM,
             landingPadSize = LandingPadSize.MEDIUM,
             thrustStrength = ThrustStrength.MEDIUM
-        ),
-        navigateToGame = false
+        )
     )
 
     MaterialTheme(colors = darkColors()) {

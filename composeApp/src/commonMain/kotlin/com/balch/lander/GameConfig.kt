@@ -10,24 +10,42 @@ data class GameConfig(
      * Range: 0.0 (low) to 1.0 (high)
      */
     val fuelLevel: Float = 0.5f,
-    
+
     /**
      * Gravity strength affecting the lander.
      * Based on Moon gravity with 5 options.
      */
     val gravity: GravityLevel = GravityLevel.MEDIUM,
-    
+
     /**
      * Size of the landing pad.
      * 3 options available.
      */
     val landingPadSize: LandingPadSize = LandingPadSize.MEDIUM,
-    
+
     /**
      * Strength of the lander's thrust.
      * 3 options available.
      */
-    val thrustStrength: ThrustStrength = ThrustStrength.MEDIUM
+    val thrustStrength: ThrustStrength = ThrustStrength.MEDIUM,
+
+    /**
+     * Virtual screen width used for game calculations.
+     * This provides a consistent coordinate system regardless of actual screen size.
+     */
+    val screenWidth: Float = 1000f,
+
+    /**
+     * Virtual screen height used for game calculations.
+     * This provides a consistent coordinate system regardless of actual screen size.
+     */
+    val screenHeight: Float = 1000f,
+
+    /**
+     * Number of stars to display in the background.
+     * Controls the density of stars in the space backdrop.
+     */
+    val backgoundStarCount: Int = 250
 )
 
 /**
