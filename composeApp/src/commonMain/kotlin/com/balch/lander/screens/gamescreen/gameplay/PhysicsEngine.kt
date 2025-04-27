@@ -18,19 +18,19 @@ class PhysicsEngine(
 ) {
     // Base gravity acceleration on the Moon (1.62 m/s²)
     // Scaled for game units
-    private val baseGravity = 0.05f
+    private val baseGravity = 0.5f
 
     // Gravity adjusted by the config
     private val gravity = baseGravity * config.gravity.value
 
     // Base thrust force
-    private val baseThrust = 0.1f
+    private val baseThrust = 0.5f
 
     // Thrust adjusted by the config
     private val thrust = baseThrust * config.thrustStrength.value
 
-    // Rotation speed in degrees per second
-    private val rotationSpeed = 3f
+    // Rotation speed in degrees per second - increased for faster rotation
+    private val rotationSpeed = 12f
 
     // Fuel consumption rate per second when thrusting
     private val fuelConsumptionRate = 0.5f
@@ -149,8 +149,13 @@ class PhysicsEngine(
 
         // Apply thrust if thrusting and has fuel
         val thrustForce = if (isThrusting && hasFuel) {
+            // Convert rotation to radians
             val rotationRadians = rotation * PI.toFloat() / 180f
-            val thrustX = -sin(rotationRadians) * thrust
+            // Calculate thrust components based on lander's orientation
+            // For 0 degrees (pointing up), thrust should be upward (negative y)
+            // For 90 degrees (pointing right), thrust should be rightward (positive x)
+            // For -90 degrees (pointing left), thrust should be leftward (negative x)
+            val thrustX = sin(rotationRadians) * thrust
             val thrustY = -cos(rotationRadians) * thrust
             Vector2D(thrustX, thrustY)
         } else {
