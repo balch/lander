@@ -6,11 +6,8 @@ import com.balch.lander.GameConfig
 import com.balch.lander.GravityLevel
 import com.balch.lander.LandingPadSize
 import com.balch.lander.ThrustStrength
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 
 /**
  * ViewModel for the Start Screen.
@@ -19,23 +16,26 @@ import kotlinx.coroutines.launch
 class StartScreenViewModel : ViewModel() {
     
     // State for the Start Screen
-    private val _uiState = MutableStateFlow(StartScreenState())
-    val uiState: StateFlow<StartScreenState> = _uiState.asStateFlow()
-    
+    private val gameConfigFlow = MutableStateFlow(GameConfig())
+    val uiState: StateFlow<StartScreenState> =
+        gameConfigFlow
+            .map { StartScreenState(it) }
+            .flowOn(Dispatchers.Default)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StartScreenState())
+
+    /**
+     * Updates the game configuration.
+     */
+    fun updateGameConfig(gameConfig: GameConfig) {
+        gameConfigFlow.tryEmit(gameConfig)
+    }
+
     /**
      * Updates the fuel level configuration.
      * @param value Fuel level (0.0 to 1.0)
      */
     fun updateFuelLevel(value: Float) {
-        viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    gameConfig = currentState.gameConfig.copy(
-                        fuelLevel = value
-                    )
-                )
-            }
-        }
+        gameConfigFlow.tryEmit(gameConfigFlow.value.copy(fuelLevel = value))
     }
     
     /**
@@ -43,15 +43,7 @@ class StartScreenViewModel : ViewModel() {
      * @param gravityLevel Selected gravity level
      */
     fun updateGravityLevel(gravityLevel: GravityLevel) {
-        viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    gameConfig = currentState.gameConfig.copy(
-                        gravity = gravityLevel
-                    )
-                )
-            }
-        }
+        gameConfigFlow.tryEmit(gameConfigFlow.value.copy(gravity = gravityLevel))
     }
     
     /**
@@ -59,15 +51,7 @@ class StartScreenViewModel : ViewModel() {
      * @param landingPadSize Selected landing pad size
      */
     fun updateLandingPadSize(landingPadSize: LandingPadSize) {
-        viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    gameConfig = currentState.gameConfig.copy(
-                        landingPadSize = landingPadSize
-                    )
-                )
-            }
-        }
+        gameConfigFlow.tryEmit(gameConfigFlow.value.copy(landingPadSize = landingPadSize))
     }
     
     /**
@@ -75,15 +59,7 @@ class StartScreenViewModel : ViewModel() {
      * @param thrustStrength Selected thrust strength
      */
     fun updateThrustStrength(thrustStrength: ThrustStrength) {
-        viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    gameConfig = currentState.gameConfig.copy(
-                        thrustStrength = thrustStrength
-                    )
-                )
-            }
-        }
+        gameConfigFlow.tryEmit(gameConfigFlow.value.copy(thrustStrength = thrustStrength))
     }
 }
 
