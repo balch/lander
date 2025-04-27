@@ -169,6 +169,11 @@ fun GameScreen(
                 text = "ALTITUDE: ${gameState.distanceToGround.toInt()} m",
                 color = if (gameState.distanceToGround < 50) Color.Red else MaterialTheme.colors.onBackground
             )
+
+            Text(
+                text = "FPS: ${uiState.fps}",
+                color = MaterialTheme.colors.onBackground
+            )
         }
 
         // Small button on the bottom right of the screen
