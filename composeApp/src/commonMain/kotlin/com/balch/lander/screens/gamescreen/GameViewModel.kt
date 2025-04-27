@@ -7,6 +7,7 @@ import com.balch.lander.core.TimeUtil
 import com.balch.lander.screens.gamescreen.gameplay.ControlInputs
 import com.balch.lander.screens.gamescreen.gameplay.PhysicsEngine
 import com.balch.lander.screens.gamescreen.gameplay.TerrainGenerator
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -97,7 +98,7 @@ class GameViewModel(
         lastUpdateTime = TimeUtil.currentTimeMillis()
         
         // Start new game loop
-        gameLoopJob = viewModelScope.launch {
+        gameLoopJob = viewModelScope.launch(Dispatchers.Default) {
             while (true) {
                 // Calculate delta time
                 val currentTime = TimeUtil.currentTimeMillis()

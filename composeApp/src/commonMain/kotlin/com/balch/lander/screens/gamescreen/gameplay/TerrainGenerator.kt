@@ -4,12 +4,24 @@ import com.balch.lander.LandingPadSize
 import com.balch.lander.screens.gamescreen.LandingPad
 import com.balch.lander.screens.gamescreen.Terrain
 import com.balch.lander.screens.gamescreen.Vector2D
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.pow
 import kotlin.random.Random
 
 /**
  * Generates random terrain for the Lunar Lander game.
  */
 class TerrainGenerator {
+    /**
+     * Data class to hold information about a landing pad.
+     */
+    private data class LandingPadInfo(
+        val position: Float,
+        val isInCrater: Boolean
+    )
+
     /**
      * Generates random terrain with landing pads.
      * 
@@ -28,52 +40,67 @@ class TerrainGenerator {
         seed: Long = 0
     ): Terrain {
         val random = Random(seed)
-        
+
         // Number of terrain points to generate
         val numPoints = 100
-        
+
         // Generate landing pad positions first
-        val landingPadPositions = generateLandingPadPositions(numLandingPads, width, random)
-        
+        val landingPadInfos = generateLandingPadPositions(numLandingPads, width, random)
+
         // Calculate actual landing pad width based on size
         val baseLandingPadWidth = width / 20 // 5% of screen width
         val actualLandingPadWidth = baseLandingPadWidth * landingPadSize.value
-        
+
         // Generate terrain points
         val points = mutableListOf<Vector2D>()
         val landingPads = mutableListOf<LandingPad>()
-        
+
+        // Create some rock formations for visual interest
+        val numRocks = random.nextInt(3, 7) // 3-6 rock formations
+        val rockPositions = (0 until numRocks).map {
+            width * random.nextFloat() // Random position across width
+        }
+
+        // Create some mountain features
+        val numMountains = random.nextInt(2, 5) // 2-4 mountains
+        val mountainPositions = (0 until numMountains).map {
+            width * random.nextFloat() // Random position across width
+        }
+
         // Start with left edge
         points.add(Vector2D(0f, generateTerrainHeight(height, random)))
-        
+
         // Generate points across the width
         val step = width / (numPoints - 1)
         for (i in 1 until numPoints) {
             val x = i * step
-            
+
             // Check if this point is part of a landing pad
-            val isLandingPad = landingPadPositions.any { padX ->
-                x >= padX - actualLandingPadWidth / 2 && x <= padX + actualLandingPadWidth / 2
+            val landingPadInfo = landingPadInfos.find { padInfo ->
+                x >= padInfo.position - actualLandingPadWidth / 2 && x <= padInfo.position + actualLandingPadWidth / 2
             }
-            
-            if (isLandingPad) {
-                // Find which landing pad this is
-                val padIndex = landingPadPositions.indexOfFirst { padX ->
-                    x >= padX - actualLandingPadWidth / 2 && x <= padX + actualLandingPadWidth / 2
-                }
-                
+
+            if (landingPadInfo != null) {
                 // If this is the start of a landing pad
-                if (x <= landingPadPositions[padIndex] - actualLandingPadWidth / 2 + step) {
-                    val padStartX = landingPadPositions[padIndex] - actualLandingPadWidth / 2
-                    val padEndX = landingPadPositions[padIndex] + actualLandingPadWidth / 2
-                    val padY = height * 0.8f // Landing pads at 80% of screen height
-                    
+                if (x <= landingPadInfo.position - actualLandingPadWidth / 2 + step) {
+                    val padStartX = landingPadInfo.position - actualLandingPadWidth / 2
+                    val padEndX = landingPadInfo.position + actualLandingPadWidth / 2
+
+                    // Determine landing pad height based on whether it's in a crater
+                    val baseHeight = height * 0.8f // Default landing pad height
+                    val padY = if (landingPadInfo.isInCrater) {
+                        // Place the landing pad deeper if it's in a crater
+                        baseHeight + height * 0.05f // 5% deeper
+                    } else {
+                        baseHeight
+                    }
+
                     // Add landing pad start point
                     points.add(Vector2D(padStartX, padY))
-                    
+
                     // Add landing pad end point
                     points.add(Vector2D(padEndX, padY))
-                    
+
                     // Register the landing pad
                     landingPads.add(
                         LandingPad(
@@ -81,7 +108,7 @@ class TerrainGenerator {
                             end = Vector2D(padEndX, padY)
                         )
                     )
-                    
+
                     // Skip to the end of the landing pad
                     continue
                 } else {
@@ -89,39 +116,233 @@ class TerrainGenerator {
                     continue
                 }
             }
-            
-            // Regular terrain point
-            points.add(Vector2D(x, generateTerrainHeight(height, random)))
+
+            // Generate base terrain height
+            var terrainHeight = generateTerrainHeight(height, random)
+
+            // Apply crater effects around landing pads
+            for (padInfo in landingPadInfos) {
+                if (padInfo.isInCrater) {
+                    // Create a larger crater around landing pads that are in craters
+                    val craterWidth = actualLandingPadWidth * 3f // Crater is 3x wider than the landing pad
+                    val craterDepth = height * 0.05f // 5% of screen height
+                    terrainHeight = createCrater(x, padInfo.position, terrainHeight, craterWidth, craterDepth, random)
+                } else {
+                    // Create smaller crater-like depressions around other landing pads
+                    val craterWidth = actualLandingPadWidth * 1.5f // Smaller crater
+                    val craterDepth = height * 0.02f // 2% of screen height
+                    terrainHeight = createCrater(x, padInfo.position, terrainHeight, craterWidth, craterDepth, random)
+                }
+            }
+
+            // Apply mountain features (larger and taller than rocks)
+            for (mountainPos in mountainPositions) {
+                val mountainWidth = width * 0.1f // 10% of screen width
+                val mountainHeight = height * 0.15f * (0.7f + random.nextFloat() * 0.3f) // 10.5-15% of screen height
+                terrainHeight = createMountain(x, mountainPos, terrainHeight, mountainWidth, mountainHeight, random)
+            }
+
+            // Apply rock formations (smaller than mountains)
+            for (rockPos in rockPositions) {
+                val rockWidth = width * 0.03f // 3% of screen width
+                val rockHeight = height * 0.04f * random.nextFloat() // Up to 4% of screen height
+                terrainHeight = createRock(x, rockPos, terrainHeight, rockWidth, rockHeight, random)
+            }
+
+            // Add the terrain point
+            points.add(Vector2D(x, terrainHeight))
         }
-        
+
+        // Apply smoothing pass to reduce jagged edges
+        val smoothedPoints = smoothTerrainPoints(points, landingPads)
+
         // Create a terrain with a proper getGroundHeight implementation
-        return InterpolatedTerrain(points, landingPads)
+        return InterpolatedTerrain(smoothedPoints, landingPads)
     }
-    
+
     /**
      * Generates random positions for landing pads.
+     * Some landing pads may be placed in craters.
      */
-    private fun generateLandingPadPositions(numPads: Int, width: Float, random: Random): List<Float> {
-        val positions = mutableListOf<Float>()
+    private fun generateLandingPadPositions(numPads: Int, width: Float, random: Random): List<LandingPadInfo> {
+        val positions = mutableListOf<LandingPadInfo>()
         val segmentWidth = width / numPads
-        
+
         for (i in 0 until numPads) {
             // Place landing pad in the middle of its segment, with some randomness
             val padX = i * segmentWidth + segmentWidth / 2 + random.nextFloat() * segmentWidth * 0.4f - segmentWidth * 0.2f
-            positions.add(padX)
+
+            // Randomly decide if this landing pad should be in a crater
+            val isInCrater = random.nextFloat() < 0.4f // 40% chance to be in a crater
+
+            positions.add(LandingPadInfo(padX, isInCrater))
         }
-        
+
         return positions
     }
-    
+
+    /**
+     * Creates a crater-like depression in the terrain.
+     * 
+     * @param x Current x-coordinate
+     * @param xPos Center x-coordinate of the crater
+     * @param baseHeight Base height of the terrain
+     * @param width Width of the crater
+     * @param depth Depth of the crater
+     * @param random Random generator for variations
+     * @return Height at the given x-coordinate considering the crater
+     */
+    private fun createCrater(x: Float, xPos: Float, baseHeight: Float, width: Float, depth: Float, random: Random): Float {
+        val distance = abs(x - xPos)
+        if (distance > width) return baseHeight
+
+        // Calculate crater shape using a cosine function
+        val normalizedDist = (distance / width) * PI.toFloat()
+        val craterFactor = (cos(normalizedDist) + 1) / 2 // 0 to 1, highest at center
+
+        // Add some randomness to the crater shape
+        val randomFactor = 1f + (random.nextFloat() * 0.2f - 0.1f) // ±10% variation
+
+        // Calculate crater depth, deeper at center
+        val actualDepth = depth * craterFactor * randomFactor
+
+        return baseHeight + actualDepth
+    }
+
+    /**
+     * Creates a rock formation in the terrain with smoother edges.
+     * 
+     * @param x Current x-coordinate
+     * @param xPos Center x-coordinate of the rock
+     * @param baseHeight Base height of the terrain
+     * @param width Width of the rock
+     * @param height Height of the rock
+     * @param random Random generator for variations
+     * @return Height at the given x-coordinate considering the rock
+     */
+    private fun createRock(x: Float, xPos: Float, baseHeight: Float, width: Float, height: Float, random: Random): Float {
+        val distance = abs(x - xPos)
+        if (distance > width) return baseHeight
+
+        // Calculate rock shape using a cosine function for a smoother appearance
+        val normalizedDist = (distance / width) * PI.toFloat()
+        // Use cosine squared for smoother transitions at the edges
+        val rockFactor = cos(normalizedDist).pow(2) // 0 to 1, smoother transition
+
+        // Add some randomness to the rock shape, but less than before
+        val randomFactor = 1f + (random.nextFloat() * 0.2f - 0.1f) // ±10% variation
+
+        // Calculate rock height, varies across width
+        val actualHeight = height * rockFactor * randomFactor
+
+        return baseHeight - actualHeight // Subtract because higher y is lower on screen
+    }
+
+    /**
+     * Creates a mountain-like feature in the terrain.
+     * 
+     * @param x Current x-coordinate
+     * @param xPos Center x-coordinate of the mountain
+     * @param baseHeight Base height of the terrain
+     * @param width Width of the mountain
+     * @param height Height of the mountain
+     * @param random Random generator for variations
+     * @return Height at the given x-coordinate considering the mountain
+     */
+    private fun createMountain(x: Float, xPos: Float, baseHeight: Float, width: Float, height: Float, random: Random): Float {
+        val distance = abs(x - xPos)
+        if (distance > width) return baseHeight
+
+        // Calculate mountain shape using a smooth bell curve
+        val normalizedDist = (distance / width)
+        // Use a bell curve for a natural mountain shape
+        val mountainFactor = (1f - normalizedDist.pow(2)).pow(2)
+
+        // Add some randomness to the mountain shape
+        val randomFactor = 1f + (random.nextFloat() * 0.15f - 0.075f) // ±7.5% variation
+
+        // Calculate mountain height
+        val actualHeight = height * mountainFactor * randomFactor
+
+        return baseHeight - actualHeight // Subtract because higher y is lower on screen
+    }
+
     /**
      * Generates a random height for a terrain point.
+     * Uses a smoother algorithm to avoid jagged edges.
      */
     private fun generateTerrainHeight(screenHeight: Float, random: Random): Float {
-        // Terrain height varies between 70% and 90% of screen height
-        return screenHeight * (0.7f + random.nextFloat() * 0.2f)
+        // Base height varies between 70% and 90% of screen height, but with smoother distribution
+        val baseHeight = screenHeight * (0.7f + (random.nextFloat().pow(2) + random.nextFloat().pow(2)) / 10f)
+
+        // Add some small-scale smoothing
+        val smoothingFactor = 0.05f * screenHeight * (random.nextFloat() - 0.5f)
+
+        return baseHeight + smoothingFactor
     }
-    
+
+    /**
+     * Applies multiple smoothing passes to the terrain points to reduce jagged edges.
+     * Preserves landing pads by not smoothing their points.
+     * 
+     * @param points Original terrain points
+     * @param landingPads Landing pads to preserve
+     * @param passes Number of smoothing passes to apply
+     * @return Smoothed terrain points
+     */
+    private fun smoothTerrainPoints(
+        points: List<Vector2D>, 
+        landingPads: List<LandingPad>, 
+        passes: Int = 3
+    ): List<Vector2D> {
+        // If there are too few points, no need to smooth
+        if (points.size <= 3) return points
+
+        // Create a set of x-coordinates for landing pad points to preserve them
+        val landingPadXCoords = mutableSetOf<Float>()
+        for (pad in landingPads) {
+            landingPadXCoords.add(pad.start.x)
+            landingPadXCoords.add(pad.end.x)
+        }
+
+        // Apply multiple passes of smoothing
+        var currentPoints = points
+        repeat(passes) {
+            val result = mutableListOf<Vector2D>()
+
+            // Add first point unchanged
+            result.add(currentPoints.first())
+
+            // Apply smoothing to interior points
+            for (i in 1 until currentPoints.size - 1) {
+                val current = currentPoints[i]
+
+                // Skip smoothing for landing pad points
+                if (current.x in landingPadXCoords) {
+                    result.add(current)
+                    continue
+                }
+
+                // Get neighboring points
+                val prev = currentPoints[i - 1]
+                val next = currentPoints[i + 1]
+
+                // Apply weighted moving average (current point has more weight)
+                val smoothedY = (prev.y + current.y * 2 + next.y) / 4f
+
+                result.add(Vector2D(current.x, smoothedY))
+            }
+
+            // Add last point unchanged
+            result.add(currentPoints.last())
+
+            // Update current points for next pass
+            currentPoints = result
+        }
+
+        return currentPoints
+    }
+
     /**
      * A terrain implementation that interpolates between points for height calculation.
      */
@@ -129,30 +350,30 @@ class TerrainGenerator {
         points: List<Vector2D>,
         landingPads: List<LandingPad>
     ) : Terrain(points, landingPads) {
-        
+
         override fun getGroundHeight(x: Float): Float {
             // Check if x is before the first point
             if (x <= points.firstOrNull()?.x ?: 0f) {
                 return points.firstOrNull()?.y ?: 0f
             }
-            
+
             // Check if x is after the last point
             if (x >= points.lastOrNull()?.x ?: 0f) {
                 return points.lastOrNull()?.y ?: 0f
             }
-            
+
             // Find the two points that x is between
             for (i in 0 until points.size - 1) {
                 val p1 = points[i]
                 val p2 = points[i + 1]
-                
+
                 if (x >= p1.x && x <= p2.x) {
                     // Linear interpolation between the two points
                     val t = (x - p1.x) / (p2.x - p1.x)
                     return p1.y + t * (p2.y - p1.y)
                 }
             }
-            
+
             // Fallback
             return points.lastOrNull()?.y ?: 0f
         }
