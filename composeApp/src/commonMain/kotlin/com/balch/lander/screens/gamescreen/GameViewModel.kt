@@ -30,27 +30,10 @@ class GameViewModel(
     private val controlInputsFlow = MutableStateFlow(ControlInputs())
 
     /**
-     * Sets the thrust control input.
-     * @param isThrusting Whether thrust is active
+     * Sets the control inputs.
      */
-    fun setThrust(isThrusting: Boolean) {
-        controlInputsFlow.tryEmit(ControlInputs(thrust = isThrusting))
-    }
-
-    /**
-     * Sets the rotate left control input.
-     * @param isRotatingLeft Whether rotating left is active
-     */
-    fun setRotateLeft(isRotatingLeft: Boolean) {
-        controlInputsFlow.tryEmit(ControlInputs(rotateLeft = isRotatingLeft))
-    }
-
-    /**
-     * Sets the rotate right control input.
-     * @param isRotatingRight Whether rotating right is active
-     */
-    fun setRotateRight(isRotatingRight: Boolean) {
-        controlInputsFlow.tryEmit(ControlInputs(rotateRight = isRotatingRight))
+    fun setControlsInputs(controlInputs: ControlInputs) {
+        controlInputsFlow.tryEmit(controlInputs)
     }
 
     // UI state derived from game state and UI state flow
@@ -138,7 +121,7 @@ class GameViewModel(
                     flow {
                         // Delay to maintain frame rate (60 FPS)
                         delay(16)
-                        controlInputs
+                        emit(controlInputs)
                     }
                 ).first()
             }

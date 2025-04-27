@@ -46,12 +46,7 @@ fun AppNavigation() {
             val gameScreenState by gameViewModel.uiState.collectAsState()
             GameScreen(
                 uiState = gameScreenState,
-                onThrustPressed = { gameViewModel.setThrust(true) },
-                onThrustReleased = { gameViewModel.setThrust(false) },
-                onRotateLeftPressed = { gameViewModel.setRotateLeft(true) },
-                onRotateLeftReleased = { gameViewModel.setRotateLeft(false) },
-                onRotateRightPressed = { gameViewModel.setRotateRight(true) },
-                onRotateRightReleased = { gameViewModel.setRotateRight(false) },
+                onControlInputs = gameViewModel::setControlsInputs,
                 onRestartClicked = { config },
                 onBackToStartClicked = { currentScreen = Screen.StartScreen }
             )

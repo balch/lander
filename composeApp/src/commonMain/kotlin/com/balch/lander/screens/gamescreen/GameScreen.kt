@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.balch.lander.GameConfig
+import com.balch.lander.screens.gamescreen.gameplay.ControlInputs
 import kotlin.math.abs
 
 /**
@@ -31,12 +32,7 @@ import kotlin.math.abs
 @Composable
 fun GameScreen(
     uiState: GameScreenState,
-    onThrustPressed: () -> Unit,
-    onThrustReleased: () -> Unit,
-    onRotateLeftPressed: () -> Unit,
-    onRotateLeftReleased: () -> Unit,
-    onRotateRightPressed: () -> Unit,
-    onRotateRightReleased: () -> Unit,
+    onControlInputs: (ControlInputs) -> Unit,
     onRestartClicked: () -> Unit,
     onBackToStartClicked: () -> Unit
 ) {
@@ -51,12 +47,7 @@ fun GameScreen(
             GameScreenState.NavigateToStartScreen -> TODO()
             is GameScreenState.Playing -> PlayingContent(
                 state = uiState,
-                onThrustPressed = onThrustPressed,
-                onThrustReleased = onThrustReleased,
-                onRotateLeftPressed = onRotateLeftPressed,
-                onRotateLeftReleased = onRotateLeftReleased,
-                onRotateRightPressed = onRotateRightPressed,
-                onRotateRightReleased = onRotateRightReleased,
+                onControlInputs = onControlInputs,
             )
         }
     }
@@ -76,12 +67,7 @@ fun LoadingContent() {
 @Composable
 fun BoxScope.PlayingContent(
     state: GameScreenState.Playing,
-    onThrustPressed: () -> Unit,
-    onThrustReleased: () -> Unit,
-    onRotateLeftPressed: () -> Unit,
-    onRotateLeftReleased: () -> Unit,
-    onRotateRightPressed: () -> Unit,
-    onRotateRightReleased: () -> Unit,
+    onControlInputs: (ControlInputs) -> Unit,
 ) {
     Canvas(modifier = Modifier.fillMaxSize()) {
         drawStars(state.environmentState.config)
@@ -90,15 +76,7 @@ fun BoxScope.PlayingContent(
         drawLander(state.landerState)
     }
     drawInfoPanel(state.landerState, state.fps)
-    drawControlPanel(
-        state.landerState,
-        onThrustPressed = onThrustPressed,
-        onRotateRightPressed = onRotateRightPressed,
-        onRotateLeftPressed = onRotateLeftPressed,
-        onThrustReleased = onThrustReleased,
-        onRotateLeftReleased = onRotateLeftReleased,
-        onRotateRightReleased = onRotateRightReleased,
-    )
+    drawControlPanel(state.landerState, onControlInputs)
 }
 
 fun DrawScope.drawTerrain(terrain: Terrain) {
@@ -250,12 +228,7 @@ fun BoxScope.drawInfoPanel(landerState: LanderState, fps: Int) {
 @Composable
 fun BoxScope.drawControlPanel(
     landerState: LanderState,
-    onThrustPressed: () -> Unit,
-    onThrustReleased: () -> Unit,
-    onRotateLeftPressed: () -> Unit,
-    onRotateLeftReleased: () -> Unit,
-    onRotateRightPressed: () -> Unit,
-    onRotateRightReleased: () -> Unit,
+    onControlInputs: (ControlInputs) -> Unit,
 ) {
     // Small button on the bottom right of the screen
     if (landerState.status == GameStatus.PLAYING) {
@@ -289,12 +262,6 @@ fun BoxScope.drawControlPanel(
             val rotateLeftInteractionSource = remember { MutableInteractionSource() }
             val isRotateLeftPressed by rotateLeftInteractionSource.collectIsPressedAsState()
 
-            if (isRotateLeftPressed) {
-                onRotateLeftPressed()
-            } else {
-                onRotateLeftReleased()
-            }
-
             Button(
                 onClick = { /* Handled by interaction source */ },
                 modifier = Modifier.size(60.dp),
@@ -313,12 +280,6 @@ fun BoxScope.drawControlPanel(
             // Thrust button
             val thrustInteractionSource = remember { MutableInteractionSource() }
             val isThrustPressed by thrustInteractionSource.collectIsPressedAsState()
-
-            if (isThrustPressed) {
-                onThrustPressed()
-            } else {
-                onThrustReleased()
-            }
 
             Button(
                 onClick = { /* Handled by interaction source */ },
@@ -344,12 +305,6 @@ fun BoxScope.drawControlPanel(
             val rotateRightInteractionSource = remember { MutableInteractionSource() }
             val isRotateRightPressed by rotateRightInteractionSource.collectIsPressedAsState()
 
-            if (isRotateRightPressed) {
-                onRotateRightPressed()
-            } else {
-                onRotateRightReleased()
-            }
-
             Button(
                 onClick = { /* Handled by interaction source */ },
                 modifier = Modifier.size(60.dp),
@@ -364,6 +319,14 @@ fun BoxScope.drawControlPanel(
                     color = MaterialTheme.colors.onPrimary
                 )
             }
+
+            onControlInputs(
+                ControlInputs(
+                    thrust = isThrustPressed,
+                    rotateRight = isRotateRightPressed,
+                    rotateLeft = isRotateLeftPressed,
+                )
+            )
         }
     }
 }
