@@ -90,7 +90,7 @@ fun StartScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "LUNAR LANDER",
+                        text = "VIBE LANDER",
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
                         color = retroYellow,
