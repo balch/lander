@@ -4,9 +4,27 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.darkColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -22,6 +40,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.balch.lander.GameConfig
+import com.balch.lander.core.StringUtil
 import com.balch.lander.screens.gamescreen.gameplay.ControlInputs
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.abs
@@ -45,7 +64,6 @@ fun GameScreen(
         when (uiState) {
             is GameScreenState.GameOver -> GameOverContent(uiState, onRestartClicked, onBackToStartClicked)
             GameScreenState.Loading -> LoadingContent()
-            GameScreenState.NavigateToStartScreen -> TODO()
             is GameScreenState.Playing -> PlayingContent(
                 state = uiState,
                 onControlInputs = onControlInputs,
@@ -208,7 +226,7 @@ fun BoxScope.drawInfoPanel(landerState: LanderState, fps: Int) {
         )
 
         Text(
-            text = "DRIFT: ${landerState.velocity.x.toInt()} m/s",
+            text = "DRIFT: ${StringUtil.formatToString(landerState.velocity.x)} m/s",
             color = if (abs(landerState.velocity.x) > 2) Color.Red else MaterialTheme.colors.onBackground
         )
 

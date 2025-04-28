@@ -53,11 +53,11 @@ data class GameConfig(
  * Based on Moon gravity with variations.
  */
 enum class GravityLevel(val value: Float, val label: String) {
-    VERY_LOW(0.5f, "Very Low"),
+    VERY_LOW(0.1f, "Very Low"),
     LOW(0.8f, "Low"),
     MEDIUM(1.0f, "Medium"),
     HIGH(1.2f, "High"),
-    VERY_HIGH(1.5f, "Very High")
+    VERY_HIGH(2.0f, "Very High")
 }
 
 /**
@@ -73,7 +73,7 @@ enum class LandingPadSize(val value: Float, val label: String) {
  * Thrust strength options available in the game.
  */
 enum class ThrustStrength(val value: Float, val label: String) {
-    LOW(0.8f, "Low"),
+    LOW(0.5f, "Low"),
     MEDIUM(1.0f, "Medium"),
-    HIGH(1.2f, "High")
+    HIGH(2.0f, "High")
 }

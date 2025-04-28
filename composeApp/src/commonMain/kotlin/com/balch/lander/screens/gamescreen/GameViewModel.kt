@@ -10,7 +10,19 @@ import com.balch.lander.screens.gamescreen.gameplay.TerrainGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
 import kotlin.random.Random
 
 /**
@@ -174,7 +186,6 @@ private fun updatedGameState(
         terrain = currentGameState.environmentState.terrain
     )
 
-
     // Check if lander has landed or crashed
     return when (newLanderState.status) {
         GameStatus.PLAYING -> GameScreenState.Playing(
@@ -211,8 +222,6 @@ sealed interface GameScreenState {
          */
         val fps: Int = 0
     ) : GameScreenState
-
-    data object NavigateToStartScreen : GameScreenState
 
     data class GameOver(
         val isSuccess: Boolean,

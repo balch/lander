@@ -14,26 +14,26 @@ import kotlin.math.sin
  * Handles simulation of gravity, thrust, and movement of the lander.
  */
 class PhysicsEngine(
-    private val config: GameConfig
+    config: GameConfig
 ) {
     // Base gravity acceleration on the Moon (1.62 m/s²)
     // Scaled for game units
-    private val baseGravity = 0.5f
+    private val baseGravity = 1.0f
 
     // Gravity adjusted by the config
     private val gravity = baseGravity * config.gravity.value
 
     // Base thrust force
-    private val baseThrust = 0.5f
+    private val baseThrust = 3.0f
 
     // Thrust adjusted by the config
     private val thrust = baseThrust * config.thrustStrength.value
 
-    // Rotation speed in degrees per second - increased for faster rotation
+    // Rotation speed in degrees per second
     private val rotationSpeed = 12f
 
     // Fuel consumption rate per second when thrusting
-    private val fuelConsumptionRate = 0.5f
+    private val fuelConsumptionRate = 5f
 
     /**
      * Updates the game state based on physics calculations.
@@ -61,10 +61,11 @@ class PhysicsEngine(
 
         // Calculate new fuel level based on thrust
         val isThrusting = controls.thrust && landerState.fuel > 0
-        val newFuel = calculateNewFuel(landerState.fuel, isThrusting, deltaTime)
+        val isRotating = (controls.rotateLeft || controls.rotateRight) && landerState.fuel > 0
+        val newFuel = calculateNewFuel(landerState.fuel, isThrusting, isRotating, deltaTime)
 
         // Calculate new velocity based on gravity, thrust, and current velocity
-        val newVelocity = calculateNewVelocity(landerState.velocity, newRotation, isThrusting, newFuel > 0, deltaTime)
+        val newVelocity = calculateNewVelocity(landerState.velocity, newRotation, isThrusting, deltaTime)
 
         // Calculate new position based on velocity
         val newPosition = calculateNewPosition(landerState.position, newVelocity, deltaTime)
@@ -97,7 +98,8 @@ class PhysicsEngine(
             isThrusting = isThrusting,
             distanceToGround = distanceToGround,
             isDangerMode = isDangerMode,
-            status = determineGameStatus(tempLanderState, terrain)
+            status = determineGameStatus(tempLanderState, terrain),
+            initialFuel = landerState.initialFuel,
         )
     }
 
@@ -125,12 +127,21 @@ class PhysicsEngine(
     /**
      * Calculates the new fuel level based on thrust.
      */
-    private fun calculateNewFuel(currentFuel: Float, isThrusting: Boolean, deltaTime: Float): Float {
-        if (!isThrusting) {
-            return currentFuel
-        }
+    private fun calculateNewFuel(
+        currentFuel: Float,
+        isThrusting: Boolean,
+        isRotating: Boolean,
+        deltaTime: Float
+    ): Float {
+        val thrustingConsumption =
+            if (isThrusting) fuelConsumptionRate * deltaTime
+            else 0f
 
-        val newFuel = currentFuel - fuelConsumptionRate * deltaTime
+        val rotatingConsumption =
+            if (isRotating) (fuelConsumptionRate/10)  * deltaTime
+            else 0f
+
+        val newFuel = currentFuel - (thrustingConsumption + rotatingConsumption)
         return if (newFuel < 0) 0f else newFuel
     }
 
@@ -141,14 +152,13 @@ class PhysicsEngine(
         currentVelocity: Vector2D,
         rotation: Float,
         isThrusting: Boolean,
-        hasFuel: Boolean,
         deltaTime: Float
     ): Vector2D {
         // Apply gravity
         val gravityForce = Vector2D(0f, gravity)
 
         // Apply thrust if thrusting and has fuel
-        val thrustForce = if (isThrusting && hasFuel) {
+        val thrustForce = if (isThrusting) {
             // Convert rotation to radians
             val rotationRadians = rotation * PI.toFloat() / 180f
             // Calculate thrust components based on lander's orientation
