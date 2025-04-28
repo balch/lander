@@ -1,6 +1,8 @@
 package com.balch.lander.screens.gamescreen
 
 import com.balch.lander.GameConfig
+import com.balch.lander.core.game.models.Terrain
+import com.balch.lander.core.game.models.Vector2D
 import kotlin.math.abs
 
 /**
@@ -113,15 +115,6 @@ data class GameEnvironmentState(
 )
 
 /**
- * Represents a 2D vector with x and y components.
- */
-data class Vector2D(val x: Float, val y: Float) {
-    operator fun plus(other: Vector2D): Vector2D = Vector2D(x + other.x, y + other.y)
-    operator fun minus(other: Vector2D): Vector2D = Vector2D(x - other.x, y - other.y)
-    operator fun times(scalar: Float): Vector2D = Vector2D(x * scalar, y * scalar)
-}
-
-/**
  * Represents the current status of the game.
  */
 enum class GameStatus {
@@ -129,48 +122,3 @@ enum class GameStatus {
     LANDED,
     CRASHED
 }
-
-/**
- * Represents the terrain of the moon, including landing pads.
- */
-open class Terrain(
-    /**
-     * List of terrain points (x, y) that define the surface.
-     */
-    val points: List<Vector2D> = emptyList(),
-
-    /**
-     * List of landing pad segments.
-     */
-    val landingPads: List<LandingPad> = emptyList()
-) {
-    /**
-     * Gets the height of the ground at the given x coordinate.
-     */
-    open fun getGroundHeight(x: Float): Float {
-        // Default implementation - will be replaced with actual terrain logic
-        return 0f
-    }
-
-    /**
-     * Checks if the given x coordinate is on a landing pad.
-     */
-    open fun isOnLandingPad(x: Float): Boolean {
-        return landingPads.any { pad -> x >= pad.start.x && x <= pad.end.x }
-    }
-}
-
-/**
- * Represents a landing pad on the terrain.
- */
-data class LandingPad(
-    /**
-     * Start point of the landing pad.
-     */
-    val start: Vector2D,
-
-    /**
-     * End point of the landing pad.
-     */
-    val end: Vector2D
-)

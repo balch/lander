@@ -1,11 +1,9 @@
-package com.balch.lander.core
+package com.balch.lander.core.utils
 
 /**
- * WebAssembly/JavaScript implementation of TimeUtil.
+ * Default Native implementation of TimeUtil.
  */
 actual object TimeUtil {
-    // Start time for relative calculations
-    private var startTime = 0L
 
     // Counter for incremental time
     private var counter = 0L

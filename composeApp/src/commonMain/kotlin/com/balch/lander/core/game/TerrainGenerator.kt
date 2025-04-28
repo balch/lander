@@ -1,9 +1,9 @@
-package com.balch.lander.screens.gamescreen.gameplay
+package com.balch.lander.core.game
 
 import com.balch.lander.LandingPadSize
-import com.balch.lander.screens.gamescreen.LandingPad
-import com.balch.lander.screens.gamescreen.Terrain
-import com.balch.lander.screens.gamescreen.Vector2D
+import com.balch.lander.core.game.models.LandingPad
+import com.balch.lander.core.game.models.Terrain
+import com.balch.lander.core.game.models.Vector2D
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -48,7 +48,7 @@ class TerrainGenerator {
         val landingPadInfos = generateLandingPadPositions(numLandingPads, width, random)
 
         // Calculate actual landing pad width based on size
-        val baseLandingPadWidth = width / 20 // 5% of screen width
+        val baseLandingPadWidth = width / 10
         val actualLandingPadWidth = baseLandingPadWidth * landingPadSize.value
 
         // Generate terrain points
@@ -291,8 +291,8 @@ class TerrainGenerator {
      * @return Smoothed terrain points
      */
     private fun smoothTerrainPoints(
-        points: List<Vector2D>, 
-        landingPads: List<LandingPad>, 
+        points: List<Vector2D>,
+        landingPads: List<LandingPad>,
         passes: Int = 3
     ): List<Vector2D> {
         // If there are too few points, no need to smooth

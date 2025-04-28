@@ -3,26 +3,16 @@ package com.balch.lander.screens.gamescreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.balch.lander.GameConfig
-import com.balch.lander.core.TimeUtil
-import com.balch.lander.screens.gamescreen.gameplay.ControlInputs
-import com.balch.lander.screens.gamescreen.gameplay.PhysicsEngine
-import com.balch.lander.screens.gamescreen.gameplay.TerrainGenerator
+import com.balch.lander.core.game.ControlInputs
+import com.balch.lander.core.game.PhysicsEngine
+import com.balch.lander.core.game.TerrainGenerator
+import com.balch.lander.core.game.models.Terrain
+import com.balch.lander.core.game.models.Vector2D
+import com.balch.lander.core.utils.TimeUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.flow.*
 import kotlin.random.Random
 
 /**

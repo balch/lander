@@ -1,10 +1,10 @@
-package com.balch.lander.screens.gamescreen.gameplay
+package com.balch.lander.core.game
 
 import com.balch.lander.GameConfig
+import com.balch.lander.core.game.models.Terrain
+import com.balch.lander.core.game.models.Vector2D
 import com.balch.lander.screens.gamescreen.GameStatus
 import com.balch.lander.screens.gamescreen.LanderState
-import com.balch.lander.screens.gamescreen.Terrain
-import com.balch.lander.screens.gamescreen.Vector2D
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin

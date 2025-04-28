@@ -1,4 +1,4 @@
-package com.balch.lander.core
+package com.balch.lander.core.utils
 
 /**
  * Platform-agnostic utility for handling String.
