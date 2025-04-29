@@ -1,6 +1,6 @@
 # VIBE LANDER
 
-A retro-style Lunar Lander game built with Kotlin Multiplatform and Compose Multiplatform.
+A retro-style Lunar Lander game built by me and Junie using Kotlin Multiplatform and Compose Multiplatform. 
 
 major WIP
 
