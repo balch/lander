@@ -3,3 +3,19 @@
 A retro-style Lunar Lander game built with Kotlin Multiplatform and Compose Multiplatform.
 
 major WIP
+
+## ScreenShots
+
+### Android
+![Android Start](docs/android-start.png "Start")
+![Android Play](docs/android-play.png "Play")
+![Android Game Over](docs/android-gameover.png "Game Over")
+
+### ios
+![ios Start](docs/ios-start.png "Start")
+![ios Play](docs/ios-play.png "Play")
+![ios Game Over](docs/ios-gameover.png "Game Over")
+
+### web
+![web Start](docs/web-start.png "Start")
+![web Play](docs/web-play.png "Play")
