@@ -115,7 +115,6 @@ fun StartScreen(
     // Use BoxWithConstraints to get screen dimensions
     BoxWithConstraints(
         modifier = Modifier
-            .windowInsetsPadding(WindowInsets.safeDrawing)
             .fillMaxSize()
             .background(retroBackground)
     ) {
@@ -523,7 +522,12 @@ fun StartScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(dynamicSpacing)
+                        .padding(
+                            dynamicSpacing,
+                            WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+                            dynamicSpacing,
+                            dynamicSpacing
+                        )
                         .verticalScroll(scrollState),
                     verticalArrangement = Arrangement.spacedBy(dynamicSpacing)
                 ) {
