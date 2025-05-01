@@ -339,11 +339,12 @@ fun BoxScope.drawControlPanel(
                     modifier = Modifier.size(width = 80.dp, height = 40.dp),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(25.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF4B0082)),
+                    contentPadding = PaddingValues(4.dp),
                     border = BorderStroke(2.dp, Color(0xFFAA5500)),
                     interactionSource = rotateLeftInteractionSource
                 ) {
                     Text(
-                        text = "←",
+                        text = "<--",
                         style = MaterialTheme.typography.h6,
                         color = Color.White,
                     )
@@ -360,7 +361,7 @@ fun BoxScope.drawControlPanel(
                     interactionSource = rotateRightInteractionSource
                 ) {
                     Text(
-                        text = "→",
+                        text = "-->",
                         style = MaterialTheme.typography.h6,
                         color = Color.White
                     )

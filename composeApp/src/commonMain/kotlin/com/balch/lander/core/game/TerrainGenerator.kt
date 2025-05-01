@@ -4,6 +4,7 @@ import com.balch.lander.LandingPadSize
 import com.balch.lander.core.game.models.LandingPad
 import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.Vector2D
+import com.balch.lander.core.utils.TimeUtil
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -24,7 +25,7 @@ class TerrainGenerator {
 
     /**
      * Generates random terrain with landing pads.
-     * 
+     *
      * @param width Width of the terrain in game units
      * @param height Height of the terrain in game units
      * @param landingPadSize Size of the landing pads
@@ -37,19 +38,24 @@ class TerrainGenerator {
         height: Float,
         landingPadSize: LandingPadSize,
         numLandingPads: Int = 3,
-        seed: Long = 0
+        seed: Long = TimeUtil.currentTimeMillis()
     ): Terrain {
         val random = Random(seed)
+
+        // Calculate actual landing pad width based on size
+        val baseLandingPadWidth = width / 10
+        val actualLandingPadWidth = baseLandingPadWidth * landingPadSize.value
 
         // Number of terrain points to generate
         val numPoints = 100
 
         // Generate landing pad positions first
-        val landingPadInfos = generateLandingPadPositions(numLandingPads, width, random)
-
-        // Calculate actual landing pad width based on size
-        val baseLandingPadWidth = width / 10
-        val actualLandingPadWidth = baseLandingPadWidth * landingPadSize.value
+        val landingPadInfos = generateLandingPadPositions(
+            numPads = numLandingPads,
+            actualLandingPadWidth = actualLandingPadWidth,
+            width = width,
+            random = random
+        )
 
         // Generate terrain points
         val points = mutableListOf<Vector2D>()
@@ -157,20 +163,30 @@ class TerrainGenerator {
         val smoothedPoints = smoothTerrainPoints(points, landingPads)
 
         // Create a terrain with a proper getGroundHeight implementation
-        return InterpolatedTerrain(smoothedPoints, landingPads)
+        return Terrain(smoothedPoints, landingPads)
     }
 
     /**
      * Generates random positions for landing pads.
      * Some landing pads may be placed in craters.
      */
-    private fun generateLandingPadPositions(numPads: Int, width: Float, random: Random): List<LandingPadInfo> {
+    private fun generateLandingPadPositions(
+        numPads: Int,
+        actualLandingPadWidth: Float,
+        width: Float,
+        random: Random
+    ): List<LandingPadInfo> {
         val positions = mutableListOf<LandingPadInfo>()
         val segmentWidth = width / numPads
 
         for (i in 0 until numPads) {
             // Place landing pad in the middle of its segment, with some randomness
-            val padX = i * segmentWidth + segmentWidth / 2 + random.nextFloat() * segmentWidth * 0.4f - segmentWidth * 0.2f
+            val padX = generateRandomLandingPadPosition(
+                index = i,
+                segmentWidth = segmentWidth,
+                actualLandingPadWidth = actualLandingPadWidth,
+                random = random
+            )
 
             // Randomly decide if this landing pad should be in a crater
             val isInCrater = random.nextFloat() < 0.4f // 40% chance to be in a crater
@@ -179,6 +195,23 @@ class TerrainGenerator {
         }
 
         return positions
+    }
+
+    private fun generateRandomLandingPadPosition(
+        index: Int,
+        segmentWidth: Float,
+        actualLandingPadWidth: Float,
+        random: Random
+    ): Float {
+        fun randomPos() =
+            index * segmentWidth + segmentWidth / 2 + random.nextFloat() * segmentWidth * 0.4f - segmentWidth * 0.2f
+
+        // make sure landing pad is not in the center of the screen, as it makes it too easy to land
+        var posX = randomPos()
+        while (posX in 500-actualLandingPadWidth/2..500+actualLandingPadWidth/2)
+            posX = randomPos()
+
+        return posX
     }
 
     /**
@@ -341,41 +374,5 @@ class TerrainGenerator {
         }
 
         return currentPoints
-    }
-
-    /**
-     * A terrain implementation that interpolates between points for height calculation.
-     */
-    private class InterpolatedTerrain(
-        points: List<Vector2D>,
-        landingPads: List<LandingPad>
-    ) : Terrain(points, landingPads) {
-
-        override fun getGroundHeight(x: Float): Float {
-            // Check if x is before the first point
-            if (x <= points.firstOrNull()?.x ?: 0f) {
-                return points.firstOrNull()?.y ?: 0f
-            }
-
-            // Check if x is after the last point
-            if (x >= points.lastOrNull()?.x ?: 0f) {
-                return points.lastOrNull()?.y ?: 0f
-            }
-
-            // Find the two points that x is between
-            for (i in 0 until points.size - 1) {
-                val p1 = points[i]
-                val p2 = points[i + 1]
-
-                if (x >= p1.x && x <= p2.x) {
-                    // Linear interpolation between the two points
-                    val t = (x - p1.x) / (p2.x - p1.x)
-                    return p1.y + t * (p2.y - p1.y)
-                }
-            }
-
-            // Fallback
-            return points.lastOrNull()?.y ?: 0f
-        }
     }
 }

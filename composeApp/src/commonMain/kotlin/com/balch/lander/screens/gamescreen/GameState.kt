@@ -81,8 +81,9 @@ data class LanderState(
         val isVerticalVelocitySafe = abs(velocity.y) < MAX_SAFE_LANDING_VELOCITY_Y
         val isHorizontalVelocitySafe = abs(velocity.x) < MAX_SAFE_LANDING_VELOCITY_X
         val isUprightEnough = abs(rotation) < MAX_SAFE_LANDING_ANGLE
+        val hasReachedGround = position.y >= terrain.getGroundHeight(position.x)
 
-        return isOnLandingPad && isVerticalVelocitySafe && isHorizontalVelocitySafe && isUprightEnough
+        return isOnLandingPad && isVerticalVelocitySafe && isHorizontalVelocitySafe && isUprightEnough && hasReachedGround
     }
 
     /**
