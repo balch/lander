@@ -41,11 +41,21 @@ Lunar Lander is a classic arcade game where players control a spacecraft and att
       2. Rate of Descent 
       3. Side Drift direction and speed
       4. Distance to Ground
-   3. Display lander control pad 
-      1. Rotate Left
-      2. Rotate Right
-      3. Thrust
-      4. Small button on the bottom right of the screen
+   3. Display lander control panel
+      1. Position in the top right area of the screen
+      2. Two rows of small buttons with retro arcade look and feel
+         1. Top row: 3 thrust control buttons
+            1. "Low", "Mid", "Hi" options
+            2. thrust is applied when button is pressed
+         2. Bottom row: 2 rotation control buttons
+            1. Left and right rotation
+            2. Oval-shaped buttons (more width than height)
+            3. Take up the same total width as the top row
+      3. Buttons have retro arcade styling:
+         1. Circular/oval shapes
+         2. Border strokes
+         3. Retro-style colors
+         4. Appropriate text styling
    4. Game Play Behavior
       1. start at top center of screen
       2. lander descent is based on selected gravity
