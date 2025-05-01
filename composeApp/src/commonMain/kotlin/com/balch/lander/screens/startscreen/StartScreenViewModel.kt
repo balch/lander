@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.balch.lander.GameConfig
 import com.balch.lander.GravityLevel
 import com.balch.lander.LandingPadSize
-import com.balch.lander.ThrustStrength
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 
@@ -52,14 +51,6 @@ class StartScreenViewModel : ViewModel() {
      */
     fun updateLandingPadSize(landingPadSize: LandingPadSize) {
         gameConfigFlow.tryEmit(gameConfigFlow.value.copy(landingPadSize = landingPadSize))
-    }
-    
-    /**
-     * Updates the thrust strength configuration.
-     * @param thrustStrength Selected thrust strength
-     */
-    fun updateThrustStrength(thrustStrength: ThrustStrength) {
-        gameConfigFlow.tryEmit(gameConfigFlow.value.copy(thrustStrength = thrustStrength))
     }
 }
 

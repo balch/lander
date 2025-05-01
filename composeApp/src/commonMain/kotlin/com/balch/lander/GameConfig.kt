@@ -24,12 +24,6 @@ data class GameConfig(
     val landingPadSize: LandingPadSize = LandingPadSize.MEDIUM,
 
     /**
-     * Strength of the lander's thrust.
-     * 3 options available.
-     */
-    val thrustStrength: ThrustStrength = ThrustStrength.MEDIUM,
-
-    /**
      * Virtual screen width used for game calculations.
      * This provides a consistent coordinate system regardless of actual screen size.
      */
@@ -67,13 +61,4 @@ enum class LandingPadSize(val value: Float, val label: String) {
     SMALL(0.5f, "Small"),
     MEDIUM(1.0f, "Medium"),
     LARGE(1.5f, "Large")
-}
-
-/**
- * Thrust strength options available in the game.
- */
-enum class ThrustStrength(val value: Float, val label: String) {
-    LOW(0.5f, "Low"),
-    MEDIUM(1.0f, "Medium"),
-    HIGH(2.0f, "High")
 }

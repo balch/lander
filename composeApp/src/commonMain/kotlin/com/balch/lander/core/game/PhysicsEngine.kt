@@ -2,6 +2,7 @@ package com.balch.lander.core.game
 
 import com.balch.lander.GameConfig
 import com.balch.lander.core.game.models.Terrain
+import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.game.models.Vector2D
 import com.balch.lander.screens.gamescreen.GameStatus
 import com.balch.lander.screens.gamescreen.LanderState
@@ -19,15 +20,13 @@ class PhysicsEngine(
     // Base gravity acceleration on the Moon (1.62 m/s²)
     // Scaled for game units
     private val baseGravity = 1.0f
+    private val baseThrust = 3.0f
+
 
     // Gravity adjusted by the config
     private val gravity = baseGravity * config.gravity.value
 
     // Base thrust force
-    private val baseThrust = 3.0f
-
-    // Thrust adjusted by the config
-    private val thrust = baseThrust * config.thrustStrength.value
 
     // Rotation speed in degrees per second
     private val rotationSpeed = 12f
@@ -46,8 +45,9 @@ class PhysicsEngine(
      */
     fun update(
         landerState: LanderState,
-        deltaTime: Float, controls:
-        ControlInputs, terrain: Terrain
+        deltaTime: Float,
+        controls: ControlInputs,
+        terrain: Terrain,
     ): LanderState {
         // Process lander state with terrain information
 
@@ -60,12 +60,12 @@ class PhysicsEngine(
         val newRotation = calculateNewRotation(landerState.rotation, controls, deltaTime)
 
         // Calculate new fuel level based on thrust
-        val isThrusting = controls.thrust && landerState.fuel > 0
+        val thrustLevel = controls.calculateThrustLevel(landerState)
         val isRotating = (controls.rotateLeft || controls.rotateRight) && landerState.fuel > 0
-        val newFuel = calculateNewFuel(landerState.fuel, isThrusting, isRotating, deltaTime)
+        val newFuel = calculateNewFuel(landerState.fuel, thrustLevel, isRotating, deltaTime)
 
         // Calculate new velocity based on gravity, thrust, and current velocity
-        val newVelocity = calculateNewVelocity(landerState.velocity, newRotation, isThrusting, deltaTime)
+        val newVelocity = calculateNewVelocity(landerState.velocity, newRotation, thrustLevel, deltaTime)
 
         // Calculate new position based on velocity
         val newPosition = calculateNewPosition(landerState.position, newVelocity, deltaTime)
@@ -95,13 +95,17 @@ class PhysicsEngine(
             velocity = newVelocity,
             rotation = newRotation,
             fuel = newFuel,
-            isThrusting = isThrusting,
+            thrustStrength = controls.thrustStrength,
             distanceToGround = distanceToGround,
             isDangerMode = isDangerMode,
             status = determineGameStatus(tempLanderState, terrain),
             initialFuel = landerState.initialFuel,
         )
     }
+
+    private fun ControlInputs.calculateThrustLevel(landerState: LanderState): Float =
+        if (landerState.fuel > 0) thrustStrength.value * baseThrust
+        else 0f
 
     /**
      * Calculates the new rotation based on control inputs.
@@ -129,13 +133,12 @@ class PhysicsEngine(
      */
     private fun calculateNewFuel(
         currentFuel: Float,
-        isThrusting: Boolean,
+        thrustLevel: Float,
         isRotating: Boolean,
         deltaTime: Float
     ): Float {
         val thrustingConsumption =
-            if (isThrusting) fuelConsumptionRate * deltaTime
-            else 0f
+            (thrustLevel / baseThrust) * fuelConsumptionRate * deltaTime
 
         val rotatingConsumption =
             if (isRotating) (fuelConsumptionRate/10)  * deltaTime
@@ -151,22 +154,22 @@ class PhysicsEngine(
     private fun calculateNewVelocity(
         currentVelocity: Vector2D,
         rotation: Float,
-        isThrusting: Boolean,
+        thrustLevel: Float,
         deltaTime: Float
     ): Vector2D {
         // Apply gravity
         val gravityForce = Vector2D(0f, gravity)
 
         // Apply thrust if thrusting and has fuel
-        val thrustForce = if (isThrusting) {
+        val thrustForce = if (thrustLevel > 0) {
             // Convert rotation to radians
             val rotationRadians = rotation * PI.toFloat() / 180f
             // Calculate thrust components based on lander's orientation
             // For 0 degrees (pointing up), thrust should be upward (negative y)
             // For 90 degrees (pointing right), thrust should be rightward (positive x)
             // For -90 degrees (pointing left), thrust should be leftward (negative x)
-            val thrustX = sin(rotationRadians) * thrust
-            val thrustY = -cos(rotationRadians) * thrust
+            val thrustX = sin(rotationRadians) * thrustLevel
+            val thrustY = -cos(rotationRadians) * thrustLevel
             Vector2D(thrustX, thrustY)
         } else {
             Vector2D(0f, 0f)
@@ -235,7 +238,7 @@ class PhysicsEngine(
  * Represents the control inputs from the player.
  */
 data class ControlInputs(
-    var thrust: Boolean = false,
+    var thrustStrength: ThrustStrength = ThrustStrength.OFF,
     var rotateLeft: Boolean = false,
     var rotateRight: Boolean = false
 )

@@ -33,7 +33,6 @@ fun AppNavigation() {
                 onFuelLevelChanged = startScreenViewModel::updateFuelLevel,
                 onGravityLevelChanged = startScreenViewModel::updateGravityLevel,
                 onLandingPadSizeChanged = startScreenViewModel::updateLandingPadSize,
-                onThrustStrengthChanged = startScreenViewModel::updateThrustStrength,
                 onStartGameClicked = {
                     // Direct navigation to GameScreen with config passed as parameter
                     currentScreen = Screen.GameScreen(startScreenViewModel.uiState.value.gameConfig)

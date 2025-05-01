@@ -2,6 +2,7 @@ package com.balch.lander.screens.gamescreen
 
 import com.balch.lander.GameConfig
 import com.balch.lander.core.game.models.Terrain
+import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.game.models.Vector2D
 import kotlin.math.abs
 
@@ -47,7 +48,7 @@ data class LanderState(
     /**
      * Whether the lander is currently thrusting.
      */
-    val isThrusting: Boolean = false,
+    val thrustStrength: ThrustStrength = ThrustStrength.OFF,
 
     /**
      * Current game status.

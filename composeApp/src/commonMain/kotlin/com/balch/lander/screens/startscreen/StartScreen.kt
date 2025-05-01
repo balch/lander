@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import com.balch.lander.GameConfig
 import com.balch.lander.GravityLevel
 import com.balch.lander.LandingPadSize
-import com.balch.lander.ThrustStrength
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 /**
@@ -37,7 +36,6 @@ fun StartScreenPreview() {
             fuelLevel = 0.5f,
             gravity = GravityLevel.MEDIUM,
             landingPadSize = LandingPadSize.MEDIUM,
-            thrustStrength = ThrustStrength.MEDIUM
         )
     )
 
@@ -53,7 +51,6 @@ fun StartScreenPreview() {
                 onFuelLevelChanged = {},
                 onGravityLevelChanged = {},
                 onLandingPadSizeChanged = {},
-                onThrustStrengthChanged = {},
                 onStartGameClicked = {}
             )
         }
@@ -68,7 +65,6 @@ fun StartScreenPreviewLandscape() {
             fuelLevel = 0.5f,
             gravity = GravityLevel.MEDIUM,
             landingPadSize = LandingPadSize.MEDIUM,
-            thrustStrength = ThrustStrength.MEDIUM
         )
     )
 
@@ -84,7 +80,6 @@ fun StartScreenPreviewLandscape() {
                 onFuelLevelChanged = {},
                 onGravityLevelChanged = {},
                 onLandingPadSizeChanged = {},
-                onThrustStrengthChanged = {},
                 onStartGameClicked = {}
             )
         }
@@ -102,7 +97,6 @@ fun StartScreen(
     onFuelLevelChanged: (Float) -> Unit,
     onGravityLevelChanged: (GravityLevel) -> Unit,
     onLandingPadSizeChanged: (LandingPadSize) -> Unit,
-    onThrustStrengthChanged: (ThrustStrength) -> Unit,
     onStartGameClicked: () -> Unit
 ) {
     // Define retro colors (unchanged)
@@ -406,60 +400,6 @@ fun StartScreen(
                                         text = padSize.label.take(1),
                                         fontFamily = FontFamily.Monospace,
                                         color = if (uiState.gameConfig.landingPadSize == padSize)
-                                            Color.White
-                                        else
-                                            retroGreen,
-                                        fontSize = (12 * fontScaleFactor).sp,
-                                        modifier = Modifier.padding(
-                                            vertical = 2.dp,
-                                            horizontal = 1.dp
-                                        )
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    // Thrust Strength Options
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(
-                            text = "THRUST STRENGTH",
-                            fontFamily = FontFamily.Monospace,
-                            color = retroCyan,
-                            fontSize = (12 * fontScaleFactor).sp
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            ThrustStrength.entries.forEach { thrustStrength ->
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(horizontal = 1.dp)
-                                        .clip(RoundedCornerShape(2.dp))
-                                        .background(
-                                            if (uiState.gameConfig.thrustStrength == thrustStrength)
-                                                retroBlue
-                                            else
-                                                Color(0xFF202060)
-                                        )
-                                        .border(
-                                            1.dp,
-                                            if (uiState.gameConfig.thrustStrength == thrustStrength)
-                                                retroYellow
-                                            else
-                                                retroCyan,
-                                            RoundedCornerShape(2.dp)
-                                        )
-                                        .clickable { onThrustStrengthChanged(thrustStrength) },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = thrustStrength.label.take(1),
-                                        fontFamily = FontFamily.Monospace,
-                                        color = if (uiState.gameConfig.thrustStrength == thrustStrength)
                                             Color.White
                                         else
                                             retroGreen,
