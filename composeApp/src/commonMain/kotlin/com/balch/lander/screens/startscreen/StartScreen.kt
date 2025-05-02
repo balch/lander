@@ -340,7 +340,7 @@ fun StartScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = gravityLevel.label.take(1),
+                                        text = gravityLevel.label,
                                         fontFamily = FontFamily.Monospace,
                                         color = if (uiState.gameConfig.gravity == gravityLevel)
                                             Color.White
@@ -397,7 +397,7 @@ fun StartScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = padSize.label.take(1),
+                                        text = padSize.label,
                                         fontFamily = FontFamily.Monospace,
                                         color = if (uiState.gameConfig.landingPadSize == padSize)
                                             Color.White

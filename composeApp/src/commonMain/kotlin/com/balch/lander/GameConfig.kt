@@ -52,11 +52,11 @@ data class GameConfig(
  * Based on Moon gravity with variations.
  */
 enum class GravityLevel(val value: Float, val label: String) {
-    VERY_LOW(0.1f, "Very Low"),
-    LOW(0.8f, "Low"),
+//    VERY_LOW(0.1f, "Very Low"),
+    LOW(0.75f, "Low"),
     MEDIUM(1.0f, "Medium"),
-    HIGH(1.2f, "High"),
-    VERY_HIGH(2.0f, "Very High")
+    HIGH(2.0f, "High"),
+//    VERY_HIGH(2.0f, "Very High")
 }
 
 /**

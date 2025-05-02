@@ -37,7 +37,8 @@ class TerrainGenerator {
         width: Float,
         height: Float,
         landingPadSize: LandingPadSize,
-        numLandingPads: Int = 3,
+        numLandingPads: Int = 2,
+        numPoints: Int = 200,
         seed: Long = TimeUtil.currentTimeMillis()
     ): Terrain {
         val random = Random(seed)
@@ -45,9 +46,6 @@ class TerrainGenerator {
         // Calculate actual landing pad width based on size
         val baseLandingPadWidth = width / 10
         val actualLandingPadWidth = baseLandingPadWidth * landingPadSize.value
-
-        // Number of terrain points to generate
-        val numPoints = 100
 
         // Generate landing pad positions first
         val landingPadInfos = generateLandingPadPositions(
@@ -208,7 +206,7 @@ class TerrainGenerator {
 
         // make sure landing pad is not in the center of the screen, as it makes it too easy to land
         var posX = randomPos()
-        while (posX in 500-actualLandingPadWidth/2..500+actualLandingPadWidth/2)
+        while (posX in 500-actualLandingPadWidth..500+actualLandingPadWidth)
             posX = randomPos()
 
         return posX
