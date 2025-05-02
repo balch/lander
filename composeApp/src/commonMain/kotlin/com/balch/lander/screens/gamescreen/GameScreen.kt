@@ -77,7 +77,10 @@ fun BoxScope.PlayingContent(
         drawStars(state.environmentState.config)
         drawTerrain(state.environmentState.terrain)
         drawLandingPads(state.environmentState.terrain)
-        drawLander(state.landerState)
+        drawLander(
+            state.landerState,
+            state.environmentState.config.landerSize
+        )
     }
     drawInfoPanel(state.landerState, state.fps)
     drawControlPanel(state.landerState, onControlInputs)
@@ -142,11 +145,10 @@ fun DrawScope.drawLandingPads(terrain: Terrain) {
     }
 }
 
-fun DrawScope.drawLander(landerState: LanderState) {
+fun DrawScope.drawLander(landerState: LanderState, landerSize: Float) {
     // Draw lander
     val landerX = landerState.position.x / 1000f * size.width
     val landerY = landerState.position.y / 1000f * size.height
-    val landerSize = 25f
 
     val isThrusting = landerState.thrustStrength.value > 0f
 
@@ -395,7 +397,10 @@ fun BoxScope.GameOverContent(
         drawStars(state.environmentState.config)
         drawTerrain(state.environmentState.terrain)
         drawLandingPads(state.environmentState.terrain)
-        drawLander(state.landerState)
+        drawLander(
+            state.landerState,
+            state.environmentState.config.landerSize
+        )
     }
     drawInfoPanel(state.landerState, 0)
     GameOverMessage(
@@ -487,7 +492,7 @@ fun LanderPreview() {
             .width(20.dp)
             .height(20.dp)
             .offset(10.dp, 10.dp)) {
-            drawLander(landerState)
+            drawLander(landerState, 25F)
         }
     }
 }

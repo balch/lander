@@ -48,6 +48,7 @@ class PhysicsEngine(
         deltaTime: Float,
         controls: ControlInputs,
         terrain: Terrain,
+        config: GameConfig,
     ): LanderState {
         // Process lander state with terrain information
 
@@ -71,10 +72,10 @@ class PhysicsEngine(
         val newPosition = calculateNewPosition(landerState.position, newVelocity, deltaTime)
 
         // Calculate distance to ground
-        val distanceToGround = calculateDistanceToGround(newPosition, terrain)
+        val distanceToGround = calculateDistanceToGround(newPosition, terrain, config)
 
         // Check if lander is in danger mode
-        val isDangerMode = checkDangerMode(newPosition, newVelocity, distanceToGround, newFuel)
+        val isDangerMode = checkDangerMode(newVelocity, distanceToGround, newFuel)
 
         // Create a temporary game state with updated lander state for status determination
         // This is needed because we need to check if the lander has landed or crashed
@@ -82,7 +83,9 @@ class PhysicsEngine(
         val tempLanderState = landerState.copy(
             position = newPosition,
             velocity = newVelocity,
-            rotation = newRotation
+            rotation = newRotation,
+            distanceToGround = distanceToGround,
+            isDangerMode = isDangerMode,
         )
 
         // Return a new LanderState with all updated values
@@ -192,16 +195,19 @@ class PhysicsEngine(
     /**
      * Calculates the distance from the lander to the ground directly below.
      */
-    private fun calculateDistanceToGround(position: Vector2D, terrain: Terrain): Float {
+    private fun calculateDistanceToGround(
+        position: Vector2D,
+        terrain: Terrain,
+        config: GameConfig
+    ): Float {
         val groundHeight = terrain.getGroundHeight(position.x)
-        return groundHeight - position.y
+        return groundHeight - (position.y + config.landerSize / 2)
     }
 
     /**
      * Checks if the lander is in danger of crashing.
      */
     private fun checkDangerMode(
-        position: Vector2D,
         velocity: Vector2D,
         distanceToGround: Float,
         fuel: Float

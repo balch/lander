@@ -119,7 +119,7 @@ class GameViewModel(
                 emit(currentGameState)
 
                 controlInputs = merge(
-                    controlInputsFlow.drop(1),
+                    controlInputsFlow.drop(1), // wait for next control input
                     flow {
                         // Delay to maintain frame rate (60 FPS)
                         delay(16)
@@ -173,7 +173,8 @@ private fun updatedGameState(
         landerState = currentGameState.landerState,
         deltaTime = deltaTime,
         controls = controlInputs,
-        terrain = currentGameState.environmentState.terrain
+        terrain = currentGameState.environmentState.terrain,
+        config = currentGameState.environmentState.config,
     )
 
     // Check if lander has landed or crashed
