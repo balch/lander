@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.sp
 import com.balch.lander.GameConfig
 import com.balch.lander.GravityLevel
 import com.balch.lander.LandingPadSize
+import com.balch.lander.core.utils.calculateFontScale
+import com.balch.lander.core.utils.scale
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 /**
