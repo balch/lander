@@ -24,9 +24,24 @@ data class LanderState(
     val position: Vector2D = Vector2D(0f, 0f),
 
     /**
+     * Distance from the lander to the ground directly below.
+     */
+    val distanceToGround: Float = Float.POSITIVE_INFINITY,
+
+    /**
+     * Whether the lander is currently thrusting.
+     */
+    val thrustStrength: ThrustStrength = ThrustStrength.OFF,
+
+    /**
      * Current velocity of the lander (x, y) in units per second.
      */
     val velocity: Vector2D = Vector2D(0f, 0f),
+
+    /**
+     * Whether the lander is in danger of crashing.
+     */
+    val isDangerMode: Boolean = false,
 
     /**
      * Current rotation of the lander in degrees.
@@ -46,24 +61,9 @@ data class LanderState(
     val initialFuel: Float = 100f,
 
     /**
-     * Whether the lander is currently thrusting.
-     */
-    val thrustStrength: ThrustStrength = ThrustStrength.OFF,
-
-    /**
      * Current game status.
      */
     val status: GameStatus = GameStatus.PLAYING,
-
-    /**
-     * Distance from the lander to the ground directly below.
-     */
-    val distanceToGround: Float = 0f,
-
-    /**
-     * Whether the lander is in danger of crashing.
-     */
-    val isDangerMode: Boolean = false
 ) {
     /**
      * Checks if the lander has landed successfully.
@@ -102,7 +102,7 @@ data class LanderState(
     fun hasCrashed(terrain: Terrain): Boolean {
         val hasHitGround = distanceToGround <= 0F
         return hasHitGround
-//                && !hasLandedSuccessfully(terrain)
+                && !hasLandedSuccessfully(terrain)
     }
 }
 

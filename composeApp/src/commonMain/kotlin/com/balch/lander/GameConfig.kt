@@ -70,10 +70,10 @@ enum class GravityLevel(val value: Float, val label: String) {
 /**
  * Landing pad sizes available in the game.
  */
-enum class LandingPadSize(val value: Float, val label: String) {
-    SMALL(0.5f, "Small"),
-    MEDIUM(1.0f, "Medium"),
-    LARGE(1.5f, "Large")
+enum class LandingPadSize(val size: Float, val count: Int, val label: String) {
+    SMALL(0.5f, 6, "Small"),
+    MEDIUM(1.0f, 4,  "Medium"),
+    LARGE(1.5f, 2, "Large")
 }
 
 /**
@@ -82,23 +82,21 @@ enum class LandingPadSize(val value: Float, val label: String) {
  */
 enum class CameraZoomLevel(
     val distanceThreshold: Float,
-    val scale: Vector2D,
-    val label: String
+    val scale: Float,
 ) {
     /**
      * Far from ground - minimal zoom, centered view
      */
-    FAR(600f, Vector2D(1.0f, 1.0f), "Far"),
-
+    FAR(500f, 1.0f),
     /**
      * Medium distance - moderate zoom, slightly offset view
      */
-    MEDIUM(300f, Vector2D(1.5f, 1.5f), "Medium"),
+    MEDIUM(200f, 1.2f),
 
     /**
      * Close to ground - maximum zoom, focused on landing area
      */
-    CLOSE(0f, Vector2D(2.0f, 2.0f), "Close")
+    CLOSE(0f, 1.5f)
 }
 
 /**

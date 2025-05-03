@@ -27,14 +27,18 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.balch.lander.GameConfig
 import com.balch.lander.core.game.ControlInputs
+import com.balch.lander.core.game.TerrainGenerator
 import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.ThrustStrength
+import com.balch.lander.core.game.models.Vector2D
 import com.balch.lander.core.utils.FontScaler
 import com.balch.lander.core.utils.StringFormatter
+import com.balch.lander.core.utils.TimeProvider
 import com.balch.lander.screens.gamescreen.GameViewModel.GameScreenState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.abs
@@ -104,12 +108,12 @@ fun PlayingContent(
 
     // Animate camera scale changes
     val animatedScaleX by animateFloatAsState(
-        targetValue = state.cameraScale.x,
+        targetValue = state.cameraScale,
         animationSpec = tween(durationMillis = 500),
         label = "scaleX"
     )
     val animatedScaleY by animateFloatAsState(
-        targetValue = state.cameraScale.y,
+        targetValue = state.cameraScale,
         animationSpec = tween(durationMillis = 500),
         label = "scaleY"
     )
@@ -126,14 +130,8 @@ fun PlayingContent(
         label = "offsetY"
     )
 
-    // Convert game coordinates to dp for offset
-    // The game coordinates are in the range 0-1000, so we need to convert to dp
-    val screenWidthPx = with(density) { state.environmentState.config.screenWidth.toDp() }
-    val screenHeightPx = with(density) { state.environmentState.config.screenHeight.toDp() }
-
     // Calculate offset in dp
-    val offsetXDp = with(density) { (animatedOffsetX / state.environmentState.config.screenWidth * screenWidthPx.toPx()).toDp() }
-    val offsetYDp = with(density) { (animatedOffsetY / state.environmentState.config.screenHeight * screenHeightPx.toPx()).toDp() }
+    val (offsetXDp, offsetYDp) = toDp(Vector2D(animatedOffsetX, animatedOffsetY), state.environmentState.config)
 
     Box(
         modifier = Modifier
@@ -177,11 +175,14 @@ fun PlayingContent(
                 .offset(offsetXDp, offsetYDp)
         ) {
             drawStars(state.environmentState.config)
-            drawTerrain(state.environmentState.terrain)
+            drawTerrain(
+                state.environmentState.terrain,
+                state.environmentState.config
+            )
             drawLandingPads(state.environmentState.terrain)
             drawLander(
                 state.landerState,
-                state.environmentState.config.landerSize
+                state.environmentState.config
             )
         }
         drawInfoPanel(state.landerState, state.fps, fontScaler, stringFormatter)
@@ -189,7 +190,28 @@ fun PlayingContent(
     }
 }
 
-fun DrawScope.drawTerrain(terrain: Terrain) {
+@Composable
+fun toDp(point: Vector2D, config: GameConfig): Pair<Dp, Dp> {
+    // Get the local density for dp conversions
+    val density = LocalDensity.current
+    val screenWidth = config.screenWidth
+    val screenHeight = config.screenHeight
+
+    // Convert game coordinates to dp for offset
+    // The game coordinates are in the range 0-1000, so we need to convert to dp
+    val screenWidthPx = with(density) { screenWidth.toDp() }
+    val screenHeightPx = with(density) { screenHeight.toDp() }
+
+    return Pair(
+        with(density) { (point.x / screenWidth * screenWidthPx.toPx()).toDp() },
+        with(density) { (point.y / screenHeight * screenHeightPx.toPx()).toDp() }
+    )
+}
+
+fun DrawScope.drawTerrain(terrain: Terrain, config: GameConfig) {
+    val screenWidth = config.screenWidth
+    val screenHeight = config.screenHeight
+
     val terrainPoints = terrain.points
     if (terrainPoints.size < 2) {
         // Need at least two points to draw a path or line
@@ -199,15 +221,15 @@ fun DrawScope.drawTerrain(terrain: Terrain) {
     val path = Path()
     // Scale the first point and move the path to it
     val firstPoint = terrainPoints[0]
-    val startX = firstPoint.x / 1000f * size.width
-    val startY = firstPoint.y / 1000f * size.height
+    val startX = firstPoint.x / screenWidth * size.width
+    val startY = firstPoint.y / screenHeight * size.height
     path.moveTo(startX, startY)
 
     // Iterate through the rest of the points and add lines to the path
     for (i in 1 until terrainPoints.size) {
         val point = terrainPoints[i]
-        val x = point.x / 1000f * size.width
-        val y = point.y / 1000f * size.height
+        val x = point.x / screenWidth * size.width
+        val y = point.y / screenHeight * size.height
         path.lineTo(x, y)
     }
 
@@ -217,6 +239,27 @@ fun DrawScope.drawTerrain(terrain: Terrain) {
         color = Color.Gray,
         style = Stroke(width = 2f) // Use Stroke style for path outline
     )
+}
+
+@Preview
+@Composable
+fun TerrainPreview() {
+    val config = GameConfig()
+    val terrain = TerrainGenerator(TimeProvider())
+        .generateTerrain(config.screenWidth, config.screenHeight)
+
+    val (width, height) = toDp(Vector2D(config.screenWidth, config.screenHeight), config)
+
+    MaterialTheme(colors = darkColors()) {
+        Canvas(
+            modifier = Modifier
+                .width(width)
+                .height(height)
+        ){
+            drawTerrain(terrain, config)
+            drawLandingPads(terrain)
+        }
+    }
 }
 
 fun DrawScope.drawStars(config: GameConfig) {
@@ -231,6 +274,22 @@ fun DrawScope.drawStars(config: GameConfig) {
         )
     }
 }
+
+@Preview
+@Composable
+fun StarsPreview() {
+    val config = GameConfig()
+
+    MaterialTheme(colors = darkColors()) {
+        Canvas(modifier = Modifier
+            .width(600.dp)
+            .height(350.dp)
+        ) {
+            drawStars(config)
+        }
+    }
+}
+
 fun DrawScope.drawLandingPads(terrain: Terrain) {
     terrain.landingPads.forEach { pad ->
         val x1 = pad.start.x / 1000f * size.width
@@ -248,10 +307,17 @@ fun DrawScope.drawLandingPads(terrain: Terrain) {
     }
 }
 
-fun DrawScope.drawLander(landerState: LanderState, landerSize: Float) {
+fun DrawScope.drawLander(
+    landerState: LanderState,
+    config: GameConfig,
+) {
+    val landerSize = config.landerSize
+    val screenWidth = config.screenWidth
+    val screenHeight = config.screenHeight
+
     // Draw lander
-    val landerX = landerState.position.x / 1000f * size.width
-    val landerY = landerState.position.y / 1000f * size.height
+    val landerX = landerState.position.x / screenWidth * size.width
+    val landerY = landerState.position.y / screenHeight * size.height
 
     val isThrusting = landerState.thrustStrength.value > 0f
 
@@ -294,6 +360,25 @@ fun DrawScope.drawLander(landerState: LanderState, landerSize: Float) {
                 size = Size(landerSize / 2, landerSize * landerState.thrustStrength.value),
                 alpha = 0.5f
             )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun LanderPreview() {
+    val landerState = LanderState(
+        thrustStrength = ThrustStrength.MEDIUM,
+    )
+    val config = GameConfig()
+
+    MaterialTheme(colors = darkColors()) {
+        Canvas(modifier = Modifier
+            .width(25.dp)
+            .height(25.dp)
+            .offset(12.dp, 12.dp)
+        ){
+            drawLander(landerState, config)
         }
     }
 }
@@ -344,6 +429,21 @@ fun BoxScope.drawInfoPanel(
                 color = MaterialTheme.colors.onBackground,
                 fontSize = fontScaler.scale(14.sp),
             )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun InfoPanelPreview() {
+    val landerState = LanderState()
+
+    MaterialTheme(colors = darkColors()) {
+        Box(modifier = Modifier
+            .width(600.dp)
+            .height(350.dp)
+        ) {
+            drawInfoPanel(landerState, 60)
         }
     }
 }
@@ -508,6 +608,21 @@ fun BoxScope.drawControlPanel(
     }
 }
 
+@Preview
+@Composable
+fun ControlPadPreview() {
+    val landerState = LanderState()
+
+    MaterialTheme(colors = darkColors()) {
+        Box(modifier = Modifier
+            .width(600.dp)
+            .height(350.dp)
+        ) {
+            drawControlPanel(landerState, {  })
+        }
+    }
+}
+
 @Composable
 fun BoxScope.GameOverContent(
     state: GameScreenState.GameOver,
@@ -516,11 +631,11 @@ fun BoxScope.GameOverContent(
 ) {
     Canvas(modifier = Modifier.fillMaxSize()) {
         drawStars(state.environmentState.config)
-        drawTerrain(state.environmentState.terrain)
+        drawTerrain(state.environmentState.terrain, state.environmentState.config)
         drawLandingPads(state.environmentState.terrain)
         drawLander(
             state.landerState,
-            state.environmentState.config.landerSize
+            state.environmentState.config
         )
     }
     drawInfoPanel(state.landerState, 0)
@@ -599,66 +714,6 @@ fun GameOverMessage(
                     }
                 }
             }
-        }
-    }
-}
-
-@Preview
-@Composable
-fun LanderPreview() {
-    val landerState = LanderState()
-
-    MaterialTheme(colors = darkColors()) {
-        Canvas(modifier = Modifier
-            .width(20.dp)
-            .height(20.dp)
-            .offset(10.dp, 10.dp)) {
-            drawLander(landerState, 25F)
-        }
-    }
-}
-
-@Preview
-@Composable
-fun StarsPreview() {
-    val config = GameConfig()
-
-    MaterialTheme(colors = darkColors()) {
-        Canvas(modifier = Modifier
-            .width(600.dp)
-            .height(350.dp)
-        ) {
-            drawStars(config)
-        }
-    }
-}
-
-@Preview
-@Composable
-fun ControlPadPreview() {
-    val landerState = LanderState()
-
-    MaterialTheme(colors = darkColors()) {
-        Box(modifier = Modifier
-            .width(600.dp)
-            .height(350.dp)
-        ) {
-            drawControlPanel(landerState, {  })
-        }
-    }
-}
-
-@Preview
-@Composable
-fun InfoPanelPreview() {
-    val landerState = LanderState()
-
-    MaterialTheme(colors = darkColors()) {
-        Box(modifier = Modifier
-            .width(600.dp)
-            .height(350.dp)
-        ) {
-            drawInfoPanel(landerState, 60)
         }
     }
 }

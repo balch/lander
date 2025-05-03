@@ -36,16 +36,17 @@ class TerrainGenerator(private val timeProvider: TimeProvider) {
     fun generateTerrain(
         width: Float,
         height: Float,
-        landingPadSize: LandingPadSize,
-        numLandingPads: Int = 2,
+        landingPadSize: LandingPadSize = LandingPadSize.MEDIUM,
         numPoints: Int = 200,
         seed: Long = timeProvider.currentTimeMillis()
     ): Terrain {
         val random = Random(seed)
 
+        val numLandingPads = landingPadSize.count
+
         // Calculate actual landing pad width based on size
         val baseLandingPadWidth = width / 10
-        val actualLandingPadWidth = baseLandingPadWidth * landingPadSize.value
+        val actualLandingPadWidth = baseLandingPadWidth * landingPadSize.size
 
         // Generate landing pad positions first
         val landingPadInfos = generateLandingPadPositions(

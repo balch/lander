@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import org.lighthousegames.logging.KmLogging
 import org.lighthousegames.logging.logging
 import kotlin.math.abs
 import kotlin.random.Random
@@ -81,7 +82,7 @@ class GameViewModel(
             velocity = Vector2D(0f, 0f),
             rotation = 0f,
             fuel = initialFuel,
-            initialFuel = initialFuel
+            initialFuel = initialFuel,
         ).also { state ->
             logger.debug { "Initializing lander state : $state" }
         }
@@ -96,7 +97,7 @@ class GameViewModel(
             seed = Random.nextLong()
         ).also { state ->
             logger.debug {
-                "Terrain Generated  size: ${state.points.size} maxHeight: ${state.points.maxOf { it.y }}"
+                "Terrain Generated size: ${state.points.size} maxHeight: ${state.points.maxOf { it.y }}"
             }
         }
     }
@@ -280,7 +281,13 @@ class GameViewModel(
                     cameraScale = cameraZoomLevel.scale,
                     cameraOffset = cameraOffset,
                 ).also { state ->
-                    logger.d("GameState") { "Lander mission active! : $state" }
+                    if (KmLogging.isLoggingDebug) {
+                        logger.d("GameState") {
+                            "Lander mission active! : cameraZoomLevel=${cameraZoomLevel}, cameraOffset=$cameraOffset, LanderState=${state.landerState}"
+                        }
+                    } else {
+                        logger.v("GameState") { "Lander mission active! : $state" }
+                    }
                 }
             }
 
@@ -344,7 +351,7 @@ class GameViewModel(
              */
             val fps: Int = 0,
 
-            val cameraScale: Vector2D = Vector2D(1f, 1f),
+            val cameraScale: Float = 1f,
 
             val cameraOffset: Vector2D = Vector2D(0f, 0f),
         ) : GameScreenState
