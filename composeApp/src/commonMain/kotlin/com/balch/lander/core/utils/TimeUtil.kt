@@ -9,4 +9,6 @@ expect object TimeUtil {
      * @return Current time in milliseconds
      */
     fun currentTimeMillis(): Long
+
+    val isTimeAccurate: Boolean
 }

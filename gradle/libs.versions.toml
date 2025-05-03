@@ -6,7 +6,7 @@ android-targetSdk = "35"
 androidx-activityCompose = "1.10.1"
 androidx-appcompat = "1.7.0"
 androidx-constraintlayout = "2.2.1"
-androidx-core-ktx = "1.15.0"
+androidx-core-ktx = "1.16.0"
 androidx-espresso-core = "3.6.1"
 androidx-lifecycle = "2.8.4"
 androidx-material = "1.12.0"
@@ -14,9 +14,10 @@ androidx-test-junit = "1.2.1"
 compose-multiplatform = "1.7.3"
 junit = "4.13.2"
 koinCore = "4.0.4"
-kotlin = "2.1.10"
-kotlinx-coroutines = "1.10.1"
+kotlin = "2.1.20"
+kotlinx-coroutines = "1.10.2"
 kotlinxCoroutinesCore = "1.10.2"
+kmlogging = "1.3.0"
 
 [libraries]
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinCore" }
@@ -35,6 +36,7 @@ androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", nam
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kmlogging = { module = "org.lighthousegames:logging", version.ref = "kmlogging" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

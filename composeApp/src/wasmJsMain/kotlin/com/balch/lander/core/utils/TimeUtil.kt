@@ -5,6 +5,8 @@ package com.balch.lander.core.utils
  */
 actual object TimeUtil {
 
+    actual val isTimeAccurate: Boolean = false
+
     // Counter for incremental time
     private var counter = 0L
 

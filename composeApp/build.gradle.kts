@@ -73,6 +73,9 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
 
+            // Logging
+            implementation(libs.kmlogging)
+
             // Coroutines
             implementation(libs.kotlinx.coroutines.core)
         }

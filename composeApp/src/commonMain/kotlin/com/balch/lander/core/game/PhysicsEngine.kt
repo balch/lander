@@ -38,14 +38,14 @@ class PhysicsEngine(
      * Updates the game state based on physics calculations.
      * 
      * @param landerState Current state of the lander
-     * @param deltaTime Time elapsed since last update in seconds
+     * @param deltaTimeMs Time elapsed since last update in milliseconds
      * @param controls Current control inputs
      * @param terrain Current terrain configuration
      * @return Updated lander state
      */
     fun update(
         landerState: LanderState,
-        deltaTime: Float,
+        deltaTimeMs: Long,
         controls: ControlInputs,
         terrain: Terrain,
         config: GameConfig,
@@ -56,6 +56,8 @@ class PhysicsEngine(
         if (landerState.status != GameStatus.PLAYING) {
             return landerState
         }
+
+        val deltaTime = deltaTimeMs / 1000f
 
         // Calculate new rotation based on control inputs
         val newRotation = calculateNewRotation(landerState.rotation, controls, deltaTime)

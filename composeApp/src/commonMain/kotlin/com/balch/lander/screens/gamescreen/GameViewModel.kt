@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import org.lighthousegames.logging.logging
 import kotlin.random.Random
 
 /**
@@ -22,6 +23,7 @@ import kotlin.random.Random
 class GameViewModel(
     private val terrainGenerator: TerrainGenerator,
 ) : ViewModel() {
+    private val logger = logging()
 
     // State flows for different components
     private val startGameIntentFlow = MutableSharedFlow<GameConfig>(
@@ -65,6 +67,7 @@ class GameViewModel(
             )
 
     fun startGame(config: GameConfig) {
+        logger.info { "Starting game with config: gravity=${config.gravity}, fuelLevel=${config.fuelLevel}, landingPadSize=${config.landingPadSize}" }
         startGameIntentFlow.tryEmit(config)
     }
 
@@ -76,16 +79,22 @@ class GameViewModel(
             rotation = 0f,
             fuel = initialFuel,
             initialFuel = initialFuel
-        )
+        ).also {
+            logger.debug { "Initializing lander state : $it" }
+        }
     }
 
-    private fun generateTerrain(config: GameConfig): Terrain =
-        terrainGenerator.generateTerrain(
+    private fun generateTerrain(config: GameConfig): Terrain {
+        logger.debug { "Generating terrain with width=${config.screenWidth}, height=${config.screenHeight}, landingPadSize=${config.landingPadSize}" }
+        return terrainGenerator.generateTerrain(
             width = config.screenWidth,
             height = config.screenHeight,
             landingPadSize = config.landingPadSize,
             seed = Random.nextLong()
-        )
+        ).also {
+            logger.debug { "Terrain Generated  size: ${it.points.size} maxHeight: ${it.points.maxOf { it.y }}" }
+        }
+    }
 
     /**
      * Starts the game loop.
@@ -95,6 +104,7 @@ class GameViewModel(
         initialGameState: GameScreenState,
     ): Flow<GameScreenState> =
         flow {
+            logger.info { "Starting game loop with gravity=${config.gravity}" }
             val physicsEngine = PhysicsEngine(config)
 
             // Initialize last update time
@@ -104,25 +114,39 @@ class GameViewModel(
 
             while (currentGameState !is GameScreenState.GameOver) {
                 // Calculate delta time
-                val currentTime = TimeUtil.currentTimeMillis()
-                val deltaTime = (currentTime - lastUpdateTime) / 1000f
-                lastUpdateTime = currentTime
+                val workStartTime = TimeUtil.currentTimeMillis()
+                val deltaTimeMs = workStartTime - lastUpdateTime
+                lastUpdateTime = workStartTime
+
+                logger.verbose {
+                    "Game Loop - Start controlInputs=$controlInputs deltaTimeMs=$deltaTimeMs"
+                }
 
                 // Update game state
                 currentGameState = updatedGameState(
                     physicsEngine = physicsEngine,
-                    deltaTime = deltaTime,
+                    deltaTimeMs = deltaTimeMs,
                     currentGameState = currentGameState,
                     controlInputs = controlInputs,
                 )
 
+                val workEndTime = TimeUtil.currentTimeMillis()
+                val workTimeMs =
+                    if (TimeUtil.isTimeAccurate) workEndTime - workStartTime
+                    else 0
+                val sleepTimeMs = maxOf(0L, 16L - workTimeMs)
+
+                logger.verbose {
+                    "Game Loop - End workTimeMs=${workTimeMs.takeIf { TimeUtil.isTimeAccurate } ?: "???" } sleepTimeMs=$sleepTimeMs State: $currentGameState"
+                }
                 emit(currentGameState)
 
                 controlInputs = merge(
-                    controlInputsFlow.drop(1), // wait for next control input
+                    controlInputsFlow.drop(1) // wait for next control input
+                        .onEach { logger.debug { "Game Loop - Control Inputs: $it" } },
                     flow {
                         // Delay to maintain frame rate (60 FPS)
-                        delay(16)
+                        delay(sleepTimeMs)
                         emit(controlInputs)
                     }
                 ).first()
@@ -152,13 +176,16 @@ private val failureMessages: List<String> =
         "The moon claims another victim."
     )
 
+// Logger for game state updates
+private val gameStateLogger = logging("GameState")
+
 /**
  * Updates the game state based on physics and controls.
  * @param deltaTime Time elapsed since last update in seconds
  */
 private fun updatedGameState(
     physicsEngine: PhysicsEngine,
-    deltaTime: Float,
+    deltaTimeMs: Long,
     currentGameState: GameScreenState,
     controlInputs: ControlInputs,
 ): GameScreenState {
@@ -171,7 +198,7 @@ private fun updatedGameState(
     // Update game state using physics engine
     val newLanderState = physicsEngine.update(
         landerState = currentGameState.landerState,
-        deltaTime = deltaTime,
+        deltaTimeMs = deltaTimeMs,
         controls = controlInputs,
         terrain = currentGameState.environmentState.terrain,
         config = currentGameState.environmentState.config,
@@ -182,11 +209,19 @@ private fun updatedGameState(
         GameStatus.PLAYING -> GameScreenState.Playing(
             landerState = newLanderState,
             environmentState = currentGameState.environmentState,
-            fps = if (deltaTime > 0) (1f / deltaTime).toInt() else 0
+            fps = if (deltaTimeMs > 0) (1000L / deltaTimeMs).toInt() else 0,
         )
 
-        GameStatus.LANDED -> GameScreenState.GameOver(true, successMessages.random())
-        GameStatus.CRASHED -> GameScreenState.GameOver(false, failureMessages.random())
+        GameStatus.LANDED -> {
+            val message = successMessages.random()
+            gameStateLogger.info { "Lander successfully landed! Message: $message" }
+            GameScreenState.GameOver(true, message)
+        }
+        GameStatus.CRASHED -> {
+            val message = failureMessages.random()
+            gameStateLogger.info { "Lander crashed! Message: $message" }
+            GameScreenState.GameOver(false, message)
+        }
     }
 }
 
