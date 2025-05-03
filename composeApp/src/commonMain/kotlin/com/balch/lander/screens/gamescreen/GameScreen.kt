@@ -1,5 +1,7 @@
 package com.balch.lander.screens.gamescreen
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -12,6 +14,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
@@ -22,6 +25,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,6 +35,7 @@ import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.utils.FontScaler
 import com.balch.lander.core.utils.StringFormatter
+import com.balch.lander.screens.gamescreen.GameViewModel.GameScreenState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.abs
 
@@ -94,6 +99,42 @@ fun PlayingContent(
         focusRequester.requestFocus()
     }
 
+    // Get the local density for dp conversions
+    val density = LocalDensity.current
+
+    // Animate camera scale changes
+    val animatedScaleX by animateFloatAsState(
+        targetValue = state.cameraScale.x,
+        animationSpec = tween(durationMillis = 500),
+        label = "scaleX"
+    )
+    val animatedScaleY by animateFloatAsState(
+        targetValue = state.cameraScale.y,
+        animationSpec = tween(durationMillis = 500),
+        label = "scaleY"
+    )
+
+    // Animate camera offset changes
+    val animatedOffsetX by animateFloatAsState(
+        targetValue = state.cameraOffset.x,
+        animationSpec = tween(durationMillis = 500),
+        label = "offsetX"
+    )
+    val animatedOffsetY by animateFloatAsState(
+        targetValue = state.cameraOffset.y,
+        animationSpec = tween(durationMillis = 500),
+        label = "offsetY"
+    )
+
+    // Convert game coordinates to dp for offset
+    // The game coordinates are in the range 0-1000, so we need to convert to dp
+    val screenWidthPx = with(density) { state.environmentState.config.screenWidth.toDp() }
+    val screenHeightPx = with(density) { state.environmentState.config.screenHeight.toDp() }
+
+    // Calculate offset in dp
+    val offsetXDp = with(density) { (animatedOffsetX / state.environmentState.config.screenWidth * screenWidthPx.toPx()).toDp() }
+    val offsetYDp = with(density) { (animatedOffsetY / state.environmentState.config.screenHeight * screenHeightPx.toPx()).toDp() }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -130,7 +171,11 @@ fun PlayingContent(
                 }
             }
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        Canvas(
+            modifier = Modifier.fillMaxSize()
+                .scale(scaleX = animatedScaleX, scaleY = animatedScaleY)
+                .offset(offsetXDp, offsetYDp)
+        ) {
             drawStars(state.environmentState.config)
             drawTerrain(state.environmentState.terrain)
             drawLandingPads(state.environmentState.terrain)
@@ -278,26 +323,26 @@ fun BoxScope.drawInfoPanel(
         Text(
             text = "DESCENT: ${abs(landerState.velocity.y).toInt()} m/s",
             color = if (abs(landerState.velocity.y) > 3) Color.Red else MaterialTheme.colors.onBackground,
-            fontSize = fontScaler.scale(12.sp),
+            fontSize = fontScaler.scale(14.sp),
         )
 
         Text(
             text = "DRIFT: ${stringFormatter.formatToString(landerState.velocity.x)} m/s",
             color = if (abs(landerState.velocity.x) > 2) Color.Red else MaterialTheme.colors.onBackground,
-            fontSize = fontScaler.scale(12.sp),
+            fontSize = fontScaler.scale(14.sp),
         )
 
         Text(
             text = "ALTITUDE: ${landerState.distanceToGround.toInt()} m",
             color = if (landerState.distanceToGround < 50) Color.Red else MaterialTheme.colors.onBackground,
-            fontSize = fontScaler.scale(12.sp),
+            fontSize = fontScaler.scale(14.sp),
         )
 
         if (fps > 0) {
             Text(
                 text = "FPS: $fps",
                 color = MaterialTheme.colors.onBackground,
-                fontSize = fontScaler.scale(12.sp),
+                fontSize = fontScaler.scale(14.sp),
             )
         }
     }
@@ -433,11 +478,11 @@ fun BoxScope.drawControlPanel(
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF4B0082)),
                     contentPadding = PaddingValues(4.dp),
                     border = BorderStroke(2.dp, Color(0xFFAA5500)),
-                    interactionSource = rotateRightInteractionSource
+                    interactionSource = rotateRightInteractionSource,
                 ) {
                     Text(
                         text = "-->",
-                        fontSize = fontScaler.scale(12.sp),
+                        fontSize = fontScaler.scale(14.sp),
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )

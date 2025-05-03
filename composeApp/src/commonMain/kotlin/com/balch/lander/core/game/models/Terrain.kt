@@ -3,7 +3,7 @@ package com.balch.lander.core.game.models
 /**
  * Represents the terrain of the moon, including landing pads.
  */
-open class Terrain(
+class Terrain(
     /**
      * List of terrain points (x, y) that define the surface.
      */
@@ -18,7 +18,7 @@ open class Terrain(
      * Gets the height of the ground at the given x coordinate.
      * Uses linear interpolation between terrain points.
      */
-    open fun getGroundHeight(x: Float): Float {
+    fun getGroundHeight(x: Float): Float {
         // If there are no points, return 0
         if (points.isEmpty()) {
             return 0f
@@ -53,7 +53,9 @@ open class Terrain(
     /**
      * Checks if the given x coordinate is on a landing pad.
      */
-    open fun isOnLandingPad(x: Float): Boolean {
-        return landingPads.any { pad -> x >= pad.start.x && x <= pad.end.x }
-    }
+    fun isOnLandingPad(x: Float): Boolean =
+        landingPads.any { pad -> x >= pad.start.x && x <= pad.end.x }
+
+    override fun toString(): String =
+        "Terrain(points=${points.size}, landingPads=${landingPads.size})"
 }

@@ -2,6 +2,7 @@ package com.balch.lander.screens.gamescreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.balch.lander.CameraZoomLevel
 import com.balch.lander.GameConfig
 import com.balch.lander.core.game.ControlInputs
 import com.balch.lander.core.game.PhysicsEngine
@@ -14,6 +15,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import org.lighthousegames.logging.logging
+import kotlin.math.abs
 import kotlin.random.Random
 
 /**
@@ -80,8 +82,8 @@ class GameViewModel(
             rotation = 0f,
             fuel = initialFuel,
             initialFuel = initialFuel
-        ).also {
-            logger.debug { "Initializing lander state : $it" }
+        ).also { state ->
+            logger.debug { "Initializing lander state : $state" }
         }
     }
 
@@ -92,8 +94,10 @@ class GameViewModel(
             height = config.screenHeight,
             landingPadSize = config.landingPadSize,
             seed = Random.nextLong()
-        ).also {
-            logger.debug { "Terrain Generated  size: ${it.points.size} maxHeight: ${it.points.maxOf { it.y }}" }
+        ).also { state ->
+            logger.debug {
+                "Terrain Generated  size: ${state.points.size} maxHeight: ${state.points.maxOf { it.y }}"
+            }
         }
     }
 
@@ -138,7 +142,7 @@ class GameViewModel(
                 val sleepTimeMs = maxOf(0L, 16L - workTimeMs)
 
                 logger.verbose {
-                    "Game Loop - End workTimeMs=${workTimeMs.takeIf { timeProvider.isTimeAccurate } ?: "???" } sleepTimeMs=$sleepTimeMs State: $currentGameState"
+                    "Game Loop - End workTimeMs=${workTimeMs.takeIf { timeProvider.isTimeAccurate } ?: "???"} sleepTimeMs=$sleepTimeMs State: $currentGameState"
                 }
                 emit(currentGameState)
 
@@ -153,114 +157,210 @@ class GameViewModel(
                 ).first()
             }
         }
-}
 
-// Gets a list of success messages
-private val successMessages: List<String> =
-    listOf(
-        "Perfect landing! NASA would be proud.",
-        "Touchdown! The Eagle has landed.",
-        "Smooth as silk! You're a natural.",
-        "Landing confirmed. Mission accomplished!",
-        "That's one small step for a lander...",
-        "Houston, we have a successful landing!"
-    )
+    /**
+     * Calculates the camera scale based on the lander's distance from the ground.
+     * As the lander gets closer to the ground, the camera zooms in.
+     *
+     * @param landerState Current state of the lander
+     * @param config Game configuration
+     * @return Vector2D representing the scale factor for x and y dimensions
+     */
+    private fun calculateCameraZoomLevel(
+        landerState: LanderState,
+        config: GameConfig
+    ): CameraZoomLevel {
+        val distance = landerState.distanceToGround
 
-// Gets a list of failure messages
-private val failureMessages: List<String> =
-    listOf(
-        "Houston, we have a problem.",
-        "That's going to leave a mark...",
-        "The lander is now a permanent lunar feature.",
-        "Let's call that a 'rapid unscheduled disassembly'.",
-        "Maybe try landing gear down next time?",
-        "The moon claims another victim."
-    )
+        // Find the appropriate zoom level based on distance
+        val zoomLevel = config.cameraConfig.zoomLevels.find {
+            distance >= it.distanceThreshold
+        } ?: config.cameraConfig.zoomLevels.first()
 
-// Logger for game state updates
-private val gameStateLogger = logging("GameState")
-
-/**
- * Updates the game state based on physics and controls.
- * @param deltaTime Time elapsed since last update in seconds
- */
-private fun updatedGameState(
-    physicsEngine: PhysicsEngine,
-    deltaTimeMs: Long,
-    currentGameState: GameScreenState,
-    controlInputs: ControlInputs,
-): GameScreenState {
-
-    // Skip update if game is not in playing state
-    if (currentGameState !is GameScreenState.Playing) {
-        return currentGameState
+        return zoomLevel
     }
 
-    // Update game state using physics engine
-    val newLanderState = physicsEngine.update(
-        landerState = currentGameState.landerState,
-        deltaTimeMs = deltaTimeMs,
-        controls = controlInputs,
-        terrain = currentGameState.environmentState.terrain,
-        config = currentGameState.environmentState.config,
-    )
+    /**
+     * Calculates the camera offset based on the lander's position.
+     * Adjusts the view to keep the lander in frame as it moves.
+     *
+     * @param landerState Current state of the lander
+     * @param config Game configuration
+     * @return Vector2D representing the offset in x and y dimensions (in game coordinates)
+     */
+    private fun calculateCameraOffset(
+        landerState: LanderState,
+        zoomLevel: CameraZoomLevel,
+        config: GameConfig
+    ): Vector2D {
 
-    // Check if lander has landed or crashed
-    return when (newLanderState.status) {
-        GameStatus.PLAYING -> GameScreenState.Playing(
-            landerState = newLanderState,
-            environmentState = currentGameState.environmentState,
-            fps = if (deltaTimeMs > 0) (1000L / deltaTimeMs).toInt() else 0,
+        // If camera is zoomed out FAR, return (0,0) offset
+        if (zoomLevel == CameraZoomLevel.FAR) {
+            return Vector2D(0f, 0f)
+        }
+
+        // Calculate horizontal offset based on lander's position
+        // As lander moves toward edges, camera follows to keep it within 20% of the border
+        val horizontalCenter = config.screenWidth / 2
+        val borderMargin = config.screenWidth * 0.2f // 20% of screen width
+        val maxHorizontalOffset = config.screenWidth * config.cameraConfig.maxHorizontalOffsetPercent
+
+        // Calculate how far from center the lander is
+        val horizontalDistanceFromCenter = landerState.position.x - horizontalCenter
+
+        // Only start offsetting when lander is beyond the border margin
+        val horizontalOffsetFactor = if (abs(horizontalDistanceFromCenter) > borderMargin) {
+            // Normalize to -1..1 range, accounting for the border margin
+            val adjustedDistance = horizontalDistanceFromCenter - (if (horizontalDistanceFromCenter > 0) borderMargin else -borderMargin)
+            val normalizedDistance = adjustedDistance / (horizontalCenter - borderMargin)
+            normalizedDistance.coerceIn(-1f, 1f)
+        } else {
+            0f
+        }
+
+        // Calculate vertical offset to keep bottom of screen visible as lander descends
+        // The closer to ground, the more we want to see below the lander
+        val distanceRatio = (landerState.distanceToGround / 300f).coerceIn(0f, 1f)
+
+        // Calculate how much of the screen below the lander should be visible
+        // As lander gets closer to ground, show more of the area below
+        val visibleBottomRatio = 1f - distanceRatio
+
+        // Calculate vertical offset to ensure bottom of screen is visible
+        // and lander is positioned appropriately based on distance to ground
+        val verticalOffset = landerState.position.y - (config.screenHeight * (0.2f + (visibleBottomRatio * 0.3f)))
+
+        return Vector2D(
+            x = maxHorizontalOffset * horizontalOffsetFactor,
+            y = verticalOffset
+        )
+    }
+
+    /**
+     * Updates the game state based on physics and controls.
+     * @param deltaTime Time elapsed since last update in seconds
+     */
+    private fun updatedGameState(
+        physicsEngine: PhysicsEngine,
+        deltaTimeMs: Long,
+        currentGameState: GameScreenState,
+        controlInputs: ControlInputs,
+    ): GameScreenState {
+
+        // Skip update if game is not in playing state
+        if (currentGameState !is GameScreenState.Playing) {
+            return currentGameState
+        }
+
+        // Update game state using physics engine
+        val newLanderState = physicsEngine.update(
+            landerState = currentGameState.landerState,
+            deltaTimeMs = deltaTimeMs,
+            controls = controlInputs,
+            terrain = currentGameState.environmentState.terrain,
+            config = currentGameState.environmentState.config,
         )
 
-        GameStatus.LANDED -> {
-            val message = successMessages.random()
-            gameStateLogger.info { "Lander successfully landed! Message: $message" }
-            GameScreenState.GameOver(true, message)
-        }
-        GameStatus.CRASHED -> {
-            val message = failureMessages.random()
-            gameStateLogger.info { "Lander crashed! Message: $message" }
-            GameScreenState.GameOver(false, message)
+        // Check if lander has landed or crashed
+        return when (newLanderState.status) {
+            GameStatus.PLAYING -> {
+                val cameraZoomLevel = calculateCameraZoomLevel(
+                    landerState = newLanderState,
+                    config = currentGameState.environmentState.config
+                )
+                val cameraOffset = calculateCameraOffset(
+                    landerState = newLanderState,
+                    zoomLevel = cameraZoomLevel,
+                    config = currentGameState.environmentState.config
+                )
+                GameScreenState.Playing(
+                    landerState = newLanderState,
+                    environmentState = currentGameState.environmentState,
+                    fps = if (deltaTimeMs > 0) (1000L / deltaTimeMs).toInt() else 0,
+                    cameraScale = cameraZoomLevel.scale,
+                    cameraOffset = cameraOffset,
+                ).also { state ->
+                    logger.d("GameState") { "Lander mission active! : $state" }
+                }
+            }
+
+            GameStatus.LANDED -> {
+                val message = successMessages.random()
+                logger.info("GameState") { "Lander successfully landed! Message: $message" }
+                GameScreenState.GameOver(true, message)
+            }
+
+            GameStatus.CRASHED -> {
+                val message = failureMessages.random()
+                logger.info("GameState") { "Lander crashed! Message: $message" }
+                GameScreenState.GameOver(false, message)
+            }
         }
     }
-}
 
+    companion object {
+        // Gets a list of success messages
+        private val successMessages: List<String> =
+            listOf(
+                "Perfect landing! NASA would be proud.",
+                "Touchdown! The Eagle has landed.",
+                "Smooth as silk! You're a natural.",
+                "Landing confirmed. Mission accomplished!",
+                "That's one small step for a lander...",
+                "Houston, we have a successful landing!"
+            )
 
-/**
- * UI state for the Game Screen.
- */
-sealed interface GameScreenState {
+        // Gets a list of failure messages
+        private val failureMessages: List<String> =
+            listOf(
+                "Houston, we have a problem.",
+                "That's going to leave a mark...",
+                "The lander is now a permanent lunar feature.",
+                "Let's call that a 'rapid unscheduled disassembly'.",
+                "Maybe try landing gear down next time?",
+                "The moon claims another victim."
+            )
+    }
 
-    data object Loading : GameScreenState
-    data class Playing(
-        /**
-         * The dynamic state of the lander that changes with the game loop.
-         */
-        val landerState: LanderState = LanderState(),
+    /**
+     * UI state for the Game Screen.
+     */
+    sealed interface GameScreenState {
 
-        /**
-         * The static state of the game environment that is generated at game start.
-         */
-        val environmentState: GameEnvironmentState = GameEnvironmentState(),
+        data object Loading : GameScreenState
+        data class Playing(
+            /**
+             * The dynamic state of the lander that changes with the game loop.
+             */
+            val landerState: LanderState = LanderState(),
 
-        /**
-         * Current frames per second.
-         */
-        val fps: Int = 0
-    ) : GameScreenState
+            /**
+             * The static state of the game environment that is generated at game start.
+             */
+            val environmentState: GameEnvironmentState = GameEnvironmentState(),
 
-    data class GameOver(
-        val isSuccess: Boolean,
-        val message: String,
-        /**
-         * The dynamic state of the lander that changes with the game loop.
-         */
-        val landerState: LanderState = LanderState(),
+            /**
+             * Current frames per second.
+             */
+            val fps: Int = 0,
 
-        /**
-         * The static state of the game environment that is generated at game start.
-         */
-        val environmentState: GameEnvironmentState = GameEnvironmentState(),
-    ) : GameScreenState
+            val cameraScale: Vector2D = Vector2D(1f, 1f),
+
+            val cameraOffset: Vector2D = Vector2D(0f, 0f),
+        ) : GameScreenState
+
+        data class GameOver(
+            val isSuccess: Boolean,
+            val message: String,
+            /**
+             * The dynamic state of the lander that changes with the game loop.
+             */
+            val landerState: LanderState = LanderState(),
+
+            /**
+             * The static state of the game environment that is generated at game start.
+             */
+            val environmentState: GameEnvironmentState = GameEnvironmentState(),
+        ) : GameScreenState
+    }
 }
