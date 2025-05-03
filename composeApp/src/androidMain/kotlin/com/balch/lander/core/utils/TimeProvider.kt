@@ -5,7 +5,7 @@ import android.os.SystemClock
 /**
  * Android implementation of TimeUtil.
  */
-actual object TimeUtil {
+actual class TimeProvider {
 
     actual val isTimeAccurate: Boolean = true
 

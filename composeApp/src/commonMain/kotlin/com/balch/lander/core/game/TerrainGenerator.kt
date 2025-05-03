@@ -4,7 +4,7 @@ import com.balch.lander.LandingPadSize
 import com.balch.lander.core.game.models.LandingPad
 import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.Vector2D
-import com.balch.lander.core.utils.TimeUtil
+import com.balch.lander.core.utils.TimeProvider
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -14,7 +14,7 @@ import kotlin.random.Random
 /**
  * Generates random terrain for the Lunar Lander game.
  */
-class TerrainGenerator {
+class TerrainGenerator(private val timeProvider: TimeProvider) {
     /**
      * Data class to hold information about a landing pad.
      */
@@ -39,7 +39,7 @@ class TerrainGenerator {
         landingPadSize: LandingPadSize,
         numLandingPads: Int = 2,
         numPoints: Int = 200,
-        seed: Long = TimeUtil.currentTimeMillis()
+        seed: Long = timeProvider.currentTimeMillis()
     ): Terrain {
         val random = Random(seed)
 

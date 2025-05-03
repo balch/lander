@@ -8,7 +8,7 @@ import com.balch.lander.core.game.PhysicsEngine
 import com.balch.lander.core.game.TerrainGenerator
 import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.Vector2D
-import com.balch.lander.core.utils.TimeUtil
+import com.balch.lander.core.utils.TimeProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -22,6 +22,7 @@ import kotlin.random.Random
  */
 class GameViewModel(
     private val terrainGenerator: TerrainGenerator,
+    private val timeProvider: TimeProvider,
 ) : ViewModel() {
     private val logger = logging()
 
@@ -108,13 +109,13 @@ class GameViewModel(
             val physicsEngine = PhysicsEngine(config)
 
             // Initialize last update time
-            var lastUpdateTime = TimeUtil.currentTimeMillis()
+            var lastUpdateTime = timeProvider.currentTimeMillis()
             var currentGameState = initialGameState
             var controlInputs = ControlInputs()
 
             while (currentGameState !is GameScreenState.GameOver) {
                 // Calculate delta time
-                val workStartTime = TimeUtil.currentTimeMillis()
+                val workStartTime = timeProvider.currentTimeMillis()
                 val deltaTimeMs = workStartTime - lastUpdateTime
                 lastUpdateTime = workStartTime
 
@@ -130,14 +131,14 @@ class GameViewModel(
                     controlInputs = controlInputs,
                 )
 
-                val workEndTime = TimeUtil.currentTimeMillis()
+                val workEndTime = timeProvider.currentTimeMillis()
                 val workTimeMs =
-                    if (TimeUtil.isTimeAccurate) workEndTime - workStartTime
+                    if (timeProvider.isTimeAccurate) workEndTime - workStartTime
                     else 0
                 val sleepTimeMs = maxOf(0L, 16L - workTimeMs)
 
                 logger.verbose {
-                    "Game Loop - End workTimeMs=${workTimeMs.takeIf { TimeUtil.isTimeAccurate } ?: "???" } sleepTimeMs=$sleepTimeMs State: $currentGameState"
+                    "Game Loop - End workTimeMs=${workTimeMs.takeIf { timeProvider.isTimeAccurate } ?: "???" } sleepTimeMs=$sleepTimeMs State: $currentGameState"
                 }
                 emit(currentGameState)
 

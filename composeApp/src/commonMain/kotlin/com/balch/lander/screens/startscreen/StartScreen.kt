@@ -19,8 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.balch.lander.GameConfig
 import com.balch.lander.GravityLevel
 import com.balch.lander.LandingPadSize
-import com.balch.lander.core.utils.calculateFontScale
-import com.balch.lander.core.utils.scale
+import com.balch.lander.core.utils.FontScaler
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 /**
@@ -118,14 +117,14 @@ fun StartScreen(
         val availableHeight = maxHeight
         val isPortrait = availableWidth < availableHeight
 
-        val fontScaleFactor = calculateFontScale(
+        val fontScaleFactor = FontScaler(
             availableWidth.value,
             availableHeight.value
         )
 
         // Calculate dynamic spacing based on available space
-        val dynamicSpacing = (8.dp.value * fontScaleFactor).dp
-        val smallPadding = (4.dp.value * fontScaleFactor).dp
+        val dynamicSpacing = (8.dp.value * fontScaleFactor.scale).dp
+        val smallPadding = (4.dp.value * fontScaleFactor.scale).dp
 
         // Create responsive composable functions
         @Composable
@@ -296,7 +295,7 @@ fun StartScreen(
                                 text = "HIGH",
                                 fontFamily = FontFamily.Monospace,
                                 color = retroGreen,
-                                fontSize = (12 * fontScaleFactor).sp
+                                fontSize = fontScaleFactor.scale(12.sp)
                             )
                         }
                     }
@@ -346,8 +345,8 @@ fun StartScreen(
                                             retroGreen,
                                         fontSize = fontScaleFactor.scale(12.sp),
                                         modifier = Modifier.padding(
-                                            vertical = (2.dp.value * fontScaleFactor).dp,
-                                            horizontal = fontScaleFactor.dp
+                                            vertical = (2.dp.value * fontScaleFactor.scale).dp,
+                                            horizontal = fontScaleFactor.scale.dp
                                         )
                                     )
                                 }

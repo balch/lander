@@ -3,7 +3,7 @@ package com.balch.lander.core.utils
 /**
  * JVM/Desktop implementation of TimeUtil.
  */
-actual object TimeUtil {
+actual class TimeProvider {
 
     actual val isTimeAccurate: Boolean = true
 

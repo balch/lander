@@ -6,7 +6,7 @@ import platform.Foundation.timeIntervalSince1970
 /**
  * iOS implementation of TimeUtil.
  */
-actual object TimeUtil {
+actual class TimeProvider {
 
     actual val isTimeAccurate: Boolean = true
     /**

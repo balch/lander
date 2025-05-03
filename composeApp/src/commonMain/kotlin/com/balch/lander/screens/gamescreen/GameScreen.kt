@@ -29,9 +29,8 @@ import com.balch.lander.GameConfig
 import com.balch.lander.core.game.ControlInputs
 import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.ThrustStrength
-import com.balch.lander.core.utils.FontScale
-import com.balch.lander.core.utils.StringUtil
-import com.balch.lander.core.utils.scale
+import com.balch.lander.core.utils.FontScaler
+import com.balch.lander.core.utils.StringFormatter
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.abs
 
@@ -253,7 +252,8 @@ fun DrawScope.drawLander(landerState: LanderState, landerSize: Float) {
 
 @Composable
 fun BoxScope.drawInfoPanel(landerState: LanderState, fps: Int) {
-    val fontScaleFactor: FontScale = 1f
+    val fontScaleFactor = FontScaler(1f)
+    val stringFormatter = StringFormatter()
 
     // Lander information panel
     Column(
@@ -276,7 +276,7 @@ fun BoxScope.drawInfoPanel(landerState: LanderState, fps: Int) {
         )
 
         Text(
-            text = "DRIFT: ${StringUtil.formatToString(landerState.velocity.x)} m/s",
+            text = "DRIFT: ${stringFormatter.formatToString(landerState.velocity.x)} m/s",
             color = if (abs(landerState.velocity.x) > 2) Color.Red else MaterialTheme.colors.onBackground,
             fontSize = fontScaleFactor.scale(12.sp),
         )

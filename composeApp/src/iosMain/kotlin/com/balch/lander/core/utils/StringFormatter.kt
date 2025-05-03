@@ -5,7 +5,7 @@ import kotlin.math.min
 /**
  * Platform-agnostic utility for handling String.
  */
-actual object StringUtil {
+actual class StringFormatter {
     actual fun formatToString(value: Double): String =
         value.toString().let {
             val pos = it.indexOf(".")
