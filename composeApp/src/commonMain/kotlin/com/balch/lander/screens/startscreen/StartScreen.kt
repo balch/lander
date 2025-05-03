@@ -117,17 +117,14 @@ fun StartScreen(
         val availableHeight = maxHeight
         val isPortrait = availableWidth < availableHeight
 
-        // Calculate font scale factor based on screen size
-        // This helps adapt to user font size preferences
-        val fontScaleFactor = minOf(
-            availableWidth.value / 383f,
-            availableHeight.value / 832f,
-            1.2f
-        ).coerceAtLeast(0.6f)
+        val fontScaleFactor = calculateFontScale(
+            availableWidth.value,
+            availableHeight.value
+        )
 
         // Calculate dynamic spacing based on available space
-        val dynamicSpacing = (8 * fontScaleFactor).dp
-        val smallPadding = (4 * fontScaleFactor).dp
+        val dynamicSpacing = (8.dp.value * fontScaleFactor).dp
+        val smallPadding = (4.dp.value * fontScaleFactor).dp
 
         // Create responsive composable functions
         @Composable
@@ -145,7 +142,7 @@ fun StartScreen(
                     fontWeight = FontWeight.Bold,
                     color = retroYellow,
                     textAlign = TextAlign.Center,
-                    fontSize = (18 * fontScaleFactor).sp,
+                    fontSize = fontScaleFactor.scale(18.sp),
                     modifier = Modifier.padding(vertical = smallPadding)
                 )
             }
@@ -169,12 +166,12 @@ fun StartScreen(
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
                         color = retroCyan,
-                        fontSize = (14 * fontScaleFactor).sp,
+                        fontSize = fontScaleFactor.scale(14.sp),
                         modifier = Modifier.padding(bottom = 2.dp)
                     )
 
                     // Conditionally show instructions based on available space
-                    val instructionFontSize = (12 * fontScaleFactor).sp
+                    val instructionFontSize = fontScaleFactor.scale(12.sp)
 
                     Text(
                         text = "Land your spacecraft safely on the lunar surface.",
@@ -234,7 +231,7 @@ fun StartScreen(
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
-                        fontSize = (14 * fontScaleFactor).sp
+                        fontSize = fontScaleFactor.scale(14.sp)
                     )
                 }
             }
@@ -257,7 +254,7 @@ fun StartScreen(
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
                         color = retroYellow,
-                        fontSize = (14 * fontScaleFactor).sp,
+                        fontSize = fontScaleFactor.scale(14.sp),
                         modifier = Modifier.padding(bottom = 2.dp)
                     )
 
@@ -267,7 +264,7 @@ fun StartScreen(
                             text = "FUEL LEVEL",
                             fontFamily = FontFamily.Monospace,
                             color = retroCyan,
-                            fontSize = (12 * fontScaleFactor).sp
+                            fontSize = fontScaleFactor.scale(12.sp)
                         )
 
                         Row(
@@ -278,7 +275,7 @@ fun StartScreen(
                                 text = "LOW",
                                 fontFamily = FontFamily.Monospace,
                                 color = retroGreen,
-                                fontSize = (12 * fontScaleFactor).sp
+                                fontSize = fontScaleFactor.scale(12.sp)
                             )
 
                             Slider(
@@ -309,7 +306,7 @@ fun StartScreen(
                             text = "GRAVITY LEVEL",
                             fontFamily = FontFamily.Monospace,
                             color = retroCyan,
-                            fontSize = (12 * fontScaleFactor).sp
+                            fontSize = fontScaleFactor.scale(12.sp)
                         )
 
                         Row(
@@ -346,9 +343,9 @@ fun StartScreen(
                                             Color.White
                                         else
                                             retroGreen,
-                                        fontSize = (12 * fontScaleFactor).sp,
+                                        fontSize = fontScaleFactor.scale(12.sp),
                                         modifier = Modifier.padding(
-                                            vertical = (2 * fontScaleFactor).dp,
+                                            vertical = (2.dp.value * fontScaleFactor).dp,
                                             horizontal = fontScaleFactor.dp
                                         )
                                     )
@@ -366,7 +363,7 @@ fun StartScreen(
                             text = "LANDING PAD SIZE",
                             fontFamily = FontFamily.Monospace,
                             color = retroCyan,
-                            fontSize = (12 * fontScaleFactor).sp
+                            fontSize = fontScaleFactor.scale(12.sp)
                         )
 
                         Row(
@@ -403,7 +400,7 @@ fun StartScreen(
                                             Color.White
                                         else
                                             retroGreen,
-                                        fontSize = (12 * fontScaleFactor).sp,
+                                        fontSize = fontScaleFactor.scale(12.sp),
                                         modifier = Modifier.padding(
                                             vertical = 2.dp,
                                             horizontal = 1.dp
@@ -423,6 +420,7 @@ fun StartScreen(
             Row(
                 modifier = Modifier
                     .fillMaxSize()
+                    .safeDrawingPadding()
                     .padding(dynamicSpacing),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(dynamicSpacing)
@@ -462,6 +460,7 @@ fun StartScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .safeDrawingPadding()
                         .padding(
                             dynamicSpacing,
                             WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),

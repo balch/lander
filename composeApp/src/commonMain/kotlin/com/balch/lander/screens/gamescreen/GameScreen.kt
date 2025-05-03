@@ -24,11 +24,14 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.balch.lander.GameConfig
 import com.balch.lander.core.game.ControlInputs
 import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.ThrustStrength
+import com.balch.lander.core.utils.FontScale
 import com.balch.lander.core.utils.StringUtil
+import com.balch.lander.core.utils.scale
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.abs
 
@@ -250,37 +253,45 @@ fun DrawScope.drawLander(landerState: LanderState, landerSize: Float) {
 
 @Composable
 fun BoxScope.drawInfoPanel(landerState: LanderState, fps: Int) {
+    val fontScaleFactor: FontScale = 1f
+
     // Lander information panel
     Column(
         modifier = Modifier
             .align(Alignment.TopStart)
             .padding(24.dp)
-            .background(Color(0x80000000))
+            .safeDrawingPadding()
+            .background(Color(0x00000000))
     ) {
         Text(
             text = "FUEL: ${landerState.fuel.toInt()}/${landerState.initialFuel.toInt()}",
-            color = if (landerState.fuel < 20) Color.Red else MaterialTheme.colors.onBackground
+            color = if (landerState.fuel < 20) Color.Red else MaterialTheme.colors.onBackground,
+            fontSize = fontScaleFactor.scale(14.sp),
         )
 
         Text(
             text = "DESCENT: ${abs(landerState.velocity.y).toInt()} m/s",
-            color = if (abs(landerState.velocity.y) > 3) Color.Red else MaterialTheme.colors.onBackground
+            color = if (abs(landerState.velocity.y) > 3) Color.Red else MaterialTheme.colors.onBackground,
+            fontSize = fontScaleFactor.scale(12.sp),
         )
 
         Text(
             text = "DRIFT: ${StringUtil.formatToString(landerState.velocity.x)} m/s",
-            color = if (abs(landerState.velocity.x) > 2) Color.Red else MaterialTheme.colors.onBackground
+            color = if (abs(landerState.velocity.x) > 2) Color.Red else MaterialTheme.colors.onBackground,
+            fontSize = fontScaleFactor.scale(12.sp),
         )
 
         Text(
             text = "ALTITUDE: ${landerState.distanceToGround.toInt()} m",
-            color = if (landerState.distanceToGround < 50) Color.Red else MaterialTheme.colors.onBackground
+            color = if (landerState.distanceToGround < 50) Color.Red else MaterialTheme.colors.onBackground,
+            fontSize = fontScaleFactor.scale(12.sp),
         )
 
         if (fps > 0) {
             Text(
                 text = "FPS: $fps",
-                color = MaterialTheme.colors.onBackground
+                color = MaterialTheme.colors.onBackground,
+                fontSize = fontScaleFactor.scale(12.sp),
             )
         }
     }
@@ -297,7 +308,8 @@ fun BoxScope.drawControlPanel(
         Column(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(top = 32.dp, end = 44.dp),
+                .padding(top = 32.dp, end = 44.dp)
+                .safeDrawingPadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Thrust control buttons (top row)
