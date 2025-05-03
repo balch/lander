@@ -87,6 +87,9 @@ fun PlayingContent(
     var isRotateRightPressed = remember { false }
     val lastControlInputs = remember { mutableStateOf<ControlInputs?>(null) }
 
+    val fontScaler = FontScaler(1f)
+    val stringFormatter = StringFormatter()
+
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
@@ -136,8 +139,8 @@ fun PlayingContent(
                 state.environmentState.config.landerSize
             )
         }
-        drawInfoPanel(state.landerState, state.fps)
-        drawControlPanel(state.landerState, onControlInputs)
+        drawInfoPanel(state.landerState, state.fps, fontScaler, stringFormatter)
+        drawControlPanel(state.landerState, onControlInputs, fontScaler)
     }
 }
 
@@ -251,9 +254,12 @@ fun DrawScope.drawLander(landerState: LanderState, landerSize: Float) {
 }
 
 @Composable
-fun BoxScope.drawInfoPanel(landerState: LanderState, fps: Int) {
-    val fontScaleFactor = FontScaler(1f)
-    val stringFormatter = StringFormatter()
+fun BoxScope.drawInfoPanel(
+    landerState: LanderState,
+    fps: Int,
+    fontScaler: FontScaler = FontScaler(1f),
+    stringFormatter: StringFormatter = StringFormatter()
+) {
 
     // Lander information panel
     Column(
@@ -266,32 +272,32 @@ fun BoxScope.drawInfoPanel(landerState: LanderState, fps: Int) {
         Text(
             text = "FUEL: ${landerState.fuel.toInt()}/${landerState.initialFuel.toInt()}",
             color = if (landerState.fuel < 20) Color.Red else MaterialTheme.colors.onBackground,
-            fontSize = fontScaleFactor.scale(14.sp),
+            fontSize = fontScaler.scale(14.sp),
         )
 
         Text(
             text = "DESCENT: ${abs(landerState.velocity.y).toInt()} m/s",
             color = if (abs(landerState.velocity.y) > 3) Color.Red else MaterialTheme.colors.onBackground,
-            fontSize = fontScaleFactor.scale(12.sp),
+            fontSize = fontScaler.scale(12.sp),
         )
 
         Text(
             text = "DRIFT: ${stringFormatter.formatToString(landerState.velocity.x)} m/s",
             color = if (abs(landerState.velocity.x) > 2) Color.Red else MaterialTheme.colors.onBackground,
-            fontSize = fontScaleFactor.scale(12.sp),
+            fontSize = fontScaler.scale(12.sp),
         )
 
         Text(
             text = "ALTITUDE: ${landerState.distanceToGround.toInt()} m",
             color = if (landerState.distanceToGround < 50) Color.Red else MaterialTheme.colors.onBackground,
-            fontSize = fontScaleFactor.scale(12.sp),
+            fontSize = fontScaler.scale(12.sp),
         )
 
         if (fps > 0) {
             Text(
                 text = "FPS: $fps",
                 color = MaterialTheme.colors.onBackground,
-                fontSize = fontScaleFactor.scale(12.sp),
+                fontSize = fontScaler.scale(12.sp),
             )
         }
     }
@@ -301,6 +307,7 @@ fun BoxScope.drawInfoPanel(landerState: LanderState, fps: Int) {
 fun BoxScope.drawControlPanel(
     landerState: LanderState,
     onControlInputs: (ControlInputs) -> Unit,
+    fontScaler: FontScaler = FontScaler(1f),
 ) {
     if (landerState.status == GameStatus.PLAYING) {
 
@@ -349,9 +356,9 @@ fun BoxScope.drawControlPanel(
                 ) {
                     Text(
                         text = ThrustStrength.LOW.label,
-                        style = MaterialTheme.typography.body2,
                         color = Color.White,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        fontSize = fontScaler.scale(14.sp),
                     )
                 }
 
@@ -369,7 +376,7 @@ fun BoxScope.drawControlPanel(
                 ) {
                     Text(
                         text = ThrustStrength.MEDIUM.label,
-                        style = MaterialTheme.typography.body2,
+                        fontSize = fontScaler.scale(14.sp),
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
@@ -389,7 +396,7 @@ fun BoxScope.drawControlPanel(
                 ) {
                     Text(
                         text = ThrustStrength.HIGH.label,
-                        style = MaterialTheme.typography.body2,
+                        fontSize = fontScaler.scale(14.sp),
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
@@ -412,8 +419,9 @@ fun BoxScope.drawControlPanel(
                 ) {
                     Text(
                         text = "<--",
-                        style = MaterialTheme.typography.h6,
+                        fontSize = fontScaler.scale(14.sp),
                         color = Color.White,
+                        textAlign = TextAlign.Center
                     )
                 }
 
@@ -429,8 +437,9 @@ fun BoxScope.drawControlPanel(
                 ) {
                     Text(
                         text = "-->",
-                        style = MaterialTheme.typography.h6,
-                        color = Color.White
+                        fontSize = fontScaler.scale(12.sp),
+                        color = Color.White,
+                        textAlign = TextAlign.Center
                     )
                 }
             }
