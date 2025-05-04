@@ -6,7 +6,6 @@ import com.balch.lander.GravityLevel
 import com.balch.lander.LandingPadSize
 import com.balch.lander.core.coroutines.TestCoroutineScopeProvider
 import com.balch.lander.core.coroutines.TestDispatcherProvider
-import com.balch.lander.screens.startscreen.StartViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest

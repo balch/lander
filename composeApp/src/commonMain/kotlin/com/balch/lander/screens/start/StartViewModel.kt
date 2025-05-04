@@ -1,4 +1,4 @@
-package com.balch.lander.screens.startscreen
+package com.balch.lander.screens.start
 
 import androidx.lifecycle.ViewModel
 import com.balch.lander.GameConfig

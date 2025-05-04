@@ -3,8 +3,8 @@ package com.balch.lander
 import androidx.compose.runtime.*
 import com.balch.lander.screens.gameplay.GamePlayScreen
 import com.balch.lander.screens.gameplay.GamePlayViewModel
-import com.balch.lander.screens.startscreen.StartScreen
-import com.balch.lander.screens.startscreen.StartViewModel
+import com.balch.lander.screens.start.StartScreen
+import com.balch.lander.screens.start.StartViewModel
 import org.koin.compose.koinInject
 
 /**

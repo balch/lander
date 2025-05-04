@@ -1,4 +1,4 @@
-package com.balch.lander.screens.startscreen
+package com.balch.lander.screens.start
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable

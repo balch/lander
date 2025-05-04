@@ -9,7 +9,7 @@ import com.balch.lander.core.game.TerrainGeneratorImpl
 import com.balch.lander.core.utils.TimeProvider
 import com.balch.lander.core.utils.impl.TimeProviderImpl
 import com.balch.lander.screens.gameplay.GamePlayViewModel
-import com.balch.lander.screens.startscreen.StartViewModel
+import com.balch.lander.screens.start.StartViewModel
 import org.koin.dsl.module
 
 /**
