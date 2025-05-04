@@ -38,7 +38,7 @@ import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.game.models.Vector2D
 import com.balch.lander.core.utils.FontScaler
 import com.balch.lander.core.utils.StringFormatter
-import com.balch.lander.core.utils.TimeProvider
+import com.balch.lander.core.utils.impl.TimeProviderImpl
 import com.balch.lander.screens.gameplay.GamePlayViewModel.GameScreenState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.abs
@@ -242,7 +242,7 @@ fun DrawScope.drawTerrain(terrain: Terrain, config: GameConfig) {
 @Composable
 fun TerrainPreview() {
     val config = GameConfig()
-    val terrain = TerrainGeneratorImpl(TimeProvider())
+    val terrain = TerrainGeneratorImpl(TimeProviderImpl())
         .generateTerrain(config.screenWidth, config.screenHeight)
 
     val (width, height) = toDp(Vector2D(config.screenWidth, config.screenHeight), config)

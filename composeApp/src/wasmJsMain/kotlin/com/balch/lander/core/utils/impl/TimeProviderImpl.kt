@@ -1,11 +1,13 @@
-package com.balch.lander.core.utils
+package com.balch.lander.core.utils.impl
+
+import com.balch.lander.core.utils.TimeProvider
 
 /**
  * Default Native implementation of TimeUtil.
  */
-actual class TimeProvider {
+actual class TimeProviderImpl: TimeProvider {
 
-    actual val isTimeAccurate: Boolean = false
+    actual override val isTimeAccurate: Boolean = false
 
     // Counter for incremental time
     private var counter = 0L
@@ -16,7 +18,7 @@ actual class TimeProvider {
      * This is sufficient for calculating delta time in the game loop.
      * @return Current time in milliseconds
      */
-    actual fun currentTimeMillis(): Long {
+    actual override fun currentTimeMillis(): Long {
         counter += 16 // Simulate ~60 FPS
         return counter
     }
