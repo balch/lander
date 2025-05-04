@@ -1,8 +1,8 @@
 package com.balch.lander
 
 import androidx.compose.runtime.*
-import com.balch.lander.screens.gamescreen.GameScreen
-import com.balch.lander.screens.gamescreen.GameViewModel
+import com.balch.lander.screens.gameplay.GamePlayScreen
+import com.balch.lander.screens.gameplay.GamePlayViewModel
 import com.balch.lander.screens.startscreen.StartScreen
 import com.balch.lander.screens.startscreen.StartViewModel
 import org.koin.compose.koinInject
@@ -15,7 +15,7 @@ import org.koin.compose.koinInject
 fun AppNavigation() {
     // Inject ViewModels
     val startViewModel = koinInject<StartViewModel>()
-    val gameViewModel = koinInject<GameViewModel>()
+    val gamePlayViewModel = koinInject<GamePlayViewModel>()
 
     // Track current screen using the sealed interface Screen
     var currentScreen: Screen by remember {
@@ -45,17 +45,17 @@ fun AppNavigation() {
         }
 
         is Screen.GameScreen -> {
-            val gameScreenState by gameViewModel.uiState.collectAsState()
-            GameScreen(
+            val gameScreenState by gamePlayViewModel.uiState.collectAsState()
+            GamePlayScreen(
                 uiState = gameScreenState,
-                onControlInputs = gameViewModel::setControlsInputs,
-                onRestartClicked = { gameViewModel.startGame(currentScreen.config) },
+                onControlInputs = gamePlayViewModel::setControlsInputs,
+                onRestartClicked = { gamePlayViewModel.startGame(currentScreen.config) },
                 onBackToStartClicked = { currentScreen = Screen.StartScreen(currentScreen.config) }
             )
 
             // Use LaunchedEffect to start the game when this screen is shown or config changes
             LaunchedEffect(currentScreen.config) {
-                gameViewModel.startGame(currentScreen.config)
+                gamePlayViewModel.startGame(currentScreen.config)
             }
         }
     }

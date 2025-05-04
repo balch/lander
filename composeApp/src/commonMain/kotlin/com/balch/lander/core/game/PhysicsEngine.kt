@@ -4,8 +4,8 @@ import com.balch.lander.GameConfig
 import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.game.models.Vector2D
-import com.balch.lander.screens.gamescreen.GameStatus
-import com.balch.lander.screens.gamescreen.LanderState
+import com.balch.lander.screens.gameplay.GameStatus
+import com.balch.lander.screens.gameplay.LanderState
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin

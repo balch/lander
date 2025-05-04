@@ -1,4 +1,4 @@
-package com.balch.lander.screens.gamescreen
+package com.balch.lander.screens.gameplay
 
 import androidx.lifecycle.ViewModel
 import com.balch.lander.CameraZoomLevel
@@ -17,13 +17,12 @@ import kotlinx.coroutines.flow.*
 import org.lighthousegames.logging.KmLogging
 import org.lighthousegames.logging.logging
 import kotlin.math.abs
-import kotlin.random.Random
 
 /**
  * ViewModel for the Game Screen.
  * Handles game logic, physics, and state during gameplay.
  */
-class GameViewModel(
+class GamePlayViewModel(
     private val terrainGenerator: TerrainGenerator,
     private val timeProvider: TimeProvider,
     dispatcherProvider: DispatcherProvider,
@@ -97,7 +96,6 @@ class GameViewModel(
             width = config.screenWidth,
             height = config.screenHeight,
             landingPadSize = config.landingPadSize,
-            seed = Random.nextLong()
         ).also { state ->
             logger.debug {
                 "Terrain Generated size: ${state.points.size} maxHeight: ${state.points.maxOf { it.y }}"

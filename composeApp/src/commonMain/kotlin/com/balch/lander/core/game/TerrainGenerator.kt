@@ -14,7 +14,27 @@ import kotlin.random.Random
 /**
  * Generates random terrain for the Lunar Lander game.
  */
-class TerrainGenerator(private val timeProvider: TimeProvider) {
+interface TerrainGenerator {
+
+    /**
+     * Generates random terrain with landing pads.
+     *
+     * @param width Width of the terrain in game units
+     * @param height Height of the terrain in game units
+     * @param landingPadSize Size of the landing pads
+     * @param numPoints Number of landing pads to generate
+     * @return Generated terrain
+     */
+    fun generateTerrain(
+        width: Float,
+        height: Float,
+        landingPadSize: LandingPadSize = LandingPadSize.MEDIUM,
+        numPoints: Int = 200,
+    ): Terrain
+}
+
+class TerrainGeneratorImpl(timeProvider: TimeProvider): TerrainGenerator {
+
     /**
      * Data class to hold information about a landing pad.
      */
@@ -23,22 +43,13 @@ class TerrainGenerator(private val timeProvider: TimeProvider) {
         val isInCrater: Boolean
     )
 
-    /**
-     * Generates random terrain with landing pads.
-     *
-     * @param width Width of the terrain in game units
-     * @param height Height of the terrain in game units
-     * @param landingPadSize Size of the landing pads
-     * @param numLandingPads Number of landing pads to generate
-     * @param seed Random seed for terrain generation
-     * @return Generated terrain
-     */
-    fun generateTerrain(
+    private val seed = timeProvider.currentTimeMillis()
+
+    override fun generateTerrain(
         width: Float,
         height: Float,
-        landingPadSize: LandingPadSize = LandingPadSize.MEDIUM,
-        numPoints: Int = 200,
-        seed: Long = timeProvider.currentTimeMillis()
+        landingPadSize: LandingPadSize,
+        numPoints: Int,
     ): Terrain {
         val random = Random(seed)
 

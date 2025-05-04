@@ -1,4 +1,4 @@
-package com.balch.lander.screens.gamescreen
+package com.balch.lander.screens.gameplay
 
 import com.balch.lander.GameConfig
 import com.balch.lander.core.game.models.Terrain

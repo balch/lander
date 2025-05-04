@@ -1,4 +1,4 @@
-package com.balch.lander.screens.gamescreen
+package com.balch.lander.screens.gameplay
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -32,14 +32,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.balch.lander.GameConfig
 import com.balch.lander.core.game.ControlInputs
-import com.balch.lander.core.game.TerrainGenerator
+import com.balch.lander.core.game.TerrainGeneratorImpl
 import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.game.models.Vector2D
 import com.balch.lander.core.utils.FontScaler
 import com.balch.lander.core.utils.StringFormatter
 import com.balch.lander.core.utils.TimeProvider
-import com.balch.lander.screens.gamescreen.GameViewModel.GameScreenState
+import com.balch.lander.screens.gameplay.GamePlayViewModel.GameScreenState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.abs
 
@@ -48,7 +48,7 @@ import kotlin.math.abs
  * Displays the game area, lander information, and controls.
  */
 @Composable
-fun GameScreen(
+fun GamePlayScreen(
     uiState: GameScreenState,
     onControlInputs: (ControlInputs) -> Unit,
     onRestartClicked: () -> Unit,
@@ -242,7 +242,7 @@ fun DrawScope.drawTerrain(terrain: Terrain, config: GameConfig) {
 @Composable
 fun TerrainPreview() {
     val config = GameConfig()
-    val terrain = TerrainGenerator(TimeProvider())
+    val terrain = TerrainGeneratorImpl(TimeProvider())
         .generateTerrain(config.screenWidth, config.screenHeight)
 
     val (width, height) = toDp(Vector2D(config.screenWidth, config.screenHeight), config)
