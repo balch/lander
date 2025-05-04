@@ -103,9 +103,6 @@ fun PlayingContent(
         focusRequester.requestFocus()
     }
 
-    // Get the local density for dp conversions
-    val density = LocalDensity.current
-
     // Animate camera scale changes
     val animatedScaleX by animateFloatAsState(
         targetValue = state.cameraScale,
@@ -171,8 +168,8 @@ fun PlayingContent(
     ) {
         Canvas(
             modifier = Modifier.fillMaxSize()
-                .scale(scaleX = animatedScaleX, scaleY = animatedScaleY)
-                .offset(offsetXDp, offsetYDp)
+                .scale(animatedScaleX, animatedScaleY)
+                .offset(offsetXDp, -offsetYDp)
         ) {
             drawStars(state.environmentState.config)
             drawTerrain(

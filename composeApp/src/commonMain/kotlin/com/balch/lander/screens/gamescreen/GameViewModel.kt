@@ -171,7 +171,7 @@ class GameViewModel(
         landerState: LanderState,
         config: GameConfig
     ): CameraZoomLevel {
-        val distance = landerState.distanceToGround
+        val distance = landerState.distanceToSeaLevel
 
         // Find the appropriate zoom level based on distance
         val zoomLevel = config.cameraConfig.zoomLevels.find {
@@ -219,17 +219,21 @@ class GameViewModel(
             0f
         }
 
-        // Calculate vertical offset to keep bottom of screen visible as lander descends
-        // The closer to ground, the more we want to see below the lander
-        val distanceRatio = (landerState.distanceToGround / 300f).coerceIn(0f, 1f)
-
-        // Calculate how much of the screen below the lander should be visible
-        // As lander gets closer to ground, show more of the area below
-        val visibleBottomRatio = 1f - distanceRatio
-
-        // Calculate vertical offset to ensure bottom of screen is visible
-        // and lander is positioned appropriately based on distance to ground
-        val verticalOffset = landerState.position.y - (config.screenHeight * (0.2f + (visibleBottomRatio * 0.3f)))
+        // Calculate vertical offset based on zoom level
+        // Each zoom level has a fixed vertical offset to ensure the bottom of the ground is visible
+        val verticalOffset = when (zoomLevel) {
+            CameraZoomLevel.MEDIUM -> {
+                // For medium zoom, position the lander in the upper third of the screen
+                // This ensures we can see more of the ground below
+                (config.screenHeight * 0.4f)
+            }
+            CameraZoomLevel.CLOSE -> {
+                // For close zoom, position the lander in the upper quarter of the screen
+                // This ensures we can see even more of the ground below
+                (config.screenHeight * 0.2f)
+            }
+            else -> 0f // Should never reach here since we return early for FAR
+        }
 
         return Vector2D(
             x = maxHorizontalOffset * horizontalOffsetFactor,

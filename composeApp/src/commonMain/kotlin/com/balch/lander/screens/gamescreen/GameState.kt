@@ -29,6 +29,11 @@ data class LanderState(
     val distanceToGround: Float = Float.POSITIVE_INFINITY,
 
     /**
+     * Distance from the lander to the min terrain point.
+     */
+    val distanceToSeaLevel: Float = Float.POSITIVE_INFINITY,
+
+    /**
      * Whether the lander is currently thrusting.
      */
     val thrustStrength: ThrustStrength = ThrustStrength.OFF,

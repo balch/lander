@@ -91,12 +91,12 @@ enum class CameraZoomLevel(
     /**
      * Medium distance - moderate zoom, slightly offset view
      */
-    MEDIUM(200f, 1.2f),
+    MEDIUM(200f, 1.25f),
 
     /**
      * Close to ground - maximum zoom, focused on landing area
      */
-    CLOSE(0f, 1.5f)
+    CLOSE(0f, 1.65f)
 }
 
 /**

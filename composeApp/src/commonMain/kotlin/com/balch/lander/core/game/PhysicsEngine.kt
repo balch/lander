@@ -76,6 +76,8 @@ class PhysicsEngine(
         // Calculate distance to ground
         val distanceToGround = calculateDistanceToGround(newPosition, terrain, config)
 
+        val distanceToSeaLevel = calculateDistanceToSeaLevel(newPosition, terrain, config)
+
         // Check if lander is in danger mode
         val isDangerMode = checkDangerMode(newVelocity, distanceToGround, newFuel)
 
@@ -87,6 +89,7 @@ class PhysicsEngine(
             velocity = newVelocity,
             rotation = newRotation,
             distanceToGround = distanceToGround,
+            distanceToSeaLevel = distanceToSeaLevel,
             isDangerMode = isDangerMode,
         )
 
@@ -102,6 +105,7 @@ class PhysicsEngine(
             fuel = newFuel,
             thrustStrength = controls.thrustStrength,
             distanceToGround = distanceToGround,
+            distanceToSeaLevel = distanceToSeaLevel,
             isDangerMode = isDangerMode,
             status = determineGameStatus(tempLanderState, terrain),
             initialFuel = landerState.initialFuel,
@@ -201,10 +205,18 @@ class PhysicsEngine(
         position: Vector2D,
         terrain: Terrain,
         config: GameConfig
-    ): Float {
-        val groundHeight = terrain.getGroundHeight(position.x)
-        return groundHeight - (position.y + config.landerSize / 2)
-    }
+    ): Float =
+        terrain.getGroundHeight(position.x) - (position.y + config.landerSize / 2)
+
+    /**
+     * Calculates the distance from the lander to the sea level.
+     */
+    private fun calculateDistanceToSeaLevel(
+        position: Vector2D,
+        terrain: Terrain,
+        config: GameConfig
+    ): Float =
+        (terrain.points.maxOf { it.y } + 100) - (position.y + config.landerSize / 2)
 
     /**
      * Checks if the lander is in danger of crashing.

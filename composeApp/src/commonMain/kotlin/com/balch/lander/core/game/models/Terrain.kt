@@ -41,7 +41,7 @@ class Terrain(
             }
         }
 
-    /**
+        /**
      * Checks if the given x coordinate is on a landing pad.
      */
     fun isOnLandingPad(x: Float): Boolean =
