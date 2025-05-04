@@ -10,11 +10,7 @@ import kotlinx.coroutines.test.TestScope
  */
 class TestCoroutineScopeProvider() : CoroutineScopeProvider {
 
-    /**
-     * The test scope used by this provider.
-     * Exposed to allow tests to control the virtual time.
-     */
-    lateinit var scope: TestScope
+    lateinit var scope: CoroutineScope
 
     override fun get(viewModel: ViewModel): CoroutineScope = scope
 }

@@ -88,6 +88,7 @@ kotlin {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.mockito.kotlin)
+            implementation(libs.turbine)
         }
     }
 }
@@ -95,6 +96,12 @@ kotlin {
 android {
     namespace = "com.balch.lander"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
+
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
+    }
 
     defaultConfig {
         applicationId = "com.balch.lander"
