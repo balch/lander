@@ -1,6 +1,7 @@
 package com.balch.lander.screens.gameplay
 
 import app.cash.turbine.test
+import com.balch.lander.CameraZoomLevel
 import com.balch.lander.GameConfig
 import com.balch.lander.core.coroutines.TestCoroutineScopeProvider
 import com.balch.lander.core.coroutines.TestDispatcherProvider
@@ -14,6 +15,7 @@ import com.balch.lander.utils.TestTimeProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -106,9 +108,7 @@ class GamePlayViewModelTest {
 
             val item = awaitItem() as GamePlayViewModel.GameScreenState.Playing
             assertEquals(controlInputs.thrustStrength, item.landerState.thrustStrength)
-            assertTrue {
-                item.landerState.rotation < 0
-            }
+            assertTrue { item.landerState.rotation < 0 }
         }
     }
 
@@ -135,9 +135,99 @@ class GamePlayViewModelTest {
 
             val item = awaitItem() as GamePlayViewModel.GameScreenState.Playing
             assertEquals(controlInputs.thrustStrength, item.landerState.thrustStrength)
-            assertTrue {
-                item.landerState.rotation > 0
+            assertTrue { item.landerState.rotation > 0 }
+        }
+    }
+
+    private data class CameraTestResults(
+        val cameraZoomLevel: CameraZoomLevel = CameraZoomLevel.FAR,
+        val offset: Vector2D = Vector2D(0f, 0f),
+    )
+
+    private data class CameraTestParams(
+        val testCase: String,
+        val expectations: String,
+        val config: GameConfig,
+        val landerState: LanderState,
+        val expectedResults: CameraTestResults
+    ) {
+        fun message(index: Int): String = "$index - $testCase: $expectations"
+    }
+
+    @Test
+    fun `verify cameraZoomLevel`() {
+        // Arrange
+        val testCases = listOf(
+            CameraTestParams(
+                testCase = "Initial Game State",
+                expectations = "CameraZoomLevel.FAR",
+                config = GameConfig(),
+                landerState = LanderState(),
+                expectedResults = CameraTestResults()
+            ),
+            CameraTestParams(
+                testCase = "Transition to MEDIUM zoom",
+                expectations = "CameraZoomLevel.MEDIUM",
+                config = GameConfig(),
+                landerState = LanderState(
+                    distanceToSeaLevel = CameraZoomLevel.FAR.distanceThreshold - 1
+                ),
+                expectedResults = CameraTestResults(CameraZoomLevel.MEDIUM)
+            ),
+            CameraTestParams(
+                testCase = "Transition to NEAR zoom",
+                expectations = "CameraZoomLevel.NEAR",
+                config = GameConfig(),
+                landerState = LanderState(
+                    distanceToSeaLevel = CameraZoomLevel.MEDIUM.distanceThreshold - 1
+                ),
+                expectedResults = CameraTestResults(CameraZoomLevel.CLOSE)
+            ),
+        )
+
+        testCases.forEachIndexed { index, test ->
+            try {
+                executeCameraTest(index, test)
+                println("Test case $index - ${test.testCase} passed")
+            } catch (e: Exception) {
+                println("Test case $index - ${test.testCase} failed")
+                throw e
             }
         }
+    }
+
+    /**
+     * Test used to debug individual tests used in
+     * the `verify cameraZoomLevel` test above
+     */
+    @Ignore
+    @Test
+    fun `debug cameraZoomLevel test case`() {
+        // Arrange
+        val testCase =
+            CameraTestParams(
+                testCase = "Transition to MEDIUM zoom",
+                expectations = "CameraZoomLevel.MEDIUM",
+                config = GameConfig(),
+                landerState = LanderState(
+                    distanceToSeaLevel = CameraZoomLevel.FAR.distanceThreshold + 1
+                ),
+                expectedResults = CameraTestResults(CameraZoomLevel.MEDIUM)
+            )
+        executeCameraTest(0, testCase)
+    }
+
+    private fun executeCameraTest(index: Int, test: CameraTestParams) {
+        // Act
+        val zoomLevel = viewModel.calculateCameraZoomLevel(test.landerState, test.config)
+
+        // Assert
+        assertEquals(test.expectedResults.cameraZoomLevel, zoomLevel, test.message(index))
+
+        // Act
+        val offset = viewModel.calculateCameraOffset(test.landerState, zoomLevel, test.config)
+
+        // Assert
+//            assertEquals(test.expectedResults.offset, offset, test.message(index))
     }
 }

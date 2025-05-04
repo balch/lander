@@ -87,11 +87,11 @@ enum class CameraZoomLevel(
     /**
      * Far from ground - minimal zoom, centered view
      */
-    FAR(500f, 1.0f),
+    FAR(600f, 1.0f),
     /**
      * Medium distance - moderate zoom, slightly offset view
      */
-    MEDIUM(200f, 1.25f),
+    MEDIUM(400f, 1.25f),
 
     /**
      * Close to ground - maximum zoom, focused on landing area

@@ -1,5 +1,6 @@
 package com.balch.lander.screens.gameplay
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import com.balch.lander.CameraZoomLevel
 import com.balch.lander.GameConfig
@@ -155,7 +156,7 @@ class GamePlayViewModel(
 
                 controlInputs = merge(
                     controlInputsFlow
-                        .onEach { logger.debug { "Game Loop - Control Inputs: $it" } },
+                            .onEach { logger.debug { "Game Loop - Control Inputs: $it" } },
                     flow {
                         // Delay to maintain frame rate (60 FPS)
                         delay(sleepTimeMs)
@@ -173,7 +174,8 @@ class GamePlayViewModel(
      * @param config Game configuration
      * @return Vector2D representing the scale factor for x and y dimensions
      */
-    private fun calculateCameraZoomLevel(
+    @VisibleForTesting
+    fun calculateCameraZoomLevel(
         landerState: LanderState,
         config: GameConfig
     ): CameraZoomLevel {
@@ -195,7 +197,8 @@ class GamePlayViewModel(
      * @param config Game configuration
      * @return Vector2D representing the offset in x and y dimensions (in game coordinates)
      */
-    private fun calculateCameraOffset(
+    @VisibleForTesting
+    fun calculateCameraOffset(
         landerState: LanderState,
         zoomLevel: CameraZoomLevel,
         config: GameConfig

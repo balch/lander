@@ -10,7 +10,7 @@ import kotlinx.coroutines.test.TestScope
  */
 class TestCoroutineScopeProvider() : CoroutineScopeProvider {
 
-    lateinit var scope: CoroutineScope
+    var scope: CoroutineScope = TestScope()
 
     override fun get(viewModel: ViewModel): CoroutineScope = scope
 }
