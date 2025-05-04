@@ -11,6 +11,7 @@ import com.balch.lander.core.game.TerrainGenerator
 import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.Vector2D
 import com.balch.lander.core.utils.TimeProvider
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -37,7 +38,14 @@ class GamePlayViewModel(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
-    private val controlInputsFlow = MutableStateFlow(ControlInputs())
+    private val controlInputsFlow = MutableSharedFlow<ControlInputs>(
+        replay = 1, extraBufferCapacity = 256,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    init {
+        setControlsInputs(ControlInputs())
+    }
 
     /**
      * Sets the control inputs.
@@ -47,6 +55,7 @@ class GamePlayViewModel(
     }
 
     // UI state derived from game state and UI state flow
+    @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<GameScreenState> =
         startGameIntentFlow
             .transformLatest { config ->
@@ -244,7 +253,7 @@ class GamePlayViewModel(
 
     /**
      * Updates the game state based on physics and controls.
-     * @param deltaTime Time elapsed since last update in seconds
+     * @param  deltaTimeMs Time elapsed since last update in seconds
      */
     private fun updatedGameState(
         physicsEngine: PhysicsEngine,
