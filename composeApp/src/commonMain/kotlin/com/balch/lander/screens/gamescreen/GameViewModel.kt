@@ -14,8 +14,8 @@ import com.balch.lander.core.utils.TimeProvider
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import org.lighthousegames.logging.KmLog
 import org.lighthousegames.logging.KmLogging
+import org.lighthousegames.logging.logging
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -28,8 +28,9 @@ class GameViewModel(
     private val timeProvider: TimeProvider,
     dispatcherProvider: DispatcherProvider,
     scopeProvider: CoroutineScopeProvider,
-    private val logger: KmLog
 ) : ViewModel() {
+
+    private val logger = logging()
 
     // State flows for different components
     private val startGameIntentFlow = MutableSharedFlow<GameConfig>(

@@ -9,7 +9,6 @@ import com.balch.lander.core.utils.TimeProvider
 import com.balch.lander.screens.gamescreen.GameViewModel
 import com.balch.lander.screens.startscreen.StartScreenViewModel
 import org.koin.dsl.module
-import org.lighthousegames.logging.logging
 
 /**
  * Koin module for dependency injection.
@@ -22,8 +21,7 @@ val appModule = module {
     single { TerrainGenerator(get()) }
 
     // ViewModels
-    factory { logging() }
-    factory { StartScreenViewModel(get(), get(), get()) }
-    factory { GameViewModel(get(), get(), get(), get(), get()) }
+    factory { StartScreenViewModel(get(), get()) }
+    factory { GameViewModel(get(), get(), get(), get()) }
 
 }

@@ -7,7 +7,7 @@ import com.balch.lander.LandingPadSize
 import com.balch.lander.core.coroutines.CoroutineScopeProvider
 import com.balch.lander.core.coroutines.DispatcherProvider
 import kotlinx.coroutines.flow.*
-import org.lighthousegames.logging.KmLog
+import org.lighthousegames.logging.logging
 
 /**
  * ViewModel for the Start Screen.
@@ -16,8 +16,9 @@ import org.lighthousegames.logging.KmLog
 class StartScreenViewModel(
     dispatcherProvider: DispatcherProvider,
     scopeProvider: CoroutineScopeProvider,
-    private val logger: KmLog
 ) : ViewModel() {
+
+    private val logger = logging()
 
     // State for the Start Screen
     private val gameConfigFlow = MutableStateFlow(GameConfig())
