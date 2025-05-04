@@ -12,7 +12,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class StartScreenViewModelTest {
+class StartViewModelTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -20,7 +20,7 @@ class StartScreenViewModelTest {
     private val scopeProvider = TestCoroutineScopeProvider()
 
     private val viewModel by lazy {
-        StartScreenViewModel(dispatcherProvider, scopeProvider)
+        StartViewModel(dispatcherProvider, scopeProvider)
     }
 
     @Test

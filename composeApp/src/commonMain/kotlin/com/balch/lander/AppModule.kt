@@ -7,7 +7,7 @@ import com.balch.lander.core.coroutines.ViewModelScopeProvider
 import com.balch.lander.core.game.TerrainGenerator
 import com.balch.lander.core.utils.TimeProvider
 import com.balch.lander.screens.gamescreen.GameViewModel
-import com.balch.lander.screens.startscreen.StartScreenViewModel
+import com.balch.lander.screens.startscreen.StartViewModel
 import org.koin.dsl.module
 
 /**
@@ -21,7 +21,7 @@ val appModule = module {
     single { TerrainGenerator(get()) }
 
     // ViewModels
-    factory { StartScreenViewModel(get(), get()) }
+    factory { StartViewModel(get(), get()) }
     factory { GameViewModel(get(), get(), get(), get()) }
 
 }

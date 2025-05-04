@@ -4,7 +4,7 @@ import androidx.compose.runtime.*
 import com.balch.lander.screens.gamescreen.GameScreen
 import com.balch.lander.screens.gamescreen.GameViewModel
 import com.balch.lander.screens.startscreen.StartScreen
-import com.balch.lander.screens.startscreen.StartScreenViewModel
+import com.balch.lander.screens.startscreen.StartViewModel
 import org.koin.compose.koinInject
 
 /**
@@ -14,7 +14,7 @@ import org.koin.compose.koinInject
 @Composable
 fun AppNavigation() {
     // Inject ViewModels
-    val startScreenViewModel = koinInject<StartScreenViewModel>()
+    val startViewModel = koinInject<StartViewModel>()
     val gameViewModel = koinInject<GameViewModel>()
 
     // Track current screen using the sealed interface Screen
@@ -27,20 +27,20 @@ fun AppNavigation() {
     when (currentScreen) {
         is Screen.StartScreen -> {
             // Collect UI state only when on this screen for better performance
-            val startScreenState by startScreenViewModel.uiState.collectAsState()
+            val startScreenState by startViewModel.uiState.collectAsState()
             StartScreen(
                 uiState = startScreenState,
-                onFuelLevelChanged = startScreenViewModel::updateFuelLevel,
-                onGravityLevelChanged = startScreenViewModel::updateGravityLevel,
-                onLandingPadSizeChanged = startScreenViewModel::updateLandingPadSize,
+                onFuelLevelChanged = startViewModel::updateFuelLevel,
+                onGravityLevelChanged = startViewModel::updateGravityLevel,
+                onLandingPadSizeChanged = startViewModel::updateLandingPadSize,
                 onStartGameClicked = {
                     // Direct navigation to GameScreen with config passed as parameter
-                    currentScreen = Screen.GameScreen(startScreenViewModel.uiState.value.gameConfig)
+                    currentScreen = Screen.GameScreen(startViewModel.uiState.value.gameConfig)
                 }
             )
             // Use LaunchedEffect to start the game when this screen is shown or config changes
             LaunchedEffect(currentScreen.config) {
-                startScreenViewModel.updateGameConfig(currentScreen.config)
+                startViewModel.updateGameConfig(currentScreen.config)
             }
         }
 

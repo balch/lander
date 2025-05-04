@@ -13,7 +13,7 @@ import org.lighthousegames.logging.logging
  * ViewModel for the Start Screen.
  * Handles user configuration options and navigation to the game screen.
  */
-class StartScreenViewModel(
+class StartViewModel(
     dispatcherProvider: DispatcherProvider,
     scopeProvider: CoroutineScopeProvider,
 ) : ViewModel() {
