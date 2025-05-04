@@ -1,21 +1,21 @@
 package com.balch.lander.screens.gamescreen
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.balch.lander.CameraZoomLevel
 import com.balch.lander.GameConfig
+import com.balch.lander.core.coroutines.CoroutineScopeProvider
+import com.balch.lander.core.coroutines.DispatcherProvider
 import com.balch.lander.core.game.ControlInputs
 import com.balch.lander.core.game.PhysicsEngine
 import com.balch.lander.core.game.TerrainGenerator
 import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.Vector2D
 import com.balch.lander.core.utils.TimeProvider
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import org.lighthousegames.logging.KmLog
 import org.lighthousegames.logging.KmLogging
-import org.lighthousegames.logging.logging
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -26,8 +26,10 @@ import kotlin.random.Random
 class GameViewModel(
     private val terrainGenerator: TerrainGenerator,
     private val timeProvider: TimeProvider,
+    dispatcherProvider: DispatcherProvider,
+    scopeProvider: CoroutineScopeProvider,
+    private val logger: KmLog
 ) : ViewModel() {
-    private val logger = logging()
 
     // State flows for different components
     private val startGameIntentFlow = MutableSharedFlow<GameConfig>(
@@ -63,9 +65,9 @@ class GameViewModel(
                 emit(initialGameState)
                 emitAll(startGameLoop(config, initialGameState))
             }
-            .flowOn(Dispatchers.Default)
+            .flowOn(dispatcherProvider.default)
             .stateIn(
-                scope = viewModelScope,
+                scope = scopeProvider[this],
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = GameScreenState.Loading
             )

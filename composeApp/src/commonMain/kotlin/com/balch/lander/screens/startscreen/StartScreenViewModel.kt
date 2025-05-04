@@ -1,28 +1,35 @@
 package com.balch.lander.screens.startscreen
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.balch.lander.GameConfig
 import com.balch.lander.GravityLevel
 import com.balch.lander.LandingPadSize
-import kotlinx.coroutines.Dispatchers
+import com.balch.lander.core.coroutines.CoroutineScopeProvider
+import com.balch.lander.core.coroutines.DispatcherProvider
 import kotlinx.coroutines.flow.*
-import org.lighthousegames.logging.logging
+import org.lighthousegames.logging.KmLog
 
 /**
  * ViewModel for the Start Screen.
  * Handles user configuration options and navigation to the game screen.
  */
-class StartScreenViewModel : ViewModel() {
-    private val logger = logging()
+class StartScreenViewModel(
+    dispatcherProvider: DispatcherProvider,
+    scopeProvider: CoroutineScopeProvider,
+    private val logger: KmLog
+) : ViewModel() {
 
     // State for the Start Screen
     private val gameConfigFlow = MutableStateFlow(GameConfig())
     val uiState: StateFlow<StartScreenState> =
         gameConfigFlow
             .map { StartScreenState(it) }
-            .flowOn(Dispatchers.Default)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StartScreenState())
+            .flowOn(dispatcherProvider.default)
+            .stateIn(
+                scope = scopeProvider[this],
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = StartScreenState()
+            )
 
     /**
      * Updates the game configuration.
