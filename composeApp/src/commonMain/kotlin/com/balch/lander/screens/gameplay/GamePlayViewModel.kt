@@ -39,13 +39,9 @@ class GamePlayViewModel(
     )
 
     private val controlInputsFlow = MutableSharedFlow<ControlInputs>(
-        replay = 1, extraBufferCapacity = 256,
+        replay = 0, extraBufferCapacity = 256,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
-
-    init {
-        setControlsInputs(ControlInputs())
-    }
 
     /**
      * Sets the control inputs.
@@ -158,7 +154,7 @@ class GamePlayViewModel(
                 emit(currentGameState)
 
                 controlInputs = merge(
-                    controlInputsFlow.drop(1) // wait for next control input
+                    controlInputsFlow
                         .onEach { logger.debug { "Game Loop - Control Inputs: $it" } },
                     flow {
                         // Delay to maintain frame rate (60 FPS)
