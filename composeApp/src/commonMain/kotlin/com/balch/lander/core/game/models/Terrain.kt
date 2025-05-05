@@ -41,7 +41,16 @@ class Terrain(
             }
         }
 
-        /**
+    /**
+     * Represents the sea level height relative to the terrain.
+     *
+     * The sea level is calculated as the highest y-coordinate among the terrain points,
+     * increased by 50 units. If no terrain points exist, the sea level defaults to 0.
+     */
+    val seaLevel: Float =
+        (points.maxByOrNull { it.y }?.y)?.plus(50) ?: 0f
+
+    /**
      * Checks if the given x coordinate is on a landing pad.
      */
     fun isOnLandingPad(x: Float): Boolean =

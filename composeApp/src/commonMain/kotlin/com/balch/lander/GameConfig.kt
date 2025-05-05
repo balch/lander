@@ -83,20 +83,22 @@ enum class LandingPadSize(val size: Float, val count: Int, val label: String) {
 enum class CameraZoomLevel(
     val distanceThreshold: Float,
     val scale: Float,
+    val screenOffsetMultiplier: Float,
 ) {
     /**
      * Far from ground - minimal zoom, centered view
      */
-    FAR(600f, 1.0f),
+    FAR(600f, 1.0f, 0f),
+
     /**
      * Medium distance - moderate zoom, slightly offset view
      */
-    MEDIUM(400f, 1.25f),
+    MEDIUM(400f, 1.25f, .125f),
 
     /**
      * Close to ground - maximum zoom, focused on landing area
      */
-    CLOSE(0f, 1.65f)
+    CLOSE(0f, 2f, .2f)
 }
 
 /**

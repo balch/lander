@@ -216,7 +216,7 @@ class PhysicsEngine(
         terrain: Terrain,
         config: GameConfig
     ): Float =
-        (terrain.points.maxOf { it.y } + 100) - (position.y + config.landerSize / 2)
+        terrain.seaLevel - (position.y + config.landerSize / 2)
 
     /**
      * Checks if the lander is in danger of crashing.

@@ -172,7 +172,10 @@ class GamePlayViewModelTest {
                 landerState = LanderState(
                     distanceToSeaLevel = CameraZoomLevel.FAR.distanceThreshold - 1
                 ),
-                expectedResults = CameraTestResults(CameraZoomLevel.MEDIUM)
+                expectedResults = CameraTestResults(
+                    cameraZoomLevel = CameraZoomLevel.MEDIUM,
+                    offset = Vector2D(-400f, 125f)
+                )
             ),
             CameraTestParams(
                 testCase = "Transition to NEAR zoom",
@@ -181,7 +184,10 @@ class GamePlayViewModelTest {
                 landerState = LanderState(
                     distanceToSeaLevel = CameraZoomLevel.MEDIUM.distanceThreshold - 1
                 ),
-                expectedResults = CameraTestResults(CameraZoomLevel.CLOSE)
+                expectedResults = CameraTestResults(
+                    CameraZoomLevel.CLOSE,
+                    offset = Vector2D(-400f, 200f)
+                )
             ),
         )
 
@@ -228,6 +234,6 @@ class GamePlayViewModelTest {
         val offset = viewModel.calculateCameraOffset(test.landerState, zoomLevel, test.config)
 
         // Assert
-//            assertEquals(test.expectedResults.offset, offset, test.message(index))
+        assertEquals(test.expectedResults.offset, offset, test.message(index))
     }
 }

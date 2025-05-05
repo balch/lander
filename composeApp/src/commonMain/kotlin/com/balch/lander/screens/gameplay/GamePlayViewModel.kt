@@ -229,20 +229,7 @@ class GamePlayViewModel(
         }
 
         // Calculate vertical offset based on zoom level
-        // Each zoom level has a fixed vertical offset to ensure the bottom of the ground is visible
-        val verticalOffset = when (zoomLevel) {
-            CameraZoomLevel.MEDIUM -> {
-                // For medium zoom, position the lander in the upper third of the screen
-                // This ensures we can see more of the ground below
-                (config.screenHeight * 0.4f)
-            }
-            CameraZoomLevel.CLOSE -> {
-                // For close zoom, position the lander in the upper quarter of the screen
-                // This ensures we can see even more of the ground below
-                (config.screenHeight * 0.2f)
-            }
-            else -> 0f // Should never reach here since we return early for FAR
-        }
+        val verticalOffset = config.screenWidth * zoomLevel.screenOffsetMultiplier
 
         return Vector2D(
             x = maxHorizontalOffset * horizontalOffsetFactor,
