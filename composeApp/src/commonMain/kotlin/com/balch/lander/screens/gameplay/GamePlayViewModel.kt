@@ -39,10 +39,22 @@ class GamePlayViewModel(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    /**
+     * A shared flow used to emit and collect control inputs for the game.
+     *
+     * This SharedFlow is configured to support multiple ControlInput
+     * emissions in rapid succession. This pattern is used instead of a
+     * StateFlow which will conflate and drop multiple unhandled emissions.
+     */
     private val controlInputsFlow = MutableSharedFlow<ControlInputs>(
-        replay = 0, extraBufferCapacity = 256,
+        replay = 1, extraBufferCapacity = 256,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
+    ).also { flow ->
+        // initialize with empty inputs so we can use
+        // .drop(1) when we observe controlInputsFlow to interrupt the
+        // game fps delay
+        flow.tryEmit(ControlInputs())
+    }
 
     /**
      * Sets the control inputs.
@@ -155,7 +167,7 @@ class GamePlayViewModel(
                 emit(currentGameState)
 
                 controlInputs = merge(
-                    controlInputsFlow
+                    controlInputsFlow.drop(1) // wait for next control input
                             .onEach { logger.debug { "Game Loop - Control Inputs: $it" } },
                     flow {
                         // Delay to maintain frame rate (60 FPS)
