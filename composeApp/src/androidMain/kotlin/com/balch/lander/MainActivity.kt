@@ -13,11 +13,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Enable edge-to-edge display
-        enableEdgeToEdge()
-
         // Enable edge-to-edge (fullscreen) display
         enableEdgeToEdge()
+        AndroidContextHolder.initialize(this)
 
         // Hide the system bar (android bottom bar with 3 buttons) and make it appear when swiping up
         WindowInsetsControllerCompat(window, window.decorView).let { controller ->
