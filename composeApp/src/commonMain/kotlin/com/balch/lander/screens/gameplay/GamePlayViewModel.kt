@@ -37,9 +37,12 @@ class GamePlayViewModel(
 
     private val logger = logging()
 
+    private val fpsHistory = mutableListOf<Int>()
+
     // State flows for different components
     private val startGameIntentFlow = MutableSharedFlow<GameConfig>(
-        replay = 1, extraBufferCapacity = 1,
+        replay = 1,
+        extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -51,7 +54,8 @@ class GamePlayViewModel(
      * StateFlow which will conflate and drop multiple unhandled emissions.
      */
     private val controlInputsFlow = MutableSharedFlow<ControlInputs>(
-        replay = 1, extraBufferCapacity = 1024,
+        replay = 1,
+        extraBufferCapacity = 1024,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -71,18 +75,16 @@ class GamePlayViewModel(
     val uiState: StateFlow<GameScreenState> =
         startGameIntentFlow
             .transformLatest { config ->
+                fpsHistory.clear()
                 emit(GameScreenState.Loading)
 
-                val terrain = generateTerrain(config)
-
-                val environmentState = GameEnvironmentState(
-                    terrain = terrain,
-                    config = config
+                val initialGameState = GameScreenState.Playing(
+                    landerState = initialLanderState(config),
+                    environmentState = GameEnvironmentState(
+                        terrain = generateTerrain(config),
+                        config = config
+                    )
                 )
-
-                val landerState = initialLanderState(config)
-
-                val initialGameState = GameScreenState.Playing(landerState, environmentState)
                 emit(initialGameState)
                 emitAll(startGameLoop(config, initialGameState))
             }
@@ -180,6 +182,7 @@ class GamePlayViewModel(
                     deltaTimeMs = deltaTimeMs,
                     currentGameState = currentGameState,
                     controlInputs = controlInputs,
+                    fps = averageFps(deltaTimeMs),
                 )
 
                 val workEndTime = timeProvider.currentTimeMillis()
@@ -204,6 +207,16 @@ class GamePlayViewModel(
                 ).first()
             }
         }
+
+    private fun averageFps(deltaTimeMs: Long): Int {
+        val fps = if (deltaTimeMs > 0) (1000L / deltaTimeMs).toInt() else 0
+
+        fpsHistory.add(fps)
+        if (fpsHistory.size > 60) {
+            fpsHistory.removeAt(0)
+        }
+        return if (fpsHistory.isNotEmpty()) fpsHistory.average().toInt() else 0
+    }
 
     /**
      * Calculates the camera scale based on the lander's distance from the ground.
@@ -278,11 +291,11 @@ class GamePlayViewModel(
 
     /**
      * Updates the game state based on physics and controls.
-     * @param  deltaTimeMs Time elapsed since last update in seconds
      */
     private fun updatedGameState(
         physicsEngine: PhysicsEngine,
         deltaTimeMs: Long,
+        fps: Int,
         currentGameState: GameScreenState,
         controlInputs: ControlInputs,
     ): GameScreenState {
@@ -316,7 +329,7 @@ class GamePlayViewModel(
                 GameScreenState.Playing(
                     landerState = newLanderState,
                     environmentState = currentGameState.environmentState,
-                    fps = if (deltaTimeMs > 0) (1000L / deltaTimeMs).toInt() else 0,
+                    fps = fps,
                     cameraScale = cameraZoomLevel.scale,
                     cameraOffset = cameraOffset,
                 ).also { state ->
