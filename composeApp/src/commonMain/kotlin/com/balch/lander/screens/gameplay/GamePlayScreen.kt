@@ -94,7 +94,7 @@ fun PlayingContent(
     var isThrustPressed = remember { false }
     var isRotateLeftPressed = remember { false }
     var isRotateRightPressed = remember { false }
-    val lastControlInputs = remember { mutableStateOf<ControlInputs?>(null) }
+    var lastControlInputs by remember { mutableStateOf<ControlInputs?>(null) }
 
     val fontScaler = FontScaler(1f)
     val stringFormatter = StringFormatter()
@@ -135,7 +135,7 @@ fun PlayingContent(
             .fillMaxSize()
             .focusable(true)
             .focusRequester(focusRequester)
-            .onKeyEvent { event ->
+            .onPreviewKeyEvent { event ->
                 if (event.type == KeyEventType.KeyDown) {
                     when (event.key) {
                         Key.DirectionUp -> isThrustPressed = true
@@ -157,13 +157,11 @@ fun PlayingContent(
                     rotateRight = isRotateRightPressed,
                     rotateLeft = isRotateLeftPressed,
                 )
-                if (lastControlInputs.value != controlInputs) {
-                    lastControlInputs.value = controlInputs
+                if (lastControlInputs != controlInputs) {
+                    lastControlInputs = controlInputs
                     onControlInputs(controlInputs)
-                    true
-                } else {
-                    false
                 }
+                false
             }
     ) {
         Canvas(

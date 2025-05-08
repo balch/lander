@@ -51,7 +51,7 @@ class GamePlayViewModel(
      * StateFlow which will conflate and drop multiple unhandled emissions.
      */
     private val controlInputsFlow = MutableSharedFlow<ControlInputs>(
-        replay = 0, extraBufferCapacity = 1024,
+        replay = 1, extraBufferCapacity = 1024,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -62,6 +62,7 @@ class GamePlayViewModel(
      * Sets the control inputs.
      */
     fun setControlsInputs(controlInputs: ControlInputs) {
+        logger.v { "Setting control inputs: $controlInputs" }
         controlInputsFlow.tryEmit(controlInputs)
     }
 
@@ -92,6 +93,7 @@ class GamePlayViewModel(
                 initialValue = GameScreenState.Loading
             )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val thrustStrengthFlow: StateFlow<ThrustStrength> =
         uiState
             .mapLatest { state ->
@@ -192,12 +194,12 @@ class GamePlayViewModel(
                 emit(currentGameState)
 
                 controlInputs = merge(
-                    controlInputDistinctFlow
+                    controlInputDistinctFlow.drop(1)
                             .onEach { logger.debug { "Game Loop - Control Inputs: $it" } },
                     flow {
                         // Delay to maintain frame rate (60 FPS)
                         delay(sleepTimeMs)
-                        emit(controlInputs)
+                        emit(controlInputsFlow.firstOrNull() ?: controlInputs)
                     }
                 ).first()
             }
