@@ -7,7 +7,7 @@ class IOSPlatform: Platform {
     override val name: String = UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
 
     // For iOS, context can be the main bundle for resource loading
-    override val context: Any?
+    override val context: Any
         get() = NSBundle.mainBundle
 }
 

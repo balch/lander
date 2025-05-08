@@ -10,12 +10,15 @@ import com.balch.lander.core.game.ControlInputs
 import com.balch.lander.core.game.PhysicsEngine
 import com.balch.lander.core.game.TerrainGenerator
 import com.balch.lander.core.game.models.Terrain
+import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.game.models.Vector2D
+import com.balch.lander.core.sound.SoundService
 import com.balch.lander.core.utils.TimeProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import org.lighthousegames.logging.KmLogging
 import org.lighthousegames.logging.logging
 import kotlin.math.abs
@@ -27,6 +30,7 @@ import kotlin.math.abs
 class GamePlayViewModel(
     private val terrainGenerator: TerrainGenerator,
     private val timeProvider: TimeProvider,
+    private val soundService: SoundService,
     dispatcherProvider: DispatcherProvider,
     scopeProvider: CoroutineScopeProvider,
 ) : ViewModel() {
@@ -47,7 +51,7 @@ class GamePlayViewModel(
      * StateFlow which will conflate and drop multiple unhandled emissions.
      */
     private val controlInputsFlow = MutableSharedFlow<ControlInputs>(
-        replay = 0, extraBufferCapacity = 256,
+        replay = 0, extraBufferCapacity = 1024,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -87,6 +91,29 @@ class GamePlayViewModel(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = GameScreenState.Loading
             )
+
+    val thrustStrengthFlow: StateFlow<ThrustStrength> =
+        uiState
+            .mapLatest { state ->
+                if (state is GameScreenState.Playing) {
+                    state.landerState.thrustStrength
+                } else ThrustStrength.OFF
+            }
+            .flowOn(dispatcherProvider.default)
+            .stateIn(
+                scope = scopeProvider[this],
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = ThrustStrength.OFF
+            )
+
+    init {
+        // collect on this flow after its is created
+        scopeProvider[this].launch {
+            thrustStrengthFlow.collectLatest {
+                soundService.playThrustSound(it)
+            }
+        }
+    }
 
     fun startGame(config: GameConfig) {
         logger.info { "Starting game with config: gravity=${config.gravity}, fuelLevel=${config.fuelLevel}, landingPadSize=${config.landingPadSize}" }
@@ -304,15 +331,25 @@ class GamePlayViewModel(
             GameStatus.LANDED -> {
                 val message = successMessages.random()
                 logger.info("GameState") { "Lander successfully landed! Message: $message" }
+                soundService.playLandingSuccessSound()  // Play success sound
                 GameScreenState.GameOver(true, message)
             }
 
             GameStatus.CRASHED -> {
                 val message = failureMessages.random()
                 logger.info("GameState") { "Lander crashed! Message: $message" }
+                soundService.playCrashSound()  // Play crash sound
                 GameScreenState.GameOver(false, message)
             }
         }
+    }
+
+    /**
+     * Clean up resources when ViewModel is cleared
+     */
+    override fun onCleared() {
+        soundService.dispose()
+        super.onCleared()
     }
 
     companion object {

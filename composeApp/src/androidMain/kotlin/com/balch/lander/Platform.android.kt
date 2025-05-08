@@ -6,7 +6,7 @@ class AndroidPlatform : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
 
     // Provide the Android application context
-    override val context: Any?
+    override val context: Any
         get() = AndroidContextHolder.getAppContext()
 }
 

@@ -53,6 +53,12 @@ kotlin {
     }
 
     sourceSets {
+        commonMain {
+            dependencies {
+                api(libs.kmlogging)
+            }
+        }
+
         val desktopMain by getting
 
         androidMain.dependencies {
@@ -74,10 +80,14 @@ kotlin {
             implementation(libs.koin.compose)
 
             // Logging
-            implementation(libs.kmlogging)
+            api(libs.kmlogging)
 
             // Coroutines
             implementation(libs.kotlinx.coroutines.core)
+
+            // LexiLabs Basic Sound
+            implementation(libs.lexilabs.basic.sound)
+
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
