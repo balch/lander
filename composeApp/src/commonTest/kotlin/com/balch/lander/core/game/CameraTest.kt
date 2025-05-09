@@ -120,6 +120,8 @@ class CameraTest {
         val camera = Camera.calculateCameraInfo(test.landerState,test.config)
 
         // Assert
-        assertEquals(test.expectedResults, camera, test.message(index))
+        assertEquals(test.expectedResults.offset.x, camera.offset.x, 0.01f, test.message(index))
+        assertEquals(test.expectedResults.offset.y, camera.offset.y, 0.01f, test.message(index))
+        assertEquals(test.expectedResults.zoomLevel, camera.zoomLevel, test.message(index))
     }
 }

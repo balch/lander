@@ -92,7 +92,7 @@ data class Camera(
             // Calculate vertical offset based on zoom level
             val verticalOffset = config.screenWidth * zoomLevel.screenOffsetMultiplier
 
-            val horizontalOffset = maxHorizontalOffset * horizontalOffsetFactor
+            val horizontalOffset = -maxHorizontalOffset * horizontalOffsetFactor
             if (horizontalOffset != 0f) {
                 logger.v {
                     """
