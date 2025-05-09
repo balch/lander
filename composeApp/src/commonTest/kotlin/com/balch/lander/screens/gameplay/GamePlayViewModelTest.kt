@@ -148,49 +148,40 @@ class GamePlayViewModelTest {
         scopeProvider.scope = backgroundScope
         mockSoundService.reset()
 
-        // Act - Set control inputs with LOW thrust
-        val controlInputsLow = ControlInputs(thrustStrength = ThrustStrength.LOW)
-        viewModel.setControlsInputs(controlInputsLow)
+        viewModel.uiState.test {
+            viewModel.startGame(GameConfig())
 
-        // Assert - LOW thrust sound should be played
-        assertEquals(ThrustStrength.LOW, mockSoundService.thrustSoundPlayed)
+            skipItems(2)
 
-        // Act - Set control inputs with MEDIUM thrust
-        mockSoundService.reset()
-        val controlInputsMedium = ControlInputs(thrustStrength = ThrustStrength.MEDIUM)
-        viewModel.setControlsInputs(controlInputsMedium)
+            // Set control inputs
+            timeProvider.advanceTimeBy()
+            val controlInputsLow = ControlInputs(thrustStrength = ThrustStrength.LOW)
+            viewModel.setControlsInputs(controlInputsLow)
 
-        // Assert - MEDIUM thrust sound should be played
-        assertEquals(ThrustStrength.MEDIUM, mockSoundService.thrustSoundPlayed)
+            // Assert - LOW thrust sound should be played
+            skipItems(1)
+            assertEquals(ThrustStrength.LOW, mockSoundService.thrustSoundPlayed)
 
-        // Act - Set control inputs with OFF thrust
-        mockSoundService.reset()
-        val controlInputsOff = ControlInputs(thrustStrength = ThrustStrength.OFF)
-        viewModel.setControlsInputs(controlInputsOff)
+            // Act - Set control inputs with MEDIUM thrust
+            timeProvider.advanceTimeBy()
+            mockSoundService.reset()
+            val controlInputsMedium = ControlInputs(thrustStrength = ThrustStrength.MEDIUM)
+            viewModel.setControlsInputs(controlInputsMedium)
 
-        // Assert - OFF thrust should stop the sound
-        assertEquals(ThrustStrength.OFF, mockSoundService.thrustSoundPlayed)
-    }
+            // Assert - MEDIUM thrust sound should be played
+            skipItems(1)
+            assertEquals(ThrustStrength.MEDIUM, mockSoundService.thrustSoundPlayed)
 
-    // Note: We can't test onCleared directly as it's protected
-    // Instead, we'll test that the landing and crash sounds are played correctly
+            // Act - Set control inputs with OFF thrust
+            timeProvider.advanceTimeBy()
+            mockSoundService.reset()
+            val controlInputsOff = ControlInputs(thrustStrength = ThrustStrength.OFF)
+            viewModel.setControlsInputs(controlInputsOff)
 
-    @Test
-    fun `landing success plays success sound`() = runTest(testDispatcher) {
-        // This test would need to simulate a successful landing
-        // For now, we'll just verify that the sound service is properly injected
-        // and the thrust sound functionality works
-
-        // Arrange
-        scopeProvider.scope = backgroundScope
-        mockSoundService.reset()
-
-        // Act - Set control inputs with HIGH thrust
-        val controlInputs = ControlInputs(thrustStrength = ThrustStrength.HIGH)
-        viewModel.setControlsInputs(controlInputs)
-
-        // Assert - HIGH thrust sound should be played
-        assertEquals(ThrustStrength.HIGH, mockSoundService.thrustSoundPlayed)
+            // Assert - OFF thrust should stop the sound
+            skipItems(1)
+            assertEquals(ThrustStrength.OFF, mockSoundService.thrustSoundPlayed)
+        }
     }
 
     private data class CameraTestResults(
@@ -211,36 +202,51 @@ class GamePlayViewModelTest {
     @Test
     fun `verify cameraZoomLevel`() {
         // Arrange
+        val config = GameConfig()
+
         val testCases = listOf(
+            CameraTestParams(
+                testCase = "Empty Game State",
+                expectations = "CameraZoomLevel.FAR",
+                config = config,
+                landerState = LanderState(),
+                expectedResults = CameraTestResults()
+            ),
             CameraTestParams(
                 testCase = "Initial Game State",
                 expectations = "CameraZoomLevel.FAR",
-                config = GameConfig(),
-                landerState = LanderState(),
+                config = config,
+                landerState = LanderState(
+                    position = Vector2D(x = 500f, y = 50f),
+                    distanceToSeaLevel = 800f
+
+                ),
                 expectedResults = CameraTestResults()
             ),
             CameraTestParams(
                 testCase = "Transition to MEDIUM zoom",
                 expectations = "CameraZoomLevel.MEDIUM",
-                config = GameConfig(),
+                config = config,
                 landerState = LanderState(
+                    position = Vector2D(x = 500f, y = 550f),
                     distanceToSeaLevel = CameraZoomLevel.FAR.distanceThreshold - 1
                 ),
                 expectedResults = CameraTestResults(
                     cameraZoomLevel = CameraZoomLevel.MEDIUM,
-                    offset = Vector2D(-400f, 125f)
+                    offset = Vector2D(0f, 125f)
                 )
             ),
             CameraTestParams(
                 testCase = "Transition to NEAR zoom",
                 expectations = "CameraZoomLevel.NEAR",
-                config = GameConfig(),
+                config = config,
                 landerState = LanderState(
+                    position = Vector2D(x = 500f, y = 750f),
                     distanceToSeaLevel = CameraZoomLevel.MEDIUM.distanceThreshold - 1
                 ),
                 expectedResults = CameraTestResults(
-                    CameraZoomLevel.CLOSE,
-                    offset = Vector2D(-400f, 200f)
+                    cameraZoomLevel = CameraZoomLevel.CLOSE,
+                    offset = Vector2D(0f, 200f)
                 )
             ),
         )
@@ -264,16 +270,27 @@ class GamePlayViewModelTest {
     @Test
     fun `debug cameraZoomLevel test case`() {
         // Arrange
+        val config = GameConfig()
+
+        val scaledWidth = config.screenWidth * ( 1f - CameraZoomLevel.MEDIUM.screenOffsetMultiplier)
+        val leftBorder = scaledWidth * .2f
+        val rightBorder = scaledWidth * .8f
+
         val testCase =
             CameraTestParams(
                 testCase = "Transition to MEDIUM zoom",
                 expectations = "CameraZoomLevel.MEDIUM",
-                config = GameConfig(),
+                config = config,
                 landerState = LanderState(
-                    distanceToSeaLevel = CameraZoomLevel.FAR.distanceThreshold + 1
+                    position = Vector2D(x = leftBorder - 1f, y = 500f),
+                    distanceToSeaLevel = CameraZoomLevel.FAR.distanceThreshold - 1
                 ),
-                expectedResults = CameraTestResults(CameraZoomLevel.MEDIUM)
+                expectedResults = CameraTestResults(
+                    cameraZoomLevel = CameraZoomLevel.MEDIUM,
+                    offset = Vector2D(-400f, 125f)
+                )
             )
+
         executeCameraTest(0, testCase)
     }
 
