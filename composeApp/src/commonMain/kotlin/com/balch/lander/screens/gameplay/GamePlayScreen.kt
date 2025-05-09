@@ -2,14 +2,12 @@ package com.balch.lander.screens.gameplay
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.focusable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,11 +19,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -202,33 +203,90 @@ fun BoxScope.DebugOverlay(
     camera: Camera = Camera(),
     fps: Int = 60,
     fontScaler: FontScaler = FontScaler(1f),
+    initialExpand: Boolean = false,
 ) {
+    var expanded by remember { mutableStateOf(initialExpand) }
+
+    val animatedHeight by animateFloatAsState(
+        targetValue = if (expanded) 1f else 0f,
+        animationSpec = tween(durationMillis = 300),
+        label = "debugOverlayHeight"
+    )
+
     Column(
         modifier = Modifier
+            .fillMaxHeight(.70f)
             .align(Alignment.BottomEnd)
             .padding(bottom = 32.dp, end = 44.dp)
-            .safeDrawingPadding(),
+            .safeDrawingPadding()
+            .background(Color(0x33000000), shape = RoundedCornerShape(8.dp)),
+        horizontalAlignment = Alignment.End,
     ) {
-        Text(
-            text = "Lander: (${landerPosition.x.toInt()}, ${landerPosition.y.toInt()})",
-            color = MaterialTheme.colors.onBackground,
-            fontSize = fontScaler.scale(12.sp)
-        )
-        Text(
-            text = "Camera Offset: (${camera.offset.x.toInt()}, ${camera.offset.y.toInt()})",
-            color = MaterialTheme.colors.onBackground,
-            fontSize = fontScaler.scale(12.sp)
-        )
-        Text(
-            text = "Camera Scale: ${camera.zoomLevel.scale.toInt()}",
-            color = MaterialTheme.colors.onBackground,
-            fontSize = fontScaler.scale(12.sp)
-        )
-        Text(
-            text = "FPS: $fps",
-            color = MaterialTheme.colors.onBackground,
-            fontSize = fontScaler.scale(12.sp),
-        )
+        // Header - always visible
+        Row(
+            modifier = Modifier
+                .clickable { expanded = !expanded }
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.Top
+        ) {
+            Text(
+                text = "Debug Info",
+                color = MaterialTheme.colors.onBackground,
+                fontSize = fontScaler.scale(14.sp),
+                fontWeight = FontWeight.Bold
+            )
+
+            // Rotation animation for the arrow
+            val rotation by animateFloatAsState(
+                targetValue = if (expanded) 180f else 0f,
+                animationSpec = tween(durationMillis = 300),
+                label = "arrowRotation"
+            )
+
+            Text(
+                text = "▼", // Down arrow that will rotate
+                color = MaterialTheme.colors.onBackground,
+                fontSize = fontScaler.scale(14.sp),
+                modifier = Modifier.graphicsLayer {
+                    rotationZ = rotation
+                }
+            )
+        }
+
+        // Content - only visible when expanded
+        if (animatedHeight > 0) {
+            Column(
+                modifier = Modifier
+                    .graphicsLayer {
+                        alpha = animatedHeight
+                        scaleY = animatedHeight
+                        transformOrigin = TransformOrigin(0.5f, 0f)
+                    },
+                verticalArrangement = Arrangement.Top
+            ) {
+                Text(
+                    text = "Lander: (${landerPosition.x.toInt()}, ${landerPosition.y.toInt()})",
+                    color = MaterialTheme.colors.onBackground,
+                    fontSize = fontScaler.scale(12.sp)
+                )
+                Text(
+                    text = "Camera Offset: (${camera.offset.x.toInt()}, ${camera.offset.y.toInt()})",
+                    color = MaterialTheme.colors.onBackground,
+                    fontSize = fontScaler.scale(12.sp)
+                )
+                Text(
+                    text = "Camera Scale: ${camera.zoomLevel.scale.toInt()}",
+                    color = MaterialTheme.colors.onBackground,
+                    fontSize = fontScaler.scale(12.sp)
+                )
+                Text(
+                    text = "FPS: $fps",
+                    color = MaterialTheme.colors.onBackground,
+                    fontSize = fontScaler.scale(12.sp),
+                )
+            }
+        }
     }
 }
 
@@ -241,7 +299,8 @@ fun DebugOverlayPreview() {
     MaterialTheme(colors = darkColors()) {
         Box(modifier = Modifier
             .width(300.dp)
-            .height(300.dp)
+            .height(250.dp)
+            .background(Color.Black)
         ) {
             DebugOverlay(
                 landerPosition = position,
@@ -252,6 +311,27 @@ fun DebugOverlayPreview() {
     }
 }
 
+@Preview
+@Composable
+fun DebugOverlayExpandedPreview() {
+    val position = Vector2D(500f, 100f)
+    val camera = Camera()
+
+    MaterialTheme(colors = darkColors()) {
+        Box(modifier = Modifier
+            .width(300.dp)
+            .height(250.dp)
+            .background(Color.Black)
+        ) {
+            DebugOverlay(
+                landerPosition = position,
+                camera = camera,
+                fps = 60,
+                initialExpand = true,
+            )
+        }
+    }
+}
 
 @Composable
 fun toDp(point: Vector2D, config: GameConfig): Pair<Dp, Dp> {
