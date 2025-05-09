@@ -82,7 +82,7 @@ class GamePlayViewModelTest {
 
             val item = awaitItem()
             assertTrue(item is GamePlayViewModel.GameScreenState.Playing)
-            assertEquals(config, item.environmentState.config)
+            assertEquals(config, item.environment.config)
         }
     }
 

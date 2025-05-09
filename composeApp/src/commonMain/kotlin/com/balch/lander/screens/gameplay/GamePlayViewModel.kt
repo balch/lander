@@ -78,7 +78,7 @@ class GamePlayViewModel(
 
                 val initialGameState = GameScreenState.Playing(
                     landerState = initialLanderState(config),
-                    environmentState = GameEnvironmentState(
+                    environment = GameEnvironmentState(
                         terrain = generateTerrain(config),
                         config = config
                     )
@@ -237,8 +237,8 @@ class GamePlayViewModel(
             landerState = currentGameState.landerState,
             deltaTimeMs = deltaTimeMs,
             controls = controlInputs,
-            terrain = currentGameState.environmentState.terrain,
-            config = currentGameState.environmentState.config,
+            terrain = currentGameState.environment.terrain,
+            config = currentGameState.environment.config,
         )
 
         // Check if lander has landed or crashed
@@ -246,11 +246,11 @@ class GamePlayViewModel(
             GameStatus.PLAYING -> {
                 val camera = Camera.calculateCameraInfo(
                     landerState = newLanderState,
-                    config = currentGameState.environmentState.config
+                    config = currentGameState.environment.config
                 )
                 GameScreenState.Playing(
                     landerState = newLanderState,
-                    environmentState = currentGameState.environmentState,
+                    environment = currentGameState.environment,
                     fps = fps,
                     camera = camera,
                 ).also { state ->
@@ -327,7 +327,7 @@ class GamePlayViewModel(
             /**
              * The static state of the game environment that is generated at game start.
              */
-            val environmentState: GameEnvironmentState = GameEnvironmentState(),
+            val environment: GameEnvironmentState = GameEnvironmentState(),
 
             /**
              * Current frames per second.

@@ -131,7 +131,7 @@ fun PlayingContent(
     // Calculate offset in dp
     val (offsetXDp, offsetYDp) = toDp(
         point = Vector2D(animatedOffsetX, animatedOffsetY),
-        config = state.environmentState.config,
+        config = state.environment.config,
     )
 
     Box(
@@ -173,15 +173,15 @@ fun PlayingContent(
                 .scale(animatedScaleX, animatedScaleY)
                 .offset(offsetXDp, -offsetYDp)
         ) {
-            drawStars(state.environmentState.config)
+            drawStars(state.environment.config)
             drawTerrain(
-                state.environmentState.terrain,
-                state.environmentState.config
+                state.environment.terrain,
+                state.environment.config
             )
-            drawLandingPads(state.environmentState.terrain)
+            drawLandingPads(state.environment.terrain)
             drawLander(
                 state.landerState,
-                state.environmentState.config
+                state.environment.config
             )
         }
         DrawInfoPanel(state.landerState, fontScaler, stringFormatter)
