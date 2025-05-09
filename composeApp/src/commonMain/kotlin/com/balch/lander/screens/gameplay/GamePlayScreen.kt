@@ -180,10 +180,78 @@ fun PlayingContent(
                 state.environmentState.config
             )
         }
-        drawInfoPanel(state.landerState, state.fps, fontScaler, stringFormatter)
-        drawControlPanel(state.landerState, onControlInputs, fontScaler)
+        DrawInfoPanel(state.landerState, fontScaler, stringFormatter)
+        DrawControlPanel(state.landerState, onControlInputs, fontScaler)
+
+        DebugOverlay(
+            landerPosition = state.landerState.position,
+            cameraOffset = state.cameraOffset,
+            cameraScale = state.cameraScale,
+            fps = state.fps,
+            fontScaler = fontScaler
+        )
     }
 }
+
+@Composable
+fun BoxScope.DebugOverlay(
+    landerPosition: Vector2D,
+    cameraOffset: Vector2D,
+    cameraScale: Float,
+    fps: Int,
+    fontScaler: FontScaler = FontScaler(1f),
+) {
+    Column(
+        modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(bottom = 32.dp, end = 44.dp)
+            .safeDrawingPadding(),
+    ) {
+        Text(
+            text = "Lander: (${landerPosition.x.toInt()}, ${landerPosition.y.toInt()})",
+            color = MaterialTheme.colors.onBackground,
+            fontSize = fontScaler.scale(12.sp)
+        )
+        Text(
+            text = "Camera Offset: (${cameraOffset.x.toInt()}, ${cameraOffset.y.toInt()})",
+            color = MaterialTheme.colors.onBackground,
+            fontSize = fontScaler.scale(12.sp)
+        )
+        Text(
+            text = "Camera Scale: $cameraScale",
+            color = MaterialTheme.colors.onBackground,
+            fontSize = fontScaler.scale(12.sp)
+        )
+        Text(
+            text = "FPS: $fps",
+            color = MaterialTheme.colors.onBackground,
+            fontSize = fontScaler.scale(12.sp),
+        )
+    }
+}
+
+@Preview
+@Composable
+fun DebugOverlayPreview() {
+    val position = Vector2D(500f, 100f)
+    val scale = 1f
+    val offset = Vector2D(0f, 0f)
+
+    MaterialTheme(colors = darkColors()) {
+        Box(modifier = Modifier
+            .width(300.dp)
+            .height(300.dp)
+        ) {
+            DebugOverlay(
+                landerPosition = position,
+                cameraOffset = offset,
+                cameraScale = scale,
+                fps = 60
+            )
+        }
+    }
+}
+
 
 @Composable
 fun toDp(point: Vector2D, config: GameConfig): Pair<Dp, Dp> {
@@ -379,9 +447,8 @@ fun LanderPreview() {
 }
 
 @Composable
-fun BoxScope.drawInfoPanel(
+fun BoxScope.DrawInfoPanel(
     landerState: LanderState,
-    fps: Int,
     fontScaler: FontScaler = FontScaler(1f),
     stringFormatter: StringFormatter = StringFormatter()
 ) {
@@ -417,14 +484,6 @@ fun BoxScope.drawInfoPanel(
             color = if (landerState.distanceToGround < 50) Color.Red else MaterialTheme.colors.onBackground,
             fontSize = fontScaler.scale(14.sp),
         )
-
-        if (fps > 0) {
-            Text(
-                text = "FPS: $fps",
-                color = MaterialTheme.colors.onBackground,
-                fontSize = fontScaler.scale(14.sp),
-            )
-        }
     }
 }
 
@@ -438,13 +497,13 @@ fun InfoPanelPreview() {
             .width(600.dp)
             .height(350.dp)
         ) {
-            drawInfoPanel(landerState, 60)
+            DrawInfoPanel(landerState)
         }
     }
 }
 
 @Composable
-fun BoxScope.drawControlPanel(
+fun BoxScope.DrawControlPanel(
     landerState: LanderState,
     onControlInputs: (ControlInputs) -> Unit,
     fontScaler: FontScaler = FontScaler(1f),
@@ -613,7 +672,7 @@ fun ControlPadPreview() {
             .width(600.dp)
             .height(350.dp)
         ) {
-            drawControlPanel(landerState, {  })
+            DrawControlPanel(landerState, {  })
         }
     }
 }
@@ -633,7 +692,7 @@ fun BoxScope.GameOverContent(
             state.environmentState.config
         )
     }
-    drawInfoPanel(state.landerState, 0)
+    DrawInfoPanel(state.landerState)
     GameOverMessage(
         uiState = state,
         onRestartClicked = onRestartClicked,

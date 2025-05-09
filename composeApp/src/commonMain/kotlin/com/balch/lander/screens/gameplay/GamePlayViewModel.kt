@@ -283,10 +283,19 @@ class GamePlayViewModel(
         // Calculate vertical offset based on zoom level
         val verticalOffset = config.screenWidth * zoomLevel.screenOffsetMultiplier
 
-        return Vector2D(
-            x = maxHorizontalOffset * horizontalOffsetFactor,
-            y = verticalOffset
-        )
+        val horizontalOffset = maxHorizontalOffset * horizontalOffsetFactor
+        if (horizontalOffset != 0f) {
+            logger.v {
+                """
+                Camera calculation:
+                lander=${landerState.position}, zoomLevel=$zoomLevel, scale=${zoomLevel.scale}
+                maxHorizontalOffset=$maxHorizontalOffset, horizontalOffsetFactor=$horizontalOffsetFactor
+                horizontalOffset=$horizontalOffset, verticalOffset=$verticalOffset
+                """.trimIndent()
+            }
+        }
+
+        return Vector2D(horizontalOffset, verticalOffset)
     }
 
     /**
