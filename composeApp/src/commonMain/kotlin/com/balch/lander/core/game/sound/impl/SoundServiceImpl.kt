@@ -1,9 +1,9 @@
-package com.balch.lander.core.sound.impl
+package com.balch.lander.core.game.sound.impl
 
 import app.lexilabs.basic.sound.Audio
 import app.lexilabs.basic.sound.ExperimentalBasicSound
 import com.balch.lander.core.game.models.ThrustStrength
-import com.balch.lander.core.sound.SoundService
+import com.balch.lander.core.game.sound.SoundService
 import com.balch.lander.getPlatform
 import lander.composeapp.generated.resources.Res
 import org.lighthousegames.logging.logging

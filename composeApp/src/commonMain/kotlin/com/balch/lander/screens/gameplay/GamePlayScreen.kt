@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.balch.lander.GameConfig
+import com.balch.lander.core.game.Camera
 import com.balch.lander.core.game.ControlInputs
 import com.balch.lander.core.game.TerrainGeneratorImpl
 import com.balch.lander.core.game.models.Terrain
@@ -105,30 +106,33 @@ fun PlayingContent(
 
     // Animate camera scale changes
     val animatedScaleX by animateFloatAsState(
-        targetValue = state.cameraScale,
+        targetValue = state.camera.zoomLevel.scale,
         animationSpec = tween(durationMillis = 500),
         label = "scaleX"
     )
     val animatedScaleY by animateFloatAsState(
-        targetValue = state.cameraScale,
+        targetValue = state.camera.zoomLevel.scale,
         animationSpec = tween(durationMillis = 500),
         label = "scaleY"
     )
 
     // Animate camera offset changes
     val animatedOffsetX by animateFloatAsState(
-        targetValue = state.cameraOffset.x,
+        targetValue = state.camera.offset.x,
         animationSpec = tween(durationMillis = 500),
         label = "offsetX"
     )
     val animatedOffsetY by animateFloatAsState(
-        targetValue = state.cameraOffset.y,
+        targetValue = state.camera.offset.y,
         animationSpec = tween(durationMillis = 500),
         label = "offsetY"
     )
 
     // Calculate offset in dp
-    val (offsetXDp, offsetYDp) = toDp(Vector2D(animatedOffsetX, animatedOffsetY), state.environmentState.config)
+    val (offsetXDp, offsetYDp) = toDp(
+        point = Vector2D(animatedOffsetX, animatedOffsetY),
+        config = state.environmentState.config,
+    )
 
     Box(
         modifier = Modifier
@@ -185,8 +189,7 @@ fun PlayingContent(
 
         DebugOverlay(
             landerPosition = state.landerState.position,
-            cameraOffset = state.cameraOffset,
-            cameraScale = state.cameraScale,
+            camera = state.camera,
             fps = state.fps,
             fontScaler = fontScaler
         )
@@ -196,9 +199,8 @@ fun PlayingContent(
 @Composable
 fun BoxScope.DebugOverlay(
     landerPosition: Vector2D,
-    cameraOffset: Vector2D,
-    cameraScale: Float,
-    fps: Int,
+    camera: Camera = Camera(),
+    fps: Int = 60,
     fontScaler: FontScaler = FontScaler(1f),
 ) {
     Column(
@@ -213,12 +215,12 @@ fun BoxScope.DebugOverlay(
             fontSize = fontScaler.scale(12.sp)
         )
         Text(
-            text = "Camera Offset: (${cameraOffset.x.toInt()}, ${cameraOffset.y.toInt()})",
+            text = "Camera Offset: (${camera.offset.x.toInt()}, ${camera.offset.y.toInt()})",
             color = MaterialTheme.colors.onBackground,
             fontSize = fontScaler.scale(12.sp)
         )
         Text(
-            text = "Camera Scale: $cameraScale",
+            text = "Camera Scale: ${camera.zoomLevel.scale.toInt()}",
             color = MaterialTheme.colors.onBackground,
             fontSize = fontScaler.scale(12.sp)
         )
@@ -234,8 +236,7 @@ fun BoxScope.DebugOverlay(
 @Composable
 fun DebugOverlayPreview() {
     val position = Vector2D(500f, 100f)
-    val scale = 1f
-    val offset = Vector2D(0f, 0f)
+    val camera = Camera()
 
     MaterialTheme(colors = darkColors()) {
         Box(modifier = Modifier
@@ -244,8 +245,7 @@ fun DebugOverlayPreview() {
         ) {
             DebugOverlay(
                 landerPosition = position,
-                cameraOffset = offset,
-                cameraScale = scale,
+                camera = camera,
                 fps = 60
             )
         }

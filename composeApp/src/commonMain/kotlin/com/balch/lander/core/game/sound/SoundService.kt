@@ -1,4 +1,4 @@
-package com.balch.lander.core.sound
+package com.balch.lander.core.game.sound
 
 import com.balch.lander.core.game.models.ThrustStrength
 

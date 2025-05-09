@@ -6,8 +6,8 @@ import com.balch.lander.core.coroutines.DispatcherProvider
 import com.balch.lander.core.coroutines.ViewModelScopeProvider
 import com.balch.lander.core.game.TerrainGenerator
 import com.balch.lander.core.game.TerrainGeneratorImpl
-import com.balch.lander.core.sound.SoundService
-import com.balch.lander.core.sound.impl.SoundServiceImpl
+import com.balch.lander.core.game.sound.SoundService
+import com.balch.lander.core.game.sound.impl.SoundServiceImpl
 import com.balch.lander.core.utils.TimeProvider
 import com.balch.lander.core.utils.impl.TimeProviderImpl
 import com.balch.lander.screens.gameplay.GamePlayViewModel
