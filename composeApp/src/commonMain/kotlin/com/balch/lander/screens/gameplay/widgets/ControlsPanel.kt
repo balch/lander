@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -24,19 +23,17 @@ import com.balch.lander.screens.gameplay.LanderState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-fun BoxScope.DrawControlPanel(
+fun DrawControlPanel(
     landerState: LanderState,
     onControlInputs: (ControlInputs) -> Unit,
     fontScaler: FontScaler = FontScaler(1f),
+    modifier: Modifier = Modifier,
 ) {
     if (landerState.status == GameStatus.PLAYING) {
 
         // Control panel in the top right area
         Column(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 32.dp, end = 44.dp)
-                .safeDrawingPadding(),
+            modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Thrust control buttons (top row)

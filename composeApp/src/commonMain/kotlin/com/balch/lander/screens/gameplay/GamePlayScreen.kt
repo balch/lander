@@ -143,15 +143,29 @@ fun PlayingContent(
             config = state.environment.config,
         )
         DrawInfoPanel(state.landerState, fontScaler, stringFormatter)
-        DrawControlPanel(state.landerState, onControlInputs, fontScaler)
 
-        DebugOverlay(
-            landerState = state.landerState,
-            camera = state.camera,
-            fps = state.fps,
-            fontScaler = fontScaler,
-            stringFormatter = stringFormatter,
-        )
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 32.dp, end = 44.dp)
+                .safeDrawingPadding(),
+        ) {
+            DrawControlPanel(
+                modifier = Modifier.align(Alignment.End),
+                landerState = state.landerState,
+                onControlInputs = onControlInputs,
+                fontScaler = fontScaler
+            )
+
+            DebugOverlay(
+                modifier = Modifier.align(Alignment.End),
+                landerState = state.landerState,
+                camera = state.camera,
+                fps = state.fps,
+                fontScaler = fontScaler,
+                stringFormatter = stringFormatter,
+            )
+        }
     }
 }
 

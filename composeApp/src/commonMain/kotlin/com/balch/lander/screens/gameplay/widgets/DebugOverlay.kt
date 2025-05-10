@@ -27,13 +27,14 @@ import com.balch.lander.screens.gameplay.LanderState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-fun BoxScope.DebugOverlay(
+fun ColumnScope.DebugOverlay(
     landerState: LanderState,
     camera: Camera = Camera(),
     fps: Int = 60,
     fontScaler: FontScaler = FontScaler(1f),
     initialExpand: Boolean = false,
     stringFormatter: StringFormatter = StringFormatter(),
+    modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(initialExpand) }
 
@@ -44,11 +45,8 @@ fun BoxScope.DebugOverlay(
     )
 
     Column(
-        modifier = Modifier
-            .fillMaxHeight(.70f)
-            .align(Alignment.BottomEnd)
-            .padding(bottom = 32.dp, end = 44.dp)
-            .safeDrawingPadding()
+        modifier = modifier
+            .align(Alignment.End)
             .background(Color(0x33000000), shape = RoundedCornerShape(8.dp)),
         horizontalAlignment = Alignment.End,
     ) {
@@ -63,7 +61,7 @@ fun BoxScope.DebugOverlay(
             Text(
                 text = "Debug Info",
                 color = MaterialTheme.colors.onBackground,
-                fontSize = fontScaler.scale(14.sp),
+                fontSize = fontScaler.scale(12.sp),
                 fontWeight = FontWeight.Bold
             )
 
@@ -77,7 +75,7 @@ fun BoxScope.DebugOverlay(
             Text(
                 text = "▼", // Down arrow that will rotate
                 color = MaterialTheme.colors.onBackground,
-                fontSize = fontScaler.scale(14.sp),
+                fontSize = fontScaler.scale(12.sp),
                 modifier = Modifier.graphicsLayer {
                     rotationZ = rotation
                 }
@@ -95,12 +93,12 @@ fun BoxScope.DebugOverlay(
                         scaleY = animatedHeight
                         transformOrigin = TransformOrigin(0.5f, 0f)
                     },
-                verticalArrangement = Arrangement.Top
+                verticalArrangement = Arrangement.spacedBy(0.dp),
             ) {
                 Text(
                     text = "Position: (x=${position.x.toInt()}, y=${position.y.toInt()}, rot=${stringFormatter.formatToString(landerState.rotation)})",
                     color = MaterialTheme.colors.onBackground,
-                    fontSize = fontScaler.scale(12.sp)
+                    fontSize = fontScaler.scale(12.sp),
                 )
                 Text(
                     text = "Height: (sea=${landerState.distanceToSeaLevel.toInt()}, grd=${landerState.distanceToGround.toInt()})",
@@ -144,7 +142,7 @@ fun DebugOverlayExpandedPreview() {
     )
 
     MaterialTheme(colors = darkColors()) {
-        Box(modifier = Modifier
+        Column(modifier = Modifier
             .width(300.dp)
             .height(300.dp)
             .background(Color.Black)
@@ -176,7 +174,7 @@ fun DebugOverlayPreview() {
     )
 
     MaterialTheme(colors = darkColors()) {
-        Box(modifier = Modifier
+        Column(modifier = Modifier
             .width(300.dp)
             .height(250.dp)
             .background(Color.Black)
