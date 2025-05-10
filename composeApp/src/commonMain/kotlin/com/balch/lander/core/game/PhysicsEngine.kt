@@ -233,7 +233,7 @@ class PhysicsEngine(
                 dangerZoneConfig.isInDangerZone(fuel, velocity) -> FlightStatus.WARNING
                 else -> FlightStatus.NOMINAL
             }.also {
-                logger.v { "Flight status Approach: $it distanceToGround=$distanceToGround\"" }
+                logger.v { "Flight status Approach: $it distanceToGround=$distanceToGround" }
             }
         } else {
             val isAligned = isLandingAligned(
