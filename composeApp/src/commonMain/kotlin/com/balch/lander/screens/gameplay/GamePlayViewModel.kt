@@ -245,8 +245,20 @@ class GamePlayViewModel(
         )
 
         // Check if lander has landed or crashed
-        return when (newLanderState.status) {
-            GameStatus.PLAYING -> {
+        return when {
+            newLanderState.flightStatus == FlightStatus.CRASHED -> {
+                val message = failureMessages.random()
+                logger.info("GameState") { "Lander crashed! Message: $message" }
+                soundService.playCrashSound()  // Play crash sound
+                GameScreenState.GameOver(false, message)
+            }
+            newLanderState.flightStatus == FlightStatus.LANDED -> {
+                val message = successMessages.random()
+                logger.info("GameState") { "Lander successfully landed! Message: $message" }
+                soundService.playLandingSuccessSound()  // Play success sound
+                GameScreenState.GameOver(true, message)
+            }
+            else -> {
                 val camera = Camera.calculateCameraInfo(
                     landerState = newLanderState,
                     config = currentGameState.environment.config
@@ -265,20 +277,6 @@ class GamePlayViewModel(
                         logger.v("GameState") { "Lander mission active! : $state" }
                     }
                 }
-            }
-
-            GameStatus.LANDED -> {
-                val message = successMessages.random()
-                logger.info("GameState") { "Lander successfully landed! Message: $message" }
-                soundService.playLandingSuccessSound()  // Play success sound
-                GameScreenState.GameOver(true, message)
-            }
-
-            GameStatus.CRASHED -> {
-                val message = failureMessages.random()
-                logger.info("GameState") { "Lander crashed! Message: $message" }
-                soundService.playCrashSound()  // Play crash sound
-                GameScreenState.GameOver(false, message)
             }
         }
     }

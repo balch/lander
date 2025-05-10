@@ -34,11 +34,7 @@ fun DrawScope.drawLander(
     val isThrusting = landerState.thrustStrength.value > 0f
 
     // Determine lander color based on game state
-    val landerColor = when {
-        landerState.isDangerMode -> Color.Red
-        isThrusting -> Color.Yellow
-        else -> Color.White
-    }
+    val landerColor = landerState.flightStatus.color
 
     // Draw lander
     rotate(landerState.rotation, Offset(landerX, landerY)) {

@@ -1,12 +1,17 @@
 package com.balch.lander.core.game
 
+import com.balch.lander.DangerZoneConfig
 import com.balch.lander.GameConfig
+import com.balch.lander.SafeLandingConfig
 import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.game.models.Vector2D
-import com.balch.lander.screens.gameplay.GameStatus
+import com.balch.lander.screens.gameplay.FlightStatus
 import com.balch.lander.screens.gameplay.LanderState
+import com.balch.lander.screens.gameplay.isGameOver
+import org.lighthousegames.logging.logging
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -17,11 +22,12 @@ import kotlin.math.sin
 class PhysicsEngine(
     config: GameConfig
 ) {
+    private val logger = logging()
+
     // Base gravity acceleration on the Moon (1.62 m/s²)
     // Scaled for game units
     private val baseGravity = 1.0f
     private val baseThrust = 3.0f
-
 
     // Gravity adjusted by the config
     private val gravity = baseGravity * config.gravity.value
@@ -36,7 +42,7 @@ class PhysicsEngine(
 
     /**
      * Updates the game state based on physics calculations.
-     * 
+     *
      * @param landerState Current state of the lander
      * @param deltaTimeMs Time elapsed since last update in milliseconds
      * @param controls Current control inputs
@@ -53,7 +59,7 @@ class PhysicsEngine(
         // Process lander state with terrain information
 
         // If game is not in playing state, return the current state
-        if (landerState.status != GameStatus.PLAYING) {
+        if (landerState.isGameOver()) {
             return landerState
         }
 
@@ -78,26 +84,17 @@ class PhysicsEngine(
 
         val distanceToSeaLevel = calculateDistanceToSeaLevel(newPosition, terrain, config)
 
-        // Check if lander is in danger mode
-        val isDangerMode = checkDangerMode(newVelocity, distanceToGround, newFuel)
-
-        // Create a temporary game state with updated lander state for status determination
-        // This is needed because we need to check if the lander has landed or crashed
-        // with the new position, velocity, and rotation values before creating the final state
-        val tempLanderState = landerState.copy(
+        val flightStatus = deriveFlightStatus(
+            config = config,
             position = newPosition,
             velocity = newVelocity,
             rotation = newRotation,
             distanceToGround = distanceToGround,
-            distanceToSeaLevel = distanceToSeaLevel,
-            isDangerMode = isDangerMode,
+            fuel = newFuel,
+            terrain = terrain,
         )
 
         // Return a new LanderState with all updated values
-        // Note: Changed from state.copy() to LanderState() constructor to make it clear
-        // that we're creating a new state rather than modifying an existing one.
-        // Also, we're now passing the terrain explicitly to determineGameStatus
-        // instead of relying on it being part of the state.
         return LanderState(
             position = newPosition,
             velocity = newVelocity,
@@ -106,8 +103,7 @@ class PhysicsEngine(
             thrustStrength = controls.thrustStrength,
             distanceToGround = distanceToGround,
             distanceToSeaLevel = distanceToSeaLevel,
-            isDangerMode = isDangerMode,
-            status = determineGameStatus(tempLanderState, terrain),
+            flightStatus = flightStatus,
             initialFuel = landerState.initialFuel,
         )
     }
@@ -150,7 +146,7 @@ class PhysicsEngine(
             (thrustLevel / baseThrust) * fuelConsumptionRate * deltaTime
 
         val rotatingConsumption =
-            if (isRotating) (fuelConsumptionRate/10)  * deltaTime
+            if (isRotating) (fuelConsumptionRate / 10) * deltaTime
             else 0f
 
         val newFuel = currentFuel - (thrustingConsumption + rotatingConsumption)
@@ -221,37 +217,87 @@ class PhysicsEngine(
     /**
      * Checks if the lander is in danger of crashing.
      */
-    private fun checkDangerMode(
+    private fun deriveFlightStatus(
+        config: GameConfig,
+        position: Vector2D,
         velocity: Vector2D,
+        rotation: Float,
         distanceToGround: Float,
-        fuel: Float
-    ): Boolean {
-        // Danger conditions:
-        // 1. Low fuel
-        // 2. High velocity near the ground
-        // 3. Close to the ground
-
-        val isFuelLow = fuel < 10f
-        val isVelocityHigh = velocity.y > 3f
-        val isCloseToGround = distanceToGround < 50f
-
-        return isFuelLow || (isVelocityHigh && isCloseToGround)
+        fuel: Float,
+        terrain: Terrain,
+    ): FlightStatus {
+        val dangerZoneConfig = config.dangerZoneConfig
+        return if (distanceToGround > dangerZoneConfig.distanceToGround) {
+            when {
+                position.isOffscreen(config) -> FlightStatus.CRASHED
+                dangerZoneConfig.isInDangerZone(fuel, velocity) -> FlightStatus.WARNING
+                else -> FlightStatus.NOMINAL
+            }.also {
+                logger.v { "Flight status Approach: $it distanceToGround=$distanceToGround\"" }
+            }
+        } else {
+            val isAligned = isLandingAligned(
+                safeLandingConfig = config.safeLandingConfig,
+                position = position, velocity = velocity,
+                rotation = rotation,
+                terrain = terrain
+            )
+            val distanceToGroundInt = distanceToGround.toInt()
+            when {
+                isAligned && distanceToGroundInt == 0 -> FlightStatus.LANDED
+                isAligned -> FlightStatus.ALIGNED
+                distanceToGroundInt <= 0 -> FlightStatus.CRASHED
+                else -> FlightStatus.DANGER
+            }.also {
+                logger.v { "Flight status Landing: $it isAligned=$isAligned distanceToGround=$distanceToGround" }
+            }
+        }
     }
 
     /**
-     * Determines the game status based on the current state.
-     * 
-     * @param state Current lander state
-     * @param terrain Current terrain configuration
-     * @return The current game status (PLAYING, LANDED, or CRASHED)
+     * Checks if lander is aligned to land correctly
+     * Conditions for successful landing:
+     * 1. Lander is over a landing pad
+     * 2. velocity is low
+     * 3. Lander is relatively upright
+     *
+     * @param safeLandingConfig Configuration specifying the constraints for a safe landing,
+     *                          such as velocity and rotation thresholds.
+     * @param terrain The terrain to check landing pad collision against
+     * @return true if the lander has landed successfully, false otherwise
      */
-    private fun determineGameStatus(state: LanderState, terrain: Terrain): GameStatus {
-        return when {
-            state.hasLandedSuccessfully(terrain) -> GameStatus.LANDED
-            state.hasCrashed(terrain) -> GameStatus.CRASHED
-            else -> GameStatus.PLAYING
-        }
-    }
+    private fun isLandingAligned(
+        safeLandingConfig: SafeLandingConfig,
+        position: Vector2D,
+        velocity: Vector2D,
+        rotation: Float,
+        terrain: Terrain,
+    ): Boolean =
+        terrain.isOnLandingPad(position.x)
+                && abs(velocity.x) < safeLandingConfig.velocityThreshold
+                && abs(velocity.y) < safeLandingConfig.velocityThreshold
+                && abs(rotation) < safeLandingConfig.rotationThreshold
+
+    private fun DangerZoneConfig.isInDangerZone(
+        fuel: Float,
+        velocity: Vector2D,
+    ): Boolean =
+        (fuel < lowFuel
+            || abs(velocity.x) > velocityThreshold
+            || abs(velocity.y) > velocityThreshold)
+            .also { dangerZone ->
+                if (dangerZone) {
+                    logger.v { "Lander In Danger Zone: fuel=$fuel velocity=$velocity" }
+                }
+            }
+
+    private fun Vector2D.isOffscreen(config: GameConfig): Boolean =
+        (x < 0 || y < 0 || x > config.screenWidth || y > config.screenHeight)
+            .also { offscreen ->
+                if (offscreen) {
+                    logger.v { "Lander Crash isOffscreen=true x=$x y=$y" }
+                }
+            }
 }
 
 /**

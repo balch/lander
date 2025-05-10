@@ -53,6 +53,41 @@ data class GameConfig(
      * Controls how the camera scales and offsets based on lander position.
      */
     val cameraConfig: CameraConfig = CameraConfig(),
+
+    /**
+     * Config to represent danger zone criteria
+     */
+    val dangerZoneConfig: DangerZoneConfig = DangerZoneConfig(),
+
+    val safeLandingConfig: SafeLandingConfig = SafeLandingConfig(),
+)
+
+/**
+ * Configuration for defining operational parameters in a "danger zone" scenario.
+ *
+ * @property lowFuel Defines the remaining fuel threshold (in percentage) below which the system considers fuel dangerously low.
+ * @property velocityThreshold Specifies the velocity (in units per second) above which the system considers movement dangerously fast.
+ * @property distanceToGround Represents the proximity to the ground (in units) under which the system treats the situation as dangerous.
+ */
+data class DangerZoneConfig(
+    val lowFuel: Int = 20,
+    val velocityThreshold: Float = 15f,
+    val distanceToGround: Int = 75,
+)
+
+/**
+ * Configuration class for determining safe landing parameters in the game.
+ *
+ * Defines the thresholds for vertical velocity and rotation angle that are considered safe
+ * during a landing operation. These parameters are used to evaluate the success of a landing
+ * and determine if the player has adhered to the acceptable landing criteria.
+ *
+ * @property velocityThreshold The maximum allowable vertical velocity (in units per second) for a safe landing.
+ * @property rotationThreshold The maximum allowable rotational angle (in degrees) for a safe landing.
+ */
+data class SafeLandingConfig(
+    val velocityThreshold: Float = 4f,
+    val rotationThreshold: Float = 4f,
 )
 
 /**

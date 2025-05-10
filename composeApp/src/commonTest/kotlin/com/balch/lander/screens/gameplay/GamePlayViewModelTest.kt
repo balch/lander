@@ -2,6 +2,7 @@ package com.balch.lander.screens.gameplay
 
 import app.cash.turbine.test
 import com.balch.lander.GameConfig
+import com.balch.lander.Platform
 import com.balch.lander.core.coroutines.TestCoroutineScopeProvider
 import com.balch.lander.core.coroutines.TestDispatcherProvider
 import com.balch.lander.core.game.ControlInputs
@@ -51,6 +52,7 @@ class GamePlayViewModelTest {
 
     private val viewModel by lazy {
         GamePlayViewModel(
+            platform = Platform(),
             terrainGenerator = terrainGenerator,
             timeProvider = timeProvider,
             soundService = mockSoundService,

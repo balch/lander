@@ -18,8 +18,8 @@ import androidx.compose.ui.unit.sp
 import com.balch.lander.core.game.ControlInputs
 import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.utils.FontScaler
-import com.balch.lander.screens.gameplay.GameStatus
 import com.balch.lander.screens.gameplay.LanderState
+import com.balch.lander.screens.gameplay.isGameOver
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -29,7 +29,7 @@ fun DrawControlPanel(
     fontScaler: FontScaler = FontScaler(1f),
     modifier: Modifier = Modifier,
 ) {
-    if (landerState.status == GameStatus.PLAYING) {
+    if (!landerState.isGameOver()) {
 
         // Control panel in the top right area
         Column(
