@@ -244,6 +244,7 @@ class PhysicsEngine(
             )
             val distanceToGroundInt = distanceToGround.toInt()
             when {
+                position.isOffscreen(config) -> FlightStatus.CRASHED
                 isAligned && distanceToGroundInt == 0 -> FlightStatus.LANDED
                 isAligned -> FlightStatus.ALIGNED
                 distanceToGroundInt <= 0 -> FlightStatus.CRASHED
