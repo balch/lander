@@ -13,8 +13,10 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import com.balch.lander.GameConfig
 import com.balch.lander.core.game.Camera
@@ -60,15 +62,13 @@ fun GamePlayScreen(
     }
 }
 
-
 @Composable
 fun LoadingContent() {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colors.background),
-
-    contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
     }
@@ -81,10 +81,7 @@ fun PlayingContent(
 ) {
     val focusRequester = remember { FocusRequester() }
 
-    var isThrustPressed = remember { false }
-    var isRotateLeftPressed = remember { false }
-    var isRotateRightPressed = remember { false }
-    var lastControlInputs by remember { mutableStateOf<ControlInputs?>(null) }
+    var lastControlInputs by remember { mutableStateOf(ControlInputs()) }
 
     val fontScaler = FontScaler(1f)
     val stringFormatter = StringFormatter()
@@ -129,27 +126,7 @@ fun PlayingContent(
             .focusable(true)
             .focusRequester(focusRequester)
             .onPreviewKeyEvent { event ->
-                if (event.type == KeyEventType.KeyDown) {
-                    when (event.key) {
-                        Key.DirectionUp -> isThrustPressed = true
-                        Key.DirectionRight -> isRotateRightPressed = true
-                        Key.DirectionLeft -> isRotateLeftPressed = true
-                    }
-                } else if (event.type == KeyEventType.KeyUp) {
-                    when (event.key) {
-                        Key.DirectionUp -> isThrustPressed = false
-                        Key.DirectionRight -> isRotateRightPressed = false
-                        Key.DirectionLeft -> isRotateLeftPressed = false
-                    }
-                }
-
-                val controlInputs = ControlInputs(
-                    thrustStrength =
-                        if (isThrustPressed) ThrustStrength.MEDIUM
-                        else ThrustStrength.OFF,
-                    rotateRight = isRotateRightPressed,
-                    rotateLeft = isRotateLeftPressed,
-                )
+                val controlInputs = KeyEventProcessor.handleEvent(event, lastControlInputs)
                 if (lastControlInputs != controlInputs) {
                     lastControlInputs = controlInputs
                     onControlInputs(controlInputs)
@@ -169,7 +146,7 @@ fun PlayingContent(
         DrawControlPanel(state.landerState, onControlInputs, fontScaler)
 
         DebugOverlay(
-            landerPosition = state.landerState.position,
+            landerState = state.landerState,
             camera = state.camera,
             fps = state.fps,
             fontScaler = fontScaler,
@@ -291,17 +268,21 @@ fun PlayingContentPreview() {
         camera = camera,
     )
 
-    val (width, height) = toDp(Vector2D(config.screenWidth, config.screenHeight), config)
+    CompositionLocalProvider(
+        LocalDensity provides Density(1.75f, 1f),
+    ) {
+        val (width, height) = toDp(Vector2D(config.screenWidth, config.screenHeight), config)
 
-    MaterialTheme(colors = darkColors()) {
-        Box(modifier = Modifier
-            .width(width)
-            .height(height)
-            .background(Color.Black)
-        ) {
-            PlayingContent(state = state, onControlInputs = {})
+        MaterialTheme(colors = darkColors()) {
+            Box(
+                modifier = Modifier
+                    .width(width)
+                    .height(height)
+                    .background(Color.Black)
+            ) {
+                PlayingContent(state = state, onControlInputs = {})
+            }
         }
     }
-
 }
 

@@ -1,4 +1,4 @@
-package com.balch.lander.screens.gameplay.canvas
+package com.balch.lander.screens.gameplay.widgets.canvas
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color

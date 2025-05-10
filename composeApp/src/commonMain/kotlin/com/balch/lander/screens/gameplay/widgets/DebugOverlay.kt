@@ -23,17 +23,17 @@ import com.balch.lander.core.game.Camera
 import com.balch.lander.core.game.models.Vector2D
 import com.balch.lander.core.utils.FontScaler
 import com.balch.lander.core.utils.StringFormatter
+import com.balch.lander.screens.gameplay.LanderState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun BoxScope.DebugOverlay(
-    landerPosition: Vector2D,
+    landerState: LanderState,
     camera: Camera = Camera(),
     fps: Int = 60,
     fontScaler: FontScaler = FontScaler(1f),
     initialExpand: Boolean = false,
-    stringFormatter: StringFormatter = StringFormatter()
-
+    stringFormatter: StringFormatter = StringFormatter(),
 ) {
     var expanded by remember { mutableStateOf(initialExpand) }
 
@@ -86,6 +86,8 @@ fun BoxScope.DebugOverlay(
 
         // Content - only visible when expanded
         if (animatedHeight > 0) {
+            val position = landerState.position
+
             Column(
                 modifier = Modifier
                     .graphicsLayer {
@@ -96,17 +98,22 @@ fun BoxScope.DebugOverlay(
                 verticalArrangement = Arrangement.Top
             ) {
                 Text(
-                    text = "Lander: (${landerPosition.x.toInt()}, ${landerPosition.y.toInt()})",
+                    text = "Position: (x=${position.x.toInt()}, y=${position.y.toInt()}, rot=${stringFormatter.formatToString(landerState.rotation)})",
                     color = MaterialTheme.colors.onBackground,
                     fontSize = fontScaler.scale(12.sp)
                 )
                 Text(
-                    text = "Camera Offset: (${camera.offset.x.toInt()}, ${camera.offset.y.toInt()})",
+                    text = "Height: (sea=${landerState.distanceToSeaLevel.toInt()}, grd=${landerState.distanceToGround.toInt()})",
                     color = MaterialTheme.colors.onBackground,
                     fontSize = fontScaler.scale(12.sp)
                 )
                 Text(
-                    text = "Camera Scale: ${stringFormatter.formatToString(camera.zoomLevel.scale)}",
+                    text = "Velocity: (x=${stringFormatter.formatToString(landerState.velocity.x)}, y=${stringFormatter.formatToString(landerState.velocity.y)})",
+                    color = MaterialTheme.colors.onBackground,
+                    fontSize = fontScaler.scale(12.sp)
+                )
+                Text(
+                    text = "Camera: (x=${camera.offset.x.toInt()}, y=${camera.offset.y.toInt()}, scale=${stringFormatter.formatToString(camera.zoomLevel.scale)})",
                     color = MaterialTheme.colors.onBackground,
                     fontSize = fontScaler.scale(12.sp)
                 )
@@ -124,6 +131,13 @@ fun BoxScope.DebugOverlay(
 @Composable
 fun DebugOverlayExpandedPreview() {
     val position = Vector2D(500f, 100f)
+    val landerState = LanderState(
+        position = position,
+        rotation = 30f,
+        velocity = Vector2D(10f, 10f),
+        distanceToSeaLevel = 850f,
+        distanceToGround = 800f,
+    )
     val camera = Camera(
         zoomLevel = CameraZoomLevel.MEDIUM,
         offset = Vector2D(1.25f, 10111111f)
@@ -136,7 +150,7 @@ fun DebugOverlayExpandedPreview() {
             .background(Color.Black)
         ) {
             DebugOverlay(
-                landerPosition = position,
+                landerState = landerState,
                 camera = camera,
                 fps = 60,
                 initialExpand = true,
@@ -149,7 +163,17 @@ fun DebugOverlayExpandedPreview() {
 @Composable
 fun DebugOverlayPreview() {
     val position = Vector2D(500f, 100f)
-    val camera = Camera()
+    val landerState = LanderState(
+        position = position,
+        rotation = 30f,
+        velocity = Vector2D(10f, 10f),
+        distanceToSeaLevel = 850f,
+        distanceToGround = 800f,
+    )
+    val camera = Camera(
+        zoomLevel = CameraZoomLevel.MEDIUM,
+        offset = Vector2D(1.25f, 10111111f)
+    )
 
     MaterialTheme(colors = darkColors()) {
         Box(modifier = Modifier
@@ -158,7 +182,7 @@ fun DebugOverlayPreview() {
             .background(Color.Black)
         ) {
             DebugOverlay(
-                landerPosition = position,
+                landerState = landerState,
                 camera = camera,
                 fps = 60
             )

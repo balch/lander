@@ -1,4 +1,4 @@
-package com.balch.lander.screens.gameplay.canvas
+package com.balch.lander.screens.gameplay.widgets.canvas
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.height

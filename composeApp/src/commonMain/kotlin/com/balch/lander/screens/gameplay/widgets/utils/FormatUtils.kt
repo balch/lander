@@ -6,6 +6,14 @@ import androidx.compose.ui.unit.Dp
 import com.balch.lander.GameConfig
 import com.balch.lander.core.game.models.Vector2D
 
+/**
+ * Converts the given `Vector2D` point from game coordinates to density-independent pixels (dp)
+ * based on the provided game configuration.
+ *
+ * @param point The point in game coordinates to be converted.
+ * @param config The game configuration containing the virtual screen width and height.
+ * @return A pair of Dp representing the converted x and y coordinates of the point in dp.
+ */
 @Composable
 fun toDp(point: Vector2D, config: GameConfig): Pair<Dp, Dp> {
     // Get the local density for dp conversions

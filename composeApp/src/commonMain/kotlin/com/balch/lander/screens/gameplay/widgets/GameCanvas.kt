@@ -18,10 +18,10 @@ import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.game.models.Vector2D
 import com.balch.lander.core.utils.impl.TimeProviderImpl
 import com.balch.lander.screens.gameplay.LanderState
-import com.balch.lander.screens.gameplay.canvas.drawLander
-import com.balch.lander.screens.gameplay.canvas.drawLandingPads
-import com.balch.lander.screens.gameplay.canvas.drawStars
-import com.balch.lander.screens.gameplay.canvas.drawTerrain
+import com.balch.lander.screens.gameplay.widgets.canvas.drawLander
+import com.balch.lander.screens.gameplay.widgets.canvas.drawLandingPads
+import com.balch.lander.screens.gameplay.widgets.canvas.drawStars
+import com.balch.lander.screens.gameplay.widgets.canvas.drawTerrain
 import com.balch.lander.screens.gameplay.widgets.utils.toDp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -48,7 +48,7 @@ fun GameCanvasPreview() {
         thrustStrength = ThrustStrength.HIGH,
         rotation = 30f,
 
-    )
+        )
     val config = GameConfig()
     val terrain = TerrainGeneratorImpl(TimeProviderImpl())
         .generateTerrain(config.screenWidth, config.screenHeight)
@@ -56,10 +56,11 @@ fun GameCanvasPreview() {
     val (width, height) = toDp(Vector2D(config.screenWidth, config.screenHeight), config)
 
     MaterialTheme(colors = darkColors()) {
-        Box(modifier = Modifier
-            .width(width)
-            .height(height)
-            .background(Color.Black)
+        Box(
+            modifier = Modifier
+                .width(width)
+                .height(height)
+                .background(Color.Black)
         ) {
             GameCanvas(
                 landerState = landerState,
