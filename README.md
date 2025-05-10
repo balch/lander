@@ -4,20 +4,18 @@ A retro-style Lunar Lander game built by me and Junie using Kotlin Multiplatform
 
 major WIP
 
+
 ## ScreenShots
-| Android                                          |
-|--------------------------------------------------|
-| ![Android Start](docs/images/android-start.png)         |
-| ![Android Play](docs/images/android-play.png)           |
-| ![Android Game Over](docs/images/android-gameover.png)  |
+| Platform | Image                                                                                                                |
+|----------|----------------------------------------------------------------------------------------------------------------------|
+| Android  | ![Android Play](docs/images/android-tablet-play.png) <br/> ![Android Zoom](docs/images/android-tablet-play-zoom.png) |
+| iOS      | ![iOS Play](docs/images/ios-play.png) <br/> ![iOS Zoom](docs/images/ios-play-zoom.png)                               |
+| Web      | ![Web Start](docs/images/web-start.png) <br/> ![Web Play](docs/images/web-play.png)                                  |
+| Desktop  | ![Desktop Start](docs/images/desktop-start.png) <br/> ![Desktop Play](docs/images/desktop-play.png)                  |
 
-| ios                                                |
+## Compose Previews
+| IntelliJ IDEA                                      |
 |----------------------------------------------------|
-| ![ios Start](docs/images/ios-start.png )                  | 
-| ![ios Play](docs/images/ios-play.png)  |
-| ![ios Game Over](docs/images/ios-gameover.png) |  |
+| ![Widgets](docs/images/IDE_Widgets_Previews.png)   |
+| ![GamePlay](docs/images/IDE_GamePlay_Previews.png) |
 
-| web   |
-|-------|
-| ![web Start](docs/images/web-start.png) |
-| ![web Play](docs/images/web-play.png) |
