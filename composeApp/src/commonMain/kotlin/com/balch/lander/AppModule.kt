@@ -19,6 +19,7 @@ import org.koin.dsl.module
  */
 val appModule = module {
     // Core
+    single<Platform> { Platform() }
     single<CoroutineScopeProvider> { ViewModelScopeProvider() }
     single<DispatcherProvider> { DefaultDispatcherProvider() }
     single<SoundService> { SoundServiceImpl() }
@@ -32,7 +33,8 @@ val appModule = module {
             timeProvider = get(),
             soundService = get(),
             dispatcherProvider = get(),
-            scopeProvider = get()
+            scopeProvider = get(),
+            platform = get(),
         )
     }
     factory { StartViewModel(get(), get()) }

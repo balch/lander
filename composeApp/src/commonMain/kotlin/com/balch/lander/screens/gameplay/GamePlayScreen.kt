@@ -163,6 +163,7 @@ fun PlayingContent(
                 landerState = state.landerState,
                 camera = state.camera,
                 fps = state.fps,
+                platform = state.environment.platform.name,
                 fontScaler = fontScaler,
                 stringFormatter = stringFormatter,
             )

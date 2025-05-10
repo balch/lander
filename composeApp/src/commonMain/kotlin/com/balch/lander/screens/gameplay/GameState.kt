@@ -1,6 +1,7 @@
 package com.balch.lander.screens.gameplay
 
 import com.balch.lander.GameConfig
+import com.balch.lander.Platform
 import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.game.models.Vector2D
@@ -123,7 +124,12 @@ data class GameEnvironmentState(
     /**
      * Current game configuration.
      */
-    val config: GameConfig = GameConfig()
+    val config: GameConfig = GameConfig(),
+
+    /**
+     * Current platform configuration.
+     */
+    val platform: Platform = Platform()
 )
 
 /**

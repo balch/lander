@@ -28,6 +28,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ColumnScope.DebugOverlay(
+    platform: String,
     landerState: LanderState,
     camera: Camera = Camera(),
     fps: Int = 60,
@@ -120,6 +121,11 @@ fun ColumnScope.DebugOverlay(
                     color = MaterialTheme.colors.onBackground,
                     fontSize = fontScaler.scale(12.sp),
                 )
+                Text(
+                    text = "Platform: $platform",
+                    color = MaterialTheme.colors.onBackground,
+                    fontSize = fontScaler.scale(12.sp),
+                )
             }
         }
     }
@@ -148,6 +154,7 @@ fun DebugOverlayExpandedPreview() {
             .background(Color.Black)
         ) {
             DebugOverlay(
+                platform = "preview",
                 landerState = landerState,
                 camera = camera,
                 fps = 60,
@@ -180,6 +187,7 @@ fun DebugOverlayPreview() {
             .background(Color.Black)
         ) {
             DebugOverlay(
+                platform = "preview",
                 landerState = landerState,
                 camera = camera,
                 fps = 60

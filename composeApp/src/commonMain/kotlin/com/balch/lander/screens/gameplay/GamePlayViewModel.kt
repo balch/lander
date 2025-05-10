@@ -2,6 +2,7 @@ package com.balch.lander.screens.gameplay
 
 import androidx.lifecycle.ViewModel
 import com.balch.lander.GameConfig
+import com.balch.lander.Platform
 import com.balch.lander.core.coroutines.CoroutineScopeProvider
 import com.balch.lander.core.coroutines.DispatcherProvider
 import com.balch.lander.core.game.Camera
@@ -26,6 +27,7 @@ import org.lighthousegames.logging.logging
  * Handles game logic, physics, and state during gameplay.
  */
 class GamePlayViewModel(
+    private val platform: Platform,
     private val terrainGenerator: TerrainGenerator,
     private val timeProvider: TimeProvider,
     private val soundService: SoundService,
@@ -80,7 +82,8 @@ class GamePlayViewModel(
                     landerState = initialLanderState(config),
                     environment = GameEnvironmentState(
                         terrain = generateTerrain(config),
-                        config = config
+                        config = config,
+                        platform = platform
                     )
                 )
                 emit(initialGameState)

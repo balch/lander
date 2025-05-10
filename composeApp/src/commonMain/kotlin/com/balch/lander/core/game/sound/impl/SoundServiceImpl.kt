@@ -2,9 +2,9 @@ package com.balch.lander.core.game.sound.impl
 
 import app.lexilabs.basic.sound.Audio
 import app.lexilabs.basic.sound.ExperimentalBasicSound
+import com.balch.lander.Platform
 import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.game.sound.SoundService
-import com.balch.lander.getPlatform
 import lander.composeapp.generated.resources.Res
 import org.lighthousegames.logging.logging
 
@@ -15,7 +15,7 @@ import org.lighthousegames.logging.logging
 @OptIn(ExperimentalBasicSound::class)
 class SoundServiceImpl : SoundService {
     private val logger = logging()
-    private val platform = getPlatform()
+    private val platform = Platform()
 
     private val thrustSounds: List<Audio> = listOf(
         Audio(platform.context, Res.getUri("files/thrust-low.mp3")),

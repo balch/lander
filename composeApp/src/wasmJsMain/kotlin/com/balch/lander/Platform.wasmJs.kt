@@ -1,10 +1,9 @@
 package com.balch.lander
 
-class WasmPlatform: Platform {
-    override val name: String = "Web with Kotlin/Wasm"
-    override val context: Any
+actual class Platform actual constructor() {
+    actual val name: String
+        get() = "Web with Kotlin/Wasm"
+
+    actual val context: Any
         get() = Unit
-
 }
-
-actual fun getPlatform(): Platform = WasmPlatform()
