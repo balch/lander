@@ -58,8 +58,8 @@ class CameraTest {
                 )
             ),
             CameraTestParams(
-                testCase = "Transition to NEAR zoom",
-                expectations = "CameraZoomLevel.NEAR",
+                testCase = "Transition to CLOSE zoom",
+                expectations = "CameraZoomLevel.CLOSE",
                 config = config,
                 landerState = LanderState(
                     position = Vector2D(x = 500f, y = 750f),

@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import com.balch.lander.CameraZoomLevel
 import com.balch.lander.GameConfig
 import com.balch.lander.core.game.Camera
 import com.balch.lander.core.game.ControlInputs
@@ -261,32 +262,125 @@ fun GameOverMessage(
     }
 }
 
+private val previewConfig: GameConfig by lazy {  GameConfig() }
+
+private val previewTerrain by lazy {
+    TerrainGeneratorImpl(TimeProviderImpl())
+        .generateTerrain(previewConfig.screenWidth, previewConfig.screenHeight)
+}
+
 @Preview
 @Composable
 fun PlayingContentPreview() {
-
     val landerState = LanderState(
         position = Vector2D(500f, 100f),
         thrustStrength = ThrustStrength.HIGH,
         rotation = 30f,
     )
-    val config = GameConfig()
-    val terrain = TerrainGeneratorImpl(TimeProviderImpl())
-        .generateTerrain(config.screenWidth, config.screenHeight)
-    val camera = Camera()
+    PlayingContentPreviewWrapper(landerState)
+}
+
+@Preview
+@Composable
+fun PlayingContentZoomMediumPreview() {
+    val distanceToSeaLevel = CameraZoomLevel.FAR.distanceThreshold - 1
+    val landerState = LanderState(
+        position = Vector2D(
+            x = 500f,
+            y = previewConfig.screenHeight - distanceToSeaLevel
+        ),
+        distanceToSeaLevel = distanceToSeaLevel
+    )
+    PlayingContentPreviewWrapper(landerState)
+}
+
+@Preview
+@Composable
+fun PlayingContentZoomMediumLeftPreview() {
+    val distanceToSeaLevel = CameraZoomLevel.FAR.distanceThreshold - 1
+    val landerState = LanderState(
+        position = Vector2D(
+            x = 200f,
+            y = previewConfig.screenHeight - distanceToSeaLevel
+        ),
+        distanceToSeaLevel = distanceToSeaLevel
+    )
+    PlayingContentPreviewWrapper(landerState)
+}
+
+@Preview
+@Composable
+fun PlayingContentZoomMediumRightPreview() {
+    val distanceToSeaLevel = CameraZoomLevel.FAR.distanceThreshold - 1
+    val landerState = LanderState(
+        position = Vector2D(
+            x = previewConfig.screenWidth - 200f,
+            y = previewConfig.screenHeight - distanceToSeaLevel
+        ),
+        distanceToSeaLevel = distanceToSeaLevel
+    )
+    PlayingContentPreviewWrapper(landerState)
+}
+
+@Preview
+@Composable
+fun PlayingContentZoomClosePreview() {
+    val distanceToSeaLevel = CameraZoomLevel.MEDIUM.distanceThreshold - 1
+    val landerState = LanderState(
+        position = Vector2D(
+            x = 500f,
+            y = previewConfig.screenHeight - distanceToSeaLevel
+        ),
+        distanceToSeaLevel = distanceToSeaLevel
+    )
+    PlayingContentPreviewWrapper(landerState)
+}
+
+@Preview
+@Composable
+fun PlayingContentZoomCloseLeftPreview() {
+    val distanceToSeaLevel = CameraZoomLevel.MEDIUM.distanceThreshold - 1
+    val landerState = LanderState(
+        position = Vector2D(
+            x = 100f,
+            y = previewConfig.screenHeight - distanceToSeaLevel
+        ),
+        distanceToSeaLevel = distanceToSeaLevel
+    )
+    PlayingContentPreviewWrapper(landerState)
+}
+
+@Preview
+@Composable
+fun PlayingContentZoomCloseRightPreview() {
+    val distanceToSeaLevel = CameraZoomLevel.MEDIUM.distanceThreshold - 1
+    val landerState = LanderState(
+        position = Vector2D(
+            x = previewConfig.screenWidth - 100f,
+            y = previewConfig.screenHeight - distanceToSeaLevel
+        ),
+        distanceToSeaLevel = distanceToSeaLevel
+    )
+    PlayingContentPreviewWrapper(landerState)
+}
+
+@Composable
+fun PlayingContentPreviewWrapper(
+    landerState: LanderState,
+) {
+    val camera = Camera.calculateCameraInfo(landerState, previewConfig)
 
     val state = GameScreenState.Playing(
         landerState = landerState,
-        environment = GameEnvironmentState(terrain, config),
+        environment = GameEnvironmentState(previewTerrain, previewConfig),
         fps = 60,
         camera = camera,
     )
 
     CompositionLocalProvider(
-        LocalDensity provides Density(1.75f, 1f),
+        LocalDensity provides Density(1.75f, 1f)
     ) {
-        val (width, height) = toDp(Vector2D(config.screenWidth, config.screenHeight), config)
-
+        val (width, height) = toDp(Vector2D(previewConfig.screenWidth, previewConfig.screenHeight), previewConfig)
         MaterialTheme(colors = darkColors()) {
             Box(
                 modifier = Modifier

@@ -1,6 +1,5 @@
 package com.balch.lander.core.game
 
-import androidx.annotation.VisibleForTesting
 import com.balch.lander.CameraZoomLevel
 import com.balch.lander.GameConfig
 import com.balch.lander.core.game.models.Vector2D
@@ -30,7 +29,6 @@ data class Camera(
          * @param config Game configuration
          * @return Vector2D representing the scale factor for x and y dimensions
          */
-        @VisibleForTesting
         fun calculateCameraZoomLevel(
             landerState: LanderState,
             config: GameConfig
@@ -53,7 +51,6 @@ data class Camera(
          * @param config Game configuration
          * @return Vector2D representing the offset in x and y dimensions (in game coordinates)
          */
-        @VisibleForTesting
         fun calculateCameraInfo(
             landerState: LanderState,
             config: GameConfig
