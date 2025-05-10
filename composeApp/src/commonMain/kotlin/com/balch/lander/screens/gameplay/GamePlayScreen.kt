@@ -2,12 +2,9 @@ package com.balch.lander.screens.gameplay
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.*
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,35 +12,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.*
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.balch.lander.GameConfig
 import com.balch.lander.core.game.Camera
 import com.balch.lander.core.game.ControlInputs
 import com.balch.lander.core.game.TerrainGeneratorImpl
-import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.game.models.Vector2D
 import com.balch.lander.core.utils.FontScaler
 import com.balch.lander.core.utils.StringFormatter
 import com.balch.lander.core.utils.impl.TimeProviderImpl
 import com.balch.lander.screens.gameplay.GamePlayViewModel.GameScreenState
+import com.balch.lander.screens.gameplay.widgets.DebugOverlay
+import com.balch.lander.screens.gameplay.widgets.DrawControlPanel
+import com.balch.lander.screens.gameplay.widgets.DrawInfoPanel
+import com.balch.lander.screens.gameplay.widgets.GameCanvas
+import com.balch.lander.screens.gameplay.widgets.utils.toDp
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlin.math.abs
 
 /**
  * Game Screen for the Lunar Lander game.
@@ -169,22 +157,14 @@ fun PlayingContent(
                 false
             }
     ) {
-        Canvas(
+        GameCanvas(
             modifier = Modifier.fillMaxSize()
                 .scale(animatedScaleX, animatedScaleY)
-                .offset(offsetXDp, -offsetYDp)
-        ) {
-            drawStars(state.environment.config)
-            drawTerrain(
-                state.environment.terrain,
-                state.environment.config
-            )
-            drawLandingPads(state.environment.terrain)
-            drawLander(
-                state.landerState,
-                state.environment.config
-            )
-        }
+                .offset(offsetXDp, -offsetYDp),
+            landerState = state.landerState,
+            terrain = state.environment.terrain,
+            config = state.environment.config,
+        )
         DrawInfoPanel(state.landerState, fontScaler, stringFormatter)
         DrawControlPanel(state.landerState, onControlInputs, fontScaler)
 
@@ -192,568 +172,9 @@ fun PlayingContent(
             landerPosition = state.landerState.position,
             camera = state.camera,
             fps = state.fps,
-            fontScaler = fontScaler
+            fontScaler = fontScaler,
+            stringFormatter = stringFormatter,
         )
-    }
-}
-
-@Composable
-fun BoxScope.DebugOverlay(
-    landerPosition: Vector2D,
-    camera: Camera = Camera(),
-    fps: Int = 60,
-    fontScaler: FontScaler = FontScaler(1f),
-    initialExpand: Boolean = false,
-) {
-    var expanded by remember { mutableStateOf(initialExpand) }
-
-    val animatedHeight by animateFloatAsState(
-        targetValue = if (expanded) 1f else 0f,
-        animationSpec = tween(durationMillis = 300),
-        label = "debugOverlayHeight"
-    )
-
-    Column(
-        modifier = Modifier
-            .fillMaxHeight(.70f)
-            .align(Alignment.BottomEnd)
-            .padding(bottom = 32.dp, end = 44.dp)
-            .safeDrawingPadding()
-            .background(Color(0x33000000), shape = RoundedCornerShape(8.dp)),
-        horizontalAlignment = Alignment.End,
-    ) {
-        // Header - always visible
-        Row(
-            modifier = Modifier
-                .clickable { expanded = !expanded }
-                .padding(4.dp),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.Top
-        ) {
-            Text(
-                text = "Debug Info",
-                color = MaterialTheme.colors.onBackground,
-                fontSize = fontScaler.scale(14.sp),
-                fontWeight = FontWeight.Bold
-            )
-
-            // Rotation animation for the arrow
-            val rotation by animateFloatAsState(
-                targetValue = if (expanded) 180f else 0f,
-                animationSpec = tween(durationMillis = 300),
-                label = "arrowRotation"
-            )
-
-            Text(
-                text = "▼", // Down arrow that will rotate
-                color = MaterialTheme.colors.onBackground,
-                fontSize = fontScaler.scale(14.sp),
-                modifier = Modifier.graphicsLayer {
-                    rotationZ = rotation
-                }
-            )
-        }
-
-        // Content - only visible when expanded
-        if (animatedHeight > 0) {
-            Column(
-                modifier = Modifier
-                    .graphicsLayer {
-                        alpha = animatedHeight
-                        scaleY = animatedHeight
-                        transformOrigin = TransformOrigin(0.5f, 0f)
-                    },
-                verticalArrangement = Arrangement.Top
-            ) {
-                Text(
-                    text = "Lander: (${landerPosition.x.toInt()}, ${landerPosition.y.toInt()})",
-                    color = MaterialTheme.colors.onBackground,
-                    fontSize = fontScaler.scale(12.sp)
-                )
-                Text(
-                    text = "Camera Offset: (${camera.offset.x.toInt()}, ${camera.offset.y.toInt()})",
-                    color = MaterialTheme.colors.onBackground,
-                    fontSize = fontScaler.scale(12.sp)
-                )
-                Text(
-                    text = "Camera Scale: ${camera.zoomLevel.scale.toInt()}",
-                    color = MaterialTheme.colors.onBackground,
-                    fontSize = fontScaler.scale(12.sp)
-                )
-                Text(
-                    text = "FPS: $fps",
-                    color = MaterialTheme.colors.onBackground,
-                    fontSize = fontScaler.scale(12.sp),
-                )
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-fun DebugOverlayPreview() {
-    val position = Vector2D(500f, 100f)
-    val camera = Camera()
-
-    MaterialTheme(colors = darkColors()) {
-        Box(modifier = Modifier
-            .width(300.dp)
-            .height(250.dp)
-            .background(Color.Black)
-        ) {
-            DebugOverlay(
-                landerPosition = position,
-                camera = camera,
-                fps = 60
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-fun DebugOverlayExpandedPreview() {
-    val position = Vector2D(500f, 100f)
-    val camera = Camera()
-
-    MaterialTheme(colors = darkColors()) {
-        Box(modifier = Modifier
-            .width(300.dp)
-            .height(250.dp)
-            .background(Color.Black)
-        ) {
-            DebugOverlay(
-                landerPosition = position,
-                camera = camera,
-                fps = 60,
-                initialExpand = true,
-            )
-        }
-    }
-}
-
-@Composable
-fun toDp(point: Vector2D, config: GameConfig): Pair<Dp, Dp> {
-    // Get the local density for dp conversions
-    val density = LocalDensity.current
-    val screenWidth = config.screenWidth
-    val screenHeight = config.screenHeight
-
-    // Convert game coordinates to dp for offset
-    // The game coordinates are in the range 0-1000, so we need to convert to dp
-    val screenWidthPx = with(density) { screenWidth.toDp() }
-    val screenHeightPx = with(density) { screenHeight.toDp() }
-
-    return Pair(
-        with(density) { (point.x / screenWidth * screenWidthPx.toPx()).toDp() },
-        with(density) { (point.y / screenHeight * screenHeightPx.toPx()).toDp() }
-    )
-}
-
-fun DrawScope.drawTerrain(terrain: Terrain, config: GameConfig) {
-    val screenWidth = config.screenWidth
-    val screenHeight = config.screenHeight
-
-    val terrainPoints = terrain.points
-    if (terrainPoints.size < 2) {
-        // Need at least two points to draw a path or line
-        return
-    }
-
-    val path = Path()
-    // Scale the first point and move the path to it
-    val firstPoint = terrainPoints[0]
-    val startX = firstPoint.x / screenWidth * size.width
-    val startY = firstPoint.y / screenHeight * size.height
-    path.moveTo(startX, startY)
-
-    // Iterate through the rest of the points and add lines to the path
-    for (i in 1 until terrainPoints.size) {
-        val point = terrainPoints[i]
-        val x = point.x / screenWidth * size.width
-        val y = point.y / screenHeight * size.height
-        path.lineTo(x, y)
-    }
-
-    // Draw the complete path once
-    drawPath(
-        path = path,
-        color = Color.Gray,
-        style = Stroke(width = 2f) // Use Stroke style for path outline
-    )
-}
-
-@Preview
-@Composable
-fun TerrainPreview() {
-    val config = GameConfig()
-    val terrain = TerrainGeneratorImpl(TimeProviderImpl())
-        .generateTerrain(config.screenWidth, config.screenHeight)
-
-    val (width, height) = toDp(Vector2D(config.screenWidth, config.screenHeight), config)
-
-    MaterialTheme(colors = darkColors()) {
-        Canvas(
-            modifier = Modifier
-                .width(width)
-                .height(height)
-        ){
-            drawTerrain(terrain, config)
-            drawLandingPads(terrain)
-        }
-    }
-}
-
-fun DrawScope.drawStars(config: GameConfig) {
-    // Draw stars (simple representation)
-    repeat(config.backgoundStarCount) {
-        val x = (0..size.width.toInt()).random().toFloat()
-        val y = (0..size.height.toInt()).random().toFloat()
-        drawCircle(
-            color = Color.White,
-            radius = (1..3).random().toFloat(),
-            center = Offset(x, y)
-        )
-    }
-}
-
-@Preview
-@Composable
-fun StarsPreview() {
-    val config = GameConfig()
-
-    MaterialTheme(colors = darkColors()) {
-        Canvas(modifier = Modifier
-            .width(600.dp)
-            .height(350.dp)
-        ) {
-            drawStars(config)
-        }
-    }
-}
-
-fun DrawScope.drawLandingPads(terrain: Terrain) {
-    terrain.landingPads.forEach { pad ->
-        val x1 = pad.start.x / 1000f * size.width
-        val y1 = pad.start.y / 1000f * size.height
-        val x2 = pad.end.x / 1000f * size.width
-        val y2 = pad.end.y / 1000f * size.height
-
-        // Draw landing pad
-        drawLine(
-            color = Color.Green,
-            start = Offset(x1, y1),
-            end = Offset(x2, y2),
-            strokeWidth = 3f
-        )
-    }
-}
-
-fun DrawScope.drawLander(
-    landerState: LanderState,
-    config: GameConfig,
-) {
-    val landerSize = config.landerSize
-    val screenWidth = config.screenWidth
-    val screenHeight = config.screenHeight
-
-    // Draw lander
-    val landerX = landerState.position.x / screenWidth * size.width
-    val landerY = landerState.position.y / screenHeight * size.height
-
-    val isThrusting = landerState.thrustStrength.value > 0f
-
-    // Determine lander color based on game state
-    val landerColor = when {
-        landerState.isDangerMode -> Color.Red
-        isThrusting -> Color.Yellow
-        else -> Color.White
-    }
-
-    // Draw lander
-    rotate(landerState.rotation, Offset(landerX, landerY)) {
-        // Lander body
-        drawRect(
-            color = landerColor,
-            topLeft = Offset(landerX - landerSize / 2, landerY - landerSize / 2),
-            size = Size(landerSize, landerSize)
-        )
-
-        // Lander legs
-        drawLine(
-            color = landerColor,
-            start = Offset(landerX - landerSize / 2, landerY + landerSize / 2),
-            end = Offset(landerX - landerSize, landerY + landerSize),
-            strokeWidth = 2f
-        )
-
-        drawLine(
-            color = landerColor,
-            start = Offset(landerX + landerSize / 2, landerY + landerSize / 2),
-            end = Offset(landerX + landerSize, landerY + landerSize),
-            strokeWidth = 2f
-        )
-
-        // Thrust flame (if thrusting)
-        if (isThrusting && landerState.fuel > 0) {
-            drawRect(
-                color = Color.Red,
-                topLeft = Offset(landerX - landerSize / 4, landerY + landerSize / 2),
-                size = Size(landerSize / 2, landerSize * landerState.thrustStrength.value),
-                alpha = 0.5f
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-fun LanderPreview() {
-    val landerState = LanderState(
-        thrustStrength = ThrustStrength.MEDIUM,
-    )
-    val config = GameConfig()
-
-    MaterialTheme(colors = darkColors()) {
-        Canvas(modifier = Modifier
-            .width(25.dp)
-            .height(25.dp)
-            .offset(12.dp, 12.dp)
-        ){
-            drawLander(landerState, config)
-        }
-    }
-}
-
-@Composable
-fun BoxScope.DrawInfoPanel(
-    landerState: LanderState,
-    fontScaler: FontScaler = FontScaler(1f),
-    stringFormatter: StringFormatter = StringFormatter()
-) {
-
-    // Lander information panel
-    Column(
-        modifier = Modifier
-            .align(Alignment.TopStart)
-            .padding(24.dp)
-            .safeDrawingPadding()
-            .background(Color(0x00000000))
-    ) {
-        Text(
-            text = "FUEL: ${landerState.fuel.toInt()}/${landerState.initialFuel.toInt()}",
-            color = if (landerState.fuel < 20) Color.Red else MaterialTheme.colors.onBackground,
-            fontSize = fontScaler.scale(14.sp),
-        )
-
-        Text(
-            text = "DESCENT: ${abs(landerState.velocity.y).toInt()} m/s",
-            color = if (abs(landerState.velocity.y) > 3) Color.Red else MaterialTheme.colors.onBackground,
-            fontSize = fontScaler.scale(14.sp),
-        )
-
-        Text(
-            text = "DRIFT: ${stringFormatter.formatToString(landerState.velocity.x)} m/s",
-            color = if (abs(landerState.velocity.x) > 2) Color.Red else MaterialTheme.colors.onBackground,
-            fontSize = fontScaler.scale(14.sp),
-        )
-
-        Text(
-            text = "ALTITUDE: ${landerState.distanceToGround.toInt()} m",
-            color = if (landerState.distanceToGround < 50) Color.Red else MaterialTheme.colors.onBackground,
-            fontSize = fontScaler.scale(14.sp),
-        )
-    }
-}
-
-@Preview
-@Composable
-fun InfoPanelPreview() {
-    val landerState = LanderState()
-
-    MaterialTheme(colors = darkColors()) {
-        Box(modifier = Modifier
-            .width(600.dp)
-            .height(350.dp)
-        ) {
-            DrawInfoPanel(landerState)
-        }
-    }
-}
-
-@Composable
-fun BoxScope.DrawControlPanel(
-    landerState: LanderState,
-    onControlInputs: (ControlInputs) -> Unit,
-    fontScaler: FontScaler = FontScaler(1f),
-) {
-    if (landerState.status == GameStatus.PLAYING) {
-
-        // Control panel in the top right area
-        Column(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 32.dp, end = 44.dp)
-                .safeDrawingPadding(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // Thrust control buttons (top row)
-
-            // Rotation control interaction sources
-            val rotateLeftInteractionSource = remember { MutableInteractionSource() }
-            val isRotateLeftPressed by rotateLeftInteractionSource.collectIsPressedAsState()
-
-            val rotateRightInteractionSource = remember { MutableInteractionSource() }
-            val isRotateRightPressed by rotateRightInteractionSource.collectIsPressedAsState()
-
-            // Track selected thrust level
-            val lowThrustInteractionSource = remember { MutableInteractionSource() }
-            val isLowThrustPressed by lowThrustInteractionSource.collectIsPressedAsState()
-
-            val midThrustInteractionSource = remember { MutableInteractionSource() }
-            val isMidThrustPressed by midThrustInteractionSource.collectIsPressedAsState()
-
-            val hiThrustInteractionSource = remember { MutableInteractionSource() }
-            val isHiThrustPressed by hiThrustInteractionSource.collectIsPressedAsState()
-
-            // Top row - Thrust controls
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Low button
-                Button(
-                    onClick = { /* Handled by interaction source */ },
-                    modifier = Modifier.size(50.dp),
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color(0xFF004000)
-                    ),
-                    contentPadding = PaddingValues(4.dp),
-                    border = BorderStroke(2.dp, Color(0xFFAA5500)),
-                    interactionSource = lowThrustInteractionSource
-                ) {
-                    Text(
-                        text = ThrustStrength.LOW.label,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        fontSize = fontScaler.scale(14.sp),
-                    )
-                }
-
-                // Mid button
-                Button(
-                    onClick = { /* Handled by interaction source */ },
-                    modifier = Modifier.size(50.dp),
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color(0xFF000080)
-                    ),
-                    contentPadding = PaddingValues(4.dp),
-                    border = BorderStroke(2.dp, Color(0xFFAA5500)),
-                    interactionSource = midThrustInteractionSource
-                ) {
-                    Text(
-                        text = ThrustStrength.MEDIUM.label,
-                        fontSize = fontScaler.scale(14.sp),
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-                // Hi button
-                Button(
-                    onClick = { /* Handled by interaction source */ },
-                    modifier = Modifier.size(50.dp),
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color(0xFFA52A2A)
-                    ),
-                    contentPadding = PaddingValues(4.dp),
-                    border = BorderStroke(2.dp, Color(0xFFAA5500)),
-                    interactionSource = hiThrustInteractionSource
-                ) {
-                    Text(
-                        text = ThrustStrength.HIGH.label,
-                        fontSize = fontScaler.scale(14.sp),
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            // Bottom row - Rotation controls
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Rotate left button
-                Button(
-                    onClick = { /* Handled by interaction source */ },
-                    modifier = Modifier.size(width = 80.dp, height = 40.dp),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF4B0082)),
-                    contentPadding = PaddingValues(4.dp),
-                    border = BorderStroke(2.dp, Color(0xFFAA5500)),
-                    interactionSource = rotateLeftInteractionSource
-                ) {
-                    Text(
-                        text = "<--",
-                        fontSize = fontScaler.scale(14.sp),
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-                // Rotate right button
-                Button(
-                    onClick = { /* Handled by interaction source */ },
-                    modifier = Modifier.size(width = 80.dp, height = 40.dp),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF4B0082)),
-                    contentPadding = PaddingValues(4.dp),
-                    border = BorderStroke(2.dp, Color(0xFFAA5500)),
-                    interactionSource = rotateRightInteractionSource,
-                ) {
-                    Text(
-                        text = "-->",
-                        fontSize = fontScaler.scale(14.sp),
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            val lastControlInputs = remember { mutableStateOf<ControlInputs?>(null) }
-            val controlInputs = ControlInputs(
-                thrustStrength = when {
-                    isLowThrustPressed -> ThrustStrength.LOW
-                    isMidThrustPressed -> ThrustStrength.MEDIUM
-                    isHiThrustPressed -> ThrustStrength.HIGH
-                    else -> ThrustStrength.OFF
-                },
-                rotateRight = isRotateRightPressed,
-                rotateLeft = isRotateLeftPressed,
-            )
-            if (lastControlInputs.value != controlInputs) {
-                lastControlInputs.value = controlInputs
-                onControlInputs(controlInputs)
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-fun ControlPadPreview() {
-    val landerState = LanderState()
-
-    MaterialTheme(colors = darkColors()) {
-        Box(modifier = Modifier
-            .width(600.dp)
-            .height(350.dp)
-        ) {
-            DrawControlPanel(landerState, {  })
-        }
     }
 }
 
@@ -763,15 +184,12 @@ fun BoxScope.GameOverContent(
     onRestartClicked: () -> Unit,
     onBackToStartClicked: () -> Unit
 ) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        drawStars(state.environmentState.config)
-        drawTerrain(state.environmentState.terrain, state.environmentState.config)
-        drawLandingPads(state.environmentState.terrain)
-        drawLander(
-            state.landerState,
-            state.environmentState.config
-        )
-    }
+    GameCanvas(
+        modifier = Modifier.fillMaxSize(),
+        landerState = state.landerState,
+        terrain = state.environmentState.terrain,
+        config = state.environmentState.config,
+    )
     DrawInfoPanel(state.landerState)
     GameOverMessage(
         uiState = state,
@@ -851,3 +269,39 @@ fun GameOverMessage(
         }
     }
 }
+
+@Preview
+@Composable
+fun PlayingContentPreview() {
+
+    val landerState = LanderState(
+        position = Vector2D(500f, 100f),
+        thrustStrength = ThrustStrength.HIGH,
+        rotation = 30f,
+    )
+    val config = GameConfig()
+    val terrain = TerrainGeneratorImpl(TimeProviderImpl())
+        .generateTerrain(config.screenWidth, config.screenHeight)
+    val camera = Camera()
+
+    val state = GameScreenState.Playing(
+        landerState = landerState,
+        environment = GameEnvironmentState(terrain, config),
+        fps = 60,
+        camera = camera,
+    )
+
+    val (width, height) = toDp(Vector2D(config.screenWidth, config.screenHeight), config)
+
+    MaterialTheme(colors = darkColors()) {
+        Box(modifier = Modifier
+            .width(width)
+            .height(height)
+            .background(Color.Black)
+        ) {
+            PlayingContent(state = state, onControlInputs = {})
+        }
+    }
+
+}
+
