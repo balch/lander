@@ -13,6 +13,7 @@ This repo contains my first:
 1. [About Vibe Lander](#About-Vibe-Lander)
 2. [ScreenShots](#ScreenShots)
 3. [Ask Junie](#Ask-Junie)
+4. [Dependencies](#Dependencies)
 
 ## About Vibe Lander
 
@@ -166,3 +167,14 @@ While the architecture is testable, I didn't spot comprehensive test coverage. T
 
 **State Management Complexity**  
 The game state management is robust but could potentially be simplified with a more unified state container approach.
+
+## Dependencies
+
+Shout out to the notable dependencies used in this project:
+
+- [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform) - UI framework for Kotlin Multiplatform (v1.8.0)
+- [Koin](https://insert-koin.io/) - Lightweight dependency injection framework for Kotlin (v4.0.4)
+- [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) - Kotlin's multiplatform technology (v2.1.20)
+- [KmLogging](https://github.com/LighthouseGames/KmLogging) - Kotlin Multiplatform logging library (v2.0.3)
+- [Lexilabs Basic Sound](https://github.com/lexilabs-org/basic) - Sound library for Kotlin Multiplatform (v0.2.5)
+- [Turbine](https://github.com/cashapp/turbine) - A small testing library for kotlinx.coroutines Flow (v1.2.0)
