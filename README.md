@@ -61,11 +61,7 @@ _sin/cos_ refresher.
 I think the Compose structure Junie created is solid, but I'm still learning proper Compose
 layout techniques, so it's hard to know for sure. Junie was a little weak on modularization
 and Compose Previews, but those manual cleanup sessions were instrumental in actually understanding
-the layouts that were produced.
-
-I also used this opportunity to test other AI Agents, mainly _Gemini 2.5 Pro_ and _Claude 3.7_. They
-were not as productive for me a Junie, but Claude did generate the DebugOverlay when
-I asked it for help with the Camera logic.
+the layouts that were generated.
 
 One of the surprising AI misses was the `Platform` object. Not sure where the first implementation 
 came from, but it ended up failing to build on iOS after displaying the `Platform` name in the _DebugOverlay_. 
