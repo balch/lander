@@ -69,8 +69,7 @@ data class Camera(
             // Calculate horizontal offset based on lander's position
             // As lander moves toward edges, camera follows to keep it within 20% of the border
             val horizontalCenter = config.screenWidth / 2
-            val borderMargin = config.screenWidth * 0.2f // 20% of screen width
-            val maxHorizontalOffset = config.screenWidth * config.cameraConfig.maxHorizontalOffsetPercent
+            val borderMargin = config.screenWidth * config.cameraConfig.maxHorizontalOffsetPercent
 
             // Calculate how far from center the lander is
             val horizontalDistanceFromCenter = landerState.position.x - horizontalCenter
@@ -87,8 +86,9 @@ data class Camera(
             }
 
             // Calculate vertical offset based on zoom level
-            val verticalOffset = config.screenWidth * zoomLevel.screenOffsetMultiplier
+            val verticalOffset = config.screenHeight * zoomLevel.screenOffsetMultiplier
 
+            val maxHorizontalOffset = config.screenWidth  * zoomLevel.scale
             val horizontalOffset = -maxHorizontalOffset * horizontalOffsetFactor
             if (horizontalOffset != 0f) {
                 logger.v {

@@ -149,7 +149,7 @@ data class CameraConfig(
     /**
      * Maximum horizontal offset as a percentage of screen width
      */
-    val maxHorizontalOffsetPercent: Float = 0.4f,
+    val maxHorizontalOffsetPercent: Float = 0.2f,
 
     /**
      * Maximum vertical offset as a percentage of screen height
