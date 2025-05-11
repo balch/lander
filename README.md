@@ -77,8 +77,10 @@ This has been the most fun coding since the last [canvas draw feature](https://y
 I'm amazed I _produced_ a working game using new technologies in a little over a 
 fortnight. 
 
-Of course, the app is not perfect as it may use too much floating point math,
-has an inverted y-axis, and contains literal camera edge cases. 
+The app is not perfect as it may use too much floating point math,
+has an inverted y-axis, and contains literal camera edge cases. Next steps will include 
+writing more tests and then seeing if Junie can improve upon the 
+coordinate system with minimal coding from me. 
 
 The highlight for me was mainly just producing code that I could learn by example from. 
 Learning to effectively communicate with an LLM will be a fun challenge. The skills
@@ -87,7 +89,8 @@ still critical while using AI.
 
 I am curious how much energy is used by each "Sending to LLM..." message I see. While it 
 may be easy to use an LLM to rename a class or do a "replace in files" operation, that is
-probably not the most efficient use of AI.
+probably not the most efficient use of AI. Keeping an eye on my
+monthly AI Quota progress bar does help me prioritize Vibe Coding usage.
 
 So far, AI has been more useful for me when getting started and exploring new concepts and tech. 
 It's also great to get AI validation when analyzing your code or asking
