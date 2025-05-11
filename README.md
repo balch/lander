@@ -45,7 +45,7 @@ Junie's initial attept was pretty good all things considered. It built an app th
 compiled and ran on all the KMP platforms, and provided a working game. It reminded
 me of when I start off a feature, I throw up a lot of code until I get something working
 that proves my idea, then I stash and start making commits one piece at a time. I used 
-this exact same process with the initial code that Junie game me.
+this exact same process with the initial code that Junie produced.
 
 Next I started on the stars and terrain as those worked but needed some attention. The stars
 logic was good and showed me how to use the *Canvas* `@Composable`. The terrain did 
