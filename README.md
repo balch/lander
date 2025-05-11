@@ -1,4 +1,4 @@
-# VIBE LANDER
+# VIBE LANDER: Retro Game in a new "Arcade"
 
 A retro-style Lunar Lander game built by me and Junie using Kotlin Multiplatform and Compose Multiplatform. 
 
@@ -9,7 +9,14 @@ This repo contains my first:
  - All Compose App
  - Vibe Code
 
-## Introduction
+## Table of Contents
+1. [About Vibe Lander](#About-Vibe-Lander)
+2. [ScreenShots](#ScreenShots)
+3. [Ask Junie](#Ask-Junie)
+
+## About Vibe Lander
+
+### Introduction
 *Hello KMP World.* 
 
 I have been developing software for a loooong time and have always searched for the elusive 
@@ -31,15 +38,87 @@ It (relatively quickly) built a couple of screens, basic app nav, a rudimentary 
 and some ViewModels. Things kind of worked, but I then stashed the code, tweaked the guidelines 
 some more and give it another run (or two). The next day I ran out of cloud credits.
 
-To Be Continued!!!!
+### My Journey with Junie
+So of course I purchased the AI Pro subscription to continue my journey.
 
-## Architecture Assessment
+Junie's initial attept was pretty good all things considered. It built an app that
+compiled and ran on all the KMP platforms, and provided a working game. It reminded
+me of when I start off a feature, I throw up a lot of code until I get something working
+that proves my idea, then I stash and start making commits one piece at a time. I used 
+this exact same process with the initial code that Junie game me.
+
+Next I started on the stars and terrain as those worked but needed some attention. The stars
+logic was good and showed me how to use the *Canvas* `@Composable`. The terrain did 
+and awesome job of layout out the landing pads, but everything else was just a bunch of
+jagged lines. I was able to get the AI to understand I wanted more mountains, craters, and
+rocks and I am happy with the results it produced. I have not had to touch the `TerrainGenerator`
+at all and I do consider this the biggest AI "Win" in this project. 
+
+The math in the PhysicsEngine is another area that worked out well. I did have
+to fix a bunch of the collision detection logic, but I'm glad I did not have to do a 
+_sin/cos_ refresher.
+
+I think the Compose structure Junie created is solid, but I'm still learning proper Compose
+layout techniques, so it's hard to know for sure. Junie was a little weak on modularization
+and Compose Previews, but those manual cleanup sessions were instrumental in actually understanding
+the layouts that were produced.
+
+I also used this oppertunity to test other AI Agents, mainly _Gemini 2.5 Pro_ and _Claude 3.7_. They
+were not as productive for me a Junie, but Claude did generate the DebugOverlay when
+I asked it for help wit the Camera logic.
+
+One of the surprising AI misses was the `Platform` object. Not sure were the first implementation 
+came from, but it ended up failing to build on iOS after displaying the `Platform` name in the DebugOverlay. 
+This required removing the ai generated pattern and repacing it with the correct `expect class Platform()`
+pattern.
+
+### Conclusion
+This was the most fun coding since the last [canvas draw feature](https://youtu.be/tYU91g0-EJc) I worked on.
+I'm amazed I was able to build a working game using new technologies in a little over a 
+fortnight. 
+
+Of course the app is not perfect as it may use too much floating point math,
+has an inverted y-axis, and contains literal camera edge cases. 
+
+The highlight for me was mainly just producing code that I could learn by example from. 
+Learning to effectively communicate with an LLM will be fun challenge. The skills
+of asking the right questions, validating the results, and iterate]ing on the solution are
+still critical while using AI.
+
+I am curious how much energy is used by each "Sending to LLM..." messages I see. While it 
+may be easy to use an LLM to rename a class or do a "replace in files" opperation, that is
+probably not the most efficient use of AI.
+
+So far, AI as been more useful for me when getting started and exploring concepts I am 
+not familiar with. It's also great to get AI validation when anayzing your code or asking
+it to write commit messages and comments. This functionality and code completion will be
+the first of many "Game-Changers" with this technology.
+
+**I'm just glad to be here for the upcomming KMP and AI Paradigm Shift!!!** 
+
+## ScreenShots
+| Platform | Image                                                                                                                |
+|----------|----------------------------------------------------------------------------------------------------------------------|
+| Android  | ![Android Play](docs/images/android-tablet-play.png) <br/> ![Android Zoom](docs/images/android-tablet-play-zoom.png) |
+| iOS      | ![iOS Play](docs/images/ios-play.png) <br/> ![iOS Zoom](docs/images/ios-play-zoom.png)                               |
+| Web      | ![Web Start](docs/images/web-start.png) <br/> ![Web Play](docs/images/web-play.png)                                  |
+| Desktop  | ![Desktop Start](docs/images/desktop-start.png) <br/> ![Desktop Play](docs/images/desktop-play.png)                  |
+
+## Compose Previews
+| IntelliJ IDEA                                      |
+|----------------------------------------------------|
+| ![Widgets](docs/images/IDE_Widgets_Previews.png)   |
+| ![GamePlay](docs/images/IDE_GamePlay_Previews.png) |
+
+## Ask Junie
 _Generated by Junie with the following prompt:_
 >"I would like for you to add a section that includes your honest assesment of the architecure patterns found in this project. Try to be consise with a slightly fun tone. I couple of high level diagrams would be nice, but not too much depth. Highlight any patterns that you see a novel and efficient. Also point out any bad architecture patterns you find."
 
+### Architecture Assessment
+
 After diving into this codebase, I've got to say - it's a pretty slick setup! Here's my honest take on the architecture patterns:
 
-### The Good Stuff 🚀
+#### The Good Stuff 🚀
 
 **KMP + Compose = Match Made in Heaven**  
 The project leverages Kotlin Multiplatform with Compose Multiplatform to truly deliver on the "write once, run everywhere" promise. The screenshots don't lie - this thing runs on Android, iOS, Desktop, and Web with shared code!
@@ -73,7 +152,7 @@ The game logic is nicely separated into components:
 - Procedural terrain generation
 - Sound service abstraction
 
-### The Clever Bits 🧠
+#### The Clever Bits 🧠
 
 **Camera System**  
 The camera implementation with dynamic zoom levels based on the lander's altitude is particularly elegant. It creates that classic arcade feel while keeping the code clean.
@@ -81,25 +160,10 @@ The camera implementation with dynamic zoom levels based on the lander's altitud
 **Physics Simulation**  
 The physics engine is decoupled from rendering, running in a background coroutine while UI updates happen on the main thread - a pattern that ensures smooth gameplay across platforms.
 
-### Areas for Improvement 🔧
+#### Areas for Improvement 🔧
 
 **Testing Coverage**  
 While the architecture is testable, I didn't spot comprehensive test coverage. The physics engine and game logic would benefit from unit tests to ensure consistent behavior.
 
 **State Management Complexity**  
 The game state management is robust but could potentially be simplified with a more unified state container approach.
-
-## ScreenShots
-| Platform | Image                                                                                                                |
-|----------|----------------------------------------------------------------------------------------------------------------------|
-| Android  | ![Android Play](docs/images/android-tablet-play.png) <br/> ![Android Zoom](docs/images/android-tablet-play-zoom.png) |
-| iOS      | ![iOS Play](docs/images/ios-play.png) <br/> ![iOS Zoom](docs/images/ios-play-zoom.png)                               |
-| Web      | ![Web Start](docs/images/web-start.png) <br/> ![Web Play](docs/images/web-play.png)                                  |
-| Desktop  | ![Desktop Start](docs/images/desktop-start.png) <br/> ![Desktop Play](docs/images/desktop-play.png)                  |
-
-## Compose Previews
-| IntelliJ IDEA                                      |
-|----------------------------------------------------|
-| ![Widgets](docs/images/IDE_Widgets_Previews.png)   |
-| ![GamePlay](docs/images/IDE_GamePlay_Previews.png) |
-
