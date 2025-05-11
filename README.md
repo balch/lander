@@ -49,9 +49,9 @@ this exact same process with the initial code that Junie produced.
 
 Next I started on the stars and terrain as those worked but needed some attention. The stars
 logic was good and showed me how to use the *Canvas* `@Composable`. The terrain did 
-and awesome job of layout out the landing pads, but everything else was just a bunch of
+an awesome job of laying out the landing pads, but everything else was just a bunch of
 jagged lines. I was able to get the AI to understand I wanted more mountains, craters, and
-rocks and I am happy with the results it produced. I have not had to touch the `TerrainGenerator`
+rocks and I am happy with the results. I have not had to touch the `TerrainGenerator`
 at all and I do consider this the biggest AI "Win" in this project. 
 
 The math in the PhysicsEngine is another area that worked out well. I did have
