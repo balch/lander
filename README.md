@@ -39,7 +39,7 @@ It (relatively quickly) built a couple of screens, basic app nav, a rudimentary 
 and some ViewModels. Things kind of worked, but I then stashed the code, tweaked the guidelines 
 some more, and gave it another run (or two). The next day I ran out of cloud credits.
 
-### My Journey with Junie
+### Pair Programming with Junie
 So of course I purchased the AI Pro subscription to continue my journey.
 
 Junie's initial attempt was pretty good all things considered. It built an app that
