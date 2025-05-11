@@ -1,6 +1,6 @@
-# VIBE LANDER: 🎮 Retro Game Built on New Platforms
+# VIBE LANDER: Retro Game Built on KMP 🎮
 
-A retro-style Lunar Lander game built by me and Junie using Kotlin Multiplatform and Compose Multiplatform. 
+A retro-style Lunar Lander game built by me and [Junie](https://www.jetbrains.com/junie/) using Kotlin Multiplatform and Compose Multiplatform. 
 
 This repo contains my first:
  - KMP app
