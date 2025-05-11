@@ -16,8 +16,17 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Physics engine for the Lunar Lander game.
- * Handles simulation of gravity, thrust, and movement of the lander.
+ * A class responsible for handling physics calculations and updating the game state for the lunar lander simulation.
+ *
+ * This class models the effects of gravity, thrust, rotation, and external inputs on the lander's behavior. It also
+ * includes methods for determining collisions, flight statuses, descent conditions, and landing states.
+ *
+ * @property logger A logging utility for debugging and tracking events within the physics engine.
+ * @property baseGravity The base gravitational acceleration applied to the lander.
+ * @property baseThrust The maximum thrust force the lander can generate.
+ * @property gravity The customized or dynamic gravity value affecting the lander.
+ * @property rotationSpeed The rate at which the lander can rotate based on control inputs.
+ * @property fuelConsumptionRate The rate at which fuel is consumed when thrust or rotation is applied.
  */
 class PhysicsEngine(
     config: GameConfig
@@ -47,6 +56,7 @@ class PhysicsEngine(
      * @param deltaTimeMs Time elapsed since last update in milliseconds
      * @param controls Current control inputs
      * @param terrain Current terrain configuration
+     * @param config The game configuration, which includes thresholds for danger zones and landing conditions.
      * @return Updated lander state
      */
     fun update(
@@ -215,7 +225,19 @@ class PhysicsEngine(
         terrain.seaLevel - (position.y + config.landerSize / 2)
 
     /**
-     * Checks if the lander is in danger of crashing.
+     * Derives the flight status of the lander based on its current state and environmental conditions.
+     *
+     * @param config The game configuration, which includes thresholds for danger zones and landing conditions.
+     * @param position The current position of the lander as a 2D vector.
+     * @param velocity The current velocity of the lander as a 2D vector.
+     * @param rotation The current rotation angle of the lander in degrees.
+     * @param distanceToGround The vertical distance between the lander and the ground.
+     * @param fuel The current amount of fuel available to the lander.
+     * @param terrain The terrain data used to analyze collision and landing conditions.
+     * @return The flight status, which can be one of the following:
+     * - `CRASHED`: If the lander is offscreen or collides with the terrain.
+     * - `WARNING` or `NOMINAL`: Determined by descent status based on velocity and remaining fuel.
+     * - A status derived from the landing check if within proximity to the ground.
      */
     private fun deriveFlightStatus(
         config: GameConfig,
@@ -227,45 +249,108 @@ class PhysicsEngine(
         terrain: Terrain,
     ): FlightStatus {
         val dangerZoneConfig = config.dangerZoneConfig
-        return if (distanceToGround > dangerZoneConfig.distanceToGround) {
-            when {
-                position.isOffscreen(config) -> FlightStatus.CRASHED
-                dangerZoneConfig.isInDangerZone(fuel, velocity) -> FlightStatus.WARNING
-                else -> FlightStatus.NOMINAL
-            }.also {
-                logger.v { "Flight status Approach: $it distanceToGround=$distanceToGround" }
-            }
-        } else {
-            val isAligned = isLandingAligned(
-                safeLandingConfig = config.safeLandingConfig,
-                position = position, velocity = velocity,
+        return when {
+            position.isOffscreen(config) -> FlightStatus.CRASHED
+            position.hitTerrain(config, terrain) -> FlightStatus.CRASHED
+            distanceToGround > dangerZoneConfig.distanceToGround ->
+                deriveDescentStatus(config, velocity, fuel)
+            else -> deriveLandingStatus(
+                config = config,
+                position = position,
+                velocity = velocity,
                 rotation = rotation,
+                distanceToGround = distanceToGround,
                 terrain = terrain
             )
-            val distanceToGroundInt = distanceToGround.toInt()
-            when {
-                position.isOffscreen(config) -> FlightStatus.CRASHED
-                isAligned && distanceToGroundInt == 0 -> FlightStatus.LANDED
-                isAligned -> FlightStatus.ALIGNED
-                distanceToGroundInt <= 0 -> FlightStatus.CRASHED
-                else -> FlightStatus.DANGER
-            }.also {
-                logger.v { "Flight status Landing: $it isAligned=$isAligned distanceToGround=$distanceToGround" }
-            }
         }
     }
 
     /**
-     * Checks if lander is aligned to land correctly
-     * Conditions for successful landing:
-     * 1. Lander is over a landing pad
-     * 2. velocity is low
-     * 3. Lander is relatively upright
+     * Determines the descent status of the lander based on its velocity and remaining fuel.
      *
-     * @param safeLandingConfig Configuration specifying the constraints for a safe landing,
-     *                          such as velocity and rotation thresholds.
-     * @param terrain The terrain to check landing pad collision against
-     * @return true if the lander has landed successfully, false otherwise
+     * @param config The game configuration that includes danger zone criteria.
+     * @param velocity The current velocity of the lander represented as a 2D vector.
+     * @param fuel The current amount of fuel available to the lander.
+     * @return A `FlightStatus` representing the descent status, which can be either `WARNING` if the
+     *         lander is in the danger zone or `NOMINAL` otherwise.
+     */
+    private fun deriveDescentStatus(config: GameConfig, velocity: Vector2D, fuel: Float): FlightStatus {
+        val dangerZoneConfig = config.dangerZoneConfig
+        return if (dangerZoneConfig.isInDangerZone(fuel, velocity)) FlightStatus.WARNING
+        else FlightStatus.NOMINAL
+    }
+
+    /**
+     * Determines the landing status of the lander based on its position, velocity, rotation,
+     * distance to the ground, and terrain configuration.
+     *
+     * @param config The game configuration, including safe landing parameters.
+     * @param position The current position of the lander as a 2D vector.
+     * @param velocity The current velocity of the lander as a 2D vector.
+     * @param rotation The current rotation angle of the lander in degrees.
+     * @param distanceToGround The measured vertical distance between the lander and the ground.
+     * @param terrain The terrain data used for determining landing conditions.
+     * @return The flight status of the lander, which can be one of the following:
+     * - `LANDED`: The lander has landed safely on the surface.
+     * - `ALIGNED`: The lander is aligned correctly for landing but not yet touching the ground.
+     * - `CRASHED`: The lander has collided with the surface without proper alignment.
+     * - `DANGER`: The lander is not in a safe position or state to land.
+     */
+    private fun deriveLandingStatus(
+        config: GameConfig,
+        position: Vector2D,
+        velocity: Vector2D,
+        rotation: Float,
+        distanceToGround: Float,
+        terrain: Terrain,
+    ): FlightStatus {
+        val isAligned = isLandingAligned(
+            safeLandingConfig = config.safeLandingConfig,
+            position = position, velocity = velocity,
+            rotation = rotation,
+            terrain = terrain
+        )
+        val distanceToGroundInt = distanceToGround.toInt()
+        return when {
+            isAligned && distanceToGroundInt == 0 -> FlightStatus.LANDED
+            isAligned -> FlightStatus.ALIGNED
+            distanceToGroundInt <= 0 -> FlightStatus.CRASHED
+            else -> FlightStatus.DANGER
+        }.also {
+            logger.v { "Flight status Landing: $it isAligned=$isAligned distanceToGround=$distanceToGround" }
+        }
+    }
+
+    /**
+     * Determines whether the current position of the lander is colliding with the terrain.
+     *
+     * @param config The game configuration, which includes settings that affect terrain collision,
+     *               such as the lander's size.
+     * @param terrain The terrain data used to determine the ground height at specific positions.
+     * @return `true` if the lander's position (considering its radius) intersects with the terrain; `false` otherwise.
+     */
+    private fun Vector2D.hitTerrain(config: GameConfig, terrain: Terrain): Boolean {
+        val landerRadius = config.landerSize / 2
+        return (y >= terrain.getGroundHeight(x - landerRadius))
+                || (y >= terrain.getGroundHeight(x + landerRadius))
+            .also { hitTerrain ->
+                if (hitTerrain) {
+                    logger.v { "Lander Crash hitTerrain=true x=$x y=$y" }
+                }
+            }
+    }
+
+    /**
+     * Determines if the lander is properly aligned for a safe landing based on its position, velocity, and rotation
+     * while being on a valid landing pad.
+     *
+     * @param safeLandingConfig Configuration containing safe landing thresholds for velocity and rotation.
+     * @param position The current position of the lander represented as a 2D vector.
+     * @param velocity The current velocity of the lander represented as a 2D vector.
+     * @param rotation The current rotation angle of the lander in degrees.
+     * @param terrain The terrain data used to verify if the lander is on a valid landing pad.
+     * @return `true` if the lander is aligned for safe landing (i.e., its position is on a landing pad and its velocity
+     * and rotation are within safe thresholds). Returns `false` otherwise.
      */
     private fun isLandingAligned(
         safeLandingConfig: SafeLandingConfig,
@@ -279,6 +364,14 @@ class PhysicsEngine(
                 && abs(velocity.y) < safeLandingConfig.velocityThreshold
                 && abs(rotation) < safeLandingConfig.rotationThreshold
 
+    /**
+     * Determines if the current state meets the danger zone criteria defined by the `DangerZoneConfig`.
+     *
+     * @param fuel The current fuel level of the lander.
+     * @param velocity The current velocity of the lander represented as a 2D vector.
+     * @return `true` if the lander is in the danger zone (e.g., low fuel or velocity exceeding thresholds),
+     *         `false` otherwise.
+     */
     private fun DangerZoneConfig.isInDangerZone(
         fuel: Float,
         velocity: Vector2D,
@@ -292,6 +385,12 @@ class PhysicsEngine(
                 }
             }
 
+    /**
+     * Determines if the current `Vector2D` position is offscreen based on the given game configuration.
+     *
+     * @param config The game configuration, which includes screen width and height values.
+     * @return `true` if the position is offscreen (outside the bounds defined by the screen width and height), `false` otherwise.
+     */
     private fun Vector2D.isOffscreen(config: GameConfig): Boolean =
         (x < 0 || y < 0 || x > config.screenWidth || y > config.screenHeight)
             .also { offscreen ->
