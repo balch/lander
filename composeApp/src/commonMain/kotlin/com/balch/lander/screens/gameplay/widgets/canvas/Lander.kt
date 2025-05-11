@@ -24,13 +24,9 @@ fun DrawScope.drawLander(
     landerState: LanderState,
     config: GameConfig,
 ) {
-    val landerSize = config.landerSize
-    val screenWidth = config.screenWidth
-    val screenHeight = config.screenHeight
-
     // Draw lander
-    val landerX = landerState.position.x / screenWidth * size.width
-    val landerY = landerState.position.y / screenHeight * size.height
+    val landerX = landerState.position.x / config.screenWidth * size.width
+    val landerY = landerState.position.y / config.screenHeight * size.height
 
     val isThrusting = landerState.thrustStrength.value > 0f
 
@@ -42,22 +38,22 @@ fun DrawScope.drawLander(
         // Lander body
         drawRect(
             color = landerColor,
-            topLeft = Offset(landerX - landerSize / 2, landerY - landerSize / 2),
-            size = Size(landerSize, landerSize)
+            topLeft = Offset(landerX - config.landerOffset, landerY - config.landerOffset),
+            size = Size(config.landerSize, config.landerSize)
         )
 
         // Lander legs
         drawLine(
             color = landerColor,
-            start = Offset(landerX - landerSize / 2, landerY + landerSize / 2),
-            end = Offset(landerX - landerSize, landerY + landerSize),
+            start = Offset(landerX - config.landerOffset, landerY + config.landerOffset),
+            end = Offset(landerX - config.landerSize, landerY + config.landerSize),
             strokeWidth = 2f
         )
 
         drawLine(
             color = landerColor,
-            start = Offset(landerX + landerSize / 2, landerY + landerSize / 2),
-            end = Offset(landerX + landerSize, landerY + landerSize),
+            start = Offset(landerX + config.landerOffset, landerY + config.landerOffset),
+            end = Offset(landerX + config.landerSize, landerY + config.landerSize),
             strokeWidth = 2f
         )
 
@@ -65,8 +61,8 @@ fun DrawScope.drawLander(
         if (isThrusting && landerState.fuel > 0) {
             drawRect(
                 color = Color.Red,
-                topLeft = Offset(landerX - landerSize / 4, landerY + landerSize / 2),
-                size = Size(landerSize / 2, landerSize * landerState.thrustStrength.value),
+                topLeft = Offset(landerX - config.landerOffset / 2, landerY + config.landerOffset),
+                size = Size(config.landerOffset, config.landerSize * landerState.thrustStrength.value),
                 alpha = 0.5f
             )
         }

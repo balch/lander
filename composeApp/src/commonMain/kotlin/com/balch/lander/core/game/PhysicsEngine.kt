@@ -212,7 +212,7 @@ class PhysicsEngine(
         terrain: Terrain,
         config: GameConfig
     ): Float =
-        terrain.getGroundHeight(position.x) - (position.y + config.landerSize / 2)
+        terrain.getGroundHeight(position.x) - (position.y + config.landerOffset)
 
     /**
      * Calculates the distance from the lander to the sea level.
@@ -222,7 +222,7 @@ class PhysicsEngine(
         terrain: Terrain,
         config: GameConfig
     ): Float =
-        terrain.seaLevel - (position.y + config.landerSize / 2)
+        terrain.seaLevel - (position.y + config.landerOffset)
 
     /**
      * Derives the flight status of the lander based on its current state and environmental conditions.
@@ -310,16 +310,18 @@ class PhysicsEngine(
             rotation = rotation,
             terrain = terrain
         )
-        val distanceToGroundInt = distanceToGround.toInt()
         return when {
-            isAligned && distanceToGroundInt == 0 -> FlightStatus.LANDED
+            isAligned && distanceToGround.isZero(config.landerSize/2) -> FlightStatus.LANDED
             isAligned -> FlightStatus.ALIGNED
-            distanceToGroundInt <= 0 -> FlightStatus.CRASHED
+            distanceToGround <= 0.0f -> FlightStatus.CRASHED
             else -> FlightStatus.DANGER
         }.also {
             logger.v { "Flight status Landing: $it isAligned=$isAligned distanceToGround=$distanceToGround" }
         }
     }
+
+    private fun Float.isZero(tolerance: Float = 1e-7f): Boolean =
+        abs(this) < tolerance
 
     /**
      * Determines whether the current position of the lander is colliding with the terrain.
@@ -329,16 +331,14 @@ class PhysicsEngine(
      * @param terrain The terrain data used to determine the ground height at specific positions.
      * @return `true` if the lander's position (considering its radius) intersects with the terrain; `false` otherwise.
      */
-    private fun Vector2D.hitTerrain(config: GameConfig, terrain: Terrain): Boolean {
-        val landerRadius = config.landerSize / 2
-        return (y >= terrain.getGroundHeight(x - landerRadius))
-                || (y >= terrain.getGroundHeight(x + landerRadius))
+    private fun Vector2D.hitTerrain(config: GameConfig, terrain: Terrain): Boolean =
+        (y >= terrain.getGroundHeight(x - config.landerOffset))
+                || (y >= terrain.getGroundHeight(x + config.landerOffset))
             .also { hitTerrain ->
                 if (hitTerrain) {
                     logger.v { "Lander Crash hitTerrain=true x=$x y=$y" }
                 }
             }
-    }
 
     /**
      * Determines if the lander is properly aligned for a safe landing based on its position, velocity, and rotation

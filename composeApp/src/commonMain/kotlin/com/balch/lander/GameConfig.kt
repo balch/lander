@@ -60,7 +60,9 @@ data class GameConfig(
     val dangerZoneConfig: DangerZoneConfig = DangerZoneConfig(),
 
     val safeLandingConfig: SafeLandingConfig = SafeLandingConfig(),
-)
+) {
+    val landerOffset = landerSize / 2f
+}
 
 /**
  * Configuration for defining operational parameters in a "danger zone" scenario.
