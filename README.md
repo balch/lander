@@ -1,4 +1,4 @@
-# VIBE LANDER: Retro Game in a new "Arcade"
+# VIBE LANDER: 🎮 Retro Game Built on New Platforms
 
 A retro-style Lunar Lander game built by me and Junie using Kotlin Multiplatform and Compose Multiplatform. 
 
