@@ -245,14 +245,14 @@ class GamePlayViewModel(
         )
 
         // Check if lander has landed or crashed
-        return when {
-            newLanderState.flightStatus == FlightStatus.CRASHED -> {
+        return when (newLanderState.flightStatus) {
+            FlightStatus.CRASHED -> {
                 val message = failureMessages.random()
                 logger.info("GameState") { "Lander crashed! Message: $message" }
                 soundService.playCrashSound()  // Play crash sound
                 GameScreenState.GameOver(false, message)
             }
-            newLanderState.flightStatus == FlightStatus.LANDED -> {
+            FlightStatus.LANDED -> {
                 val message = successMessages.random()
                 logger.info("GameState") { "Lander successfully landed! Message: $message" }
                 soundService.playLandingSuccessSound()  // Play success sound
