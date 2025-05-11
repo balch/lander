@@ -82,7 +82,7 @@ has an inverted y-axis, and contains literal camera edge cases.
 
 The highlight for me was mainly just producing code that I could learn by example from. 
 Learning to effectively communicate with an LLM will be fun challenge. The skills
-of asking the right questions, validating the results, and iterate]ing on the solution are
+of asking the right questions, validating the results, and iterating on the solution are
 still critical while using AI.
 
 I am curious how much energy is used by each "Sending to LLM..." messages I see. While it 
