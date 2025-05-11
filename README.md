@@ -20,38 +20,38 @@ This repo contains my first:
 *Hello KMP World.* 
 
 I have been developing software for a loooong time and have always searched for the elusive 
-write once, run everywhere solution that works for me. Kotlin is one of my fave languages 
+_write once, run everywhere_ solution that works for me. Kotlin is one of my fave languages 
 of all time, I really enjoy Coroutines and Flows, and am starting to wade eagerly, but 
 cautiously into the rising Compose tide. All the new build tools, plugins, libraries,
-and general support has me really excited to see what unfolds in this space.
+and general support have me really excited to see what unfolds in this space.
 
-I also wanted to checkout AI and saw the Junie release and figured why the hell not. 
-I got my hands on a new Macbook Pro, dusted off my github account, and fired up 
+I also wanted to check out AI and saw the Junie release and figured why the hell not. 
+I got my hands on a new Macbook Pro, dusted off my GitHub account, and fired up 
 Android Studio to give Junie a try (that got me close).
 
 I had much better success with IntelliJ IDEA, AI Assistant, and the Junie plugins. 
-I started up a new KMP app, and told Junie what I wanted to build (a video game, of course). 
+I started up a new KMP app and told Junie what I wanted to build (a video game, of course). 
 I was kind of amazed when it wrote the first set of guidelines. After a few 
 guideline tweaks, I asked Junie to build something. 
 
 It (relatively quickly) built a couple of screens, basic app nav, a rudimentary physics engine,
 and some ViewModels. Things kind of worked, but I then stashed the code, tweaked the guidelines 
-some more and give it another run (or two). The next day I ran out of cloud credits.
+some more, and gave it another run (or two). The next day I ran out of cloud credits.
 
 ### My Journey with Junie
 So of course I purchased the AI Pro subscription to continue my journey.
 
-Junie's initial attept was pretty good all things considered. It built an app that
-compiled and ran on all the KMP platforms, and provided a working game. It reminded
+Junie's initial attempt was pretty good all things considered. It built an app that
+compiled and ran on all the KMP platforms and provided a working game. It reminded
 me of when I start off a feature, I throw up a lot of code until I get something working
 that proves my idea, then I stash and start making commits one piece at a time. I used 
 this exact same process with the initial code that Junie produced.
 
-Next I started on the stars and terrain as those worked but needed some attention. The stars
+Next I started on the stars and terrain as those worked but needed some attention. The Stars
 logic was good and showed me how to use the *Canvas* `@Composable`. The terrain did 
 an awesome job of laying out the landing pads, but everything else was just a bunch of
 jagged lines. I was able to get the AI to understand I wanted more mountains, craters, and
-rocks and I am happy with the results. I have not had to touch the `TerrainGenerator`
+rocks, and I am happy with the results. I have not had to touch the `TerrainGenerator`
 at all and I do consider this the biggest AI "Win" in this project. 
 
 The math in the PhysicsEngine is another area that worked out well. I did have
@@ -63,38 +63,38 @@ layout techniques, so it's hard to know for sure. Junie was a little weak on mod
 and Compose Previews, but those manual cleanup sessions were instrumental in actually understanding
 the layouts that were produced.
 
-I also used this oppertunity to test other AI Agents, mainly _Gemini 2.5 Pro_ and _Claude 3.7_. They
+I also used this opportunity to test other AI Agents, mainly _Gemini 2.5 Pro_ and _Claude 3.7_. They
 were not as productive for me a Junie, but Claude did generate the DebugOverlay when
-I asked it for help wit the Camera logic.
+I asked it for help with the Camera logic.
 
-One of the surprising AI misses was the `Platform` object. Not sure were the first implementation 
-came from, but it ended up failing to build on iOS after displaying the `Platform` name in the DebugOverlay. 
-This required removing the ai generated pattern and repacing it with the correct `expect class Platform()`
+One of the surprising AI misses was the `Platform` object. Not sure where the first implementation 
+came from, but it ended up failing to build on iOS after displaying the `Platform` name in the _DebugOverlay_. 
+This required removing the AI-generated pattern and repacing it with the correct `expect class Platform()`
 pattern.
 
 ### Conclusion
-This was the most fun coding since the last [canvas draw feature](https://youtu.be/tYU91g0-EJc) I worked on.
-I'm amazed I was able to build a working game using new technologies in a little over a 
+This has been the most fun coding since the last [canvas draw feature](https://youtu.be/tYU91g0-EJc) I worked on.
+I'm amazed I _produced_ a working game using new technologies in a little over a 
 fortnight. 
 
-Of course the app is not perfect as it may use too much floating point math,
+Of course, the app is not perfect as it may use too much floating point math,
 has an inverted y-axis, and contains literal camera edge cases. 
 
 The highlight for me was mainly just producing code that I could learn by example from. 
-Learning to effectively communicate with an LLM will be fun challenge. The skills
+Learning to effectively communicate with an LLM will be a fun challenge. The skills
 of asking the right questions, validating the results, and iterating on the solution are
 still critical while using AI.
 
-I am curious how much energy is used by each "Sending to LLM..." messages I see. While it 
-may be easy to use an LLM to rename a class or do a "replace in files" opperation, that is
+I am curious how much energy is used by each "Sending to LLM..." message I see. While it 
+may be easy to use an LLM to rename a class or do a "replace in files" operation, that is
 probably not the most efficient use of AI.
 
-So far, AI as been more useful for me when getting started and exploring concepts I am 
-not familiar with. It's also great to get AI validation when anayzing your code or asking
-it to write commit messages and comments. This functionality and code completion will be
-the first of many "Game-Changers" with this technology.
+So far, AI has been more useful for me when getting started and exploring new concepts and tech. 
+It's also great to get AI validation when analyzing your code or asking
+for _free_ commit messages and comments. This functionality and code completion will be
+the first of many changes to the way I code.
 
-**I'm just glad to be here for the upcomming KMP and AI Paradigm Shift!!!** 
+**I'm glad to be here for the upcoming KMP and AI Paradigm Shifts!!!** 
 
 ## ScreenShots
 | Platform | Image                                                                                                                |
