@@ -17,6 +17,7 @@ import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.game.models.Vector2D
 import com.balch.lander.core.utils.impl.TimeProviderImpl
+import com.balch.lander.screens.gameplay.FlightStatus
 import com.balch.lander.screens.gameplay.LanderState
 import com.balch.lander.screens.gameplay.widgets.canvas.drawLander
 import com.balch.lander.screens.gameplay.widgets.canvas.drawLandingPads
@@ -47,8 +48,8 @@ fun GameCanvasPreview() {
         position = Vector2D(500f, 100f),
         thrustStrength = ThrustStrength.HIGH,
         rotation = 30f,
-
-        )
+        flightStatus = FlightStatus.WARNING
+    )
     val config = GameConfig()
     val terrain = TerrainGeneratorImpl(TimeProviderImpl())
         .generateTerrain(config.screenWidth, config.screenHeight)

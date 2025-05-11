@@ -332,7 +332,8 @@ fun PlayingContentZoomClosePreview() {
             x = 500f,
             y = previewConfig.screenHeight - distanceToSeaLevel
         ),
-        distanceToSeaLevel = distanceToSeaLevel
+        distanceToSeaLevel = distanceToSeaLevel,
+        flightStatus = FlightStatus.DANGER,
     )
     PlayingContentPreviewWrapper(landerState)
 }
@@ -346,7 +347,8 @@ fun PlayingContentZoomCloseLeftPreview() {
             x = 100f,
             y = previewConfig.screenHeight - distanceToSeaLevel
         ),
-        distanceToSeaLevel = distanceToSeaLevel
+        distanceToSeaLevel = distanceToSeaLevel,
+        flightStatus = FlightStatus.DANGER,
     )
     PlayingContentPreviewWrapper(landerState)
 }

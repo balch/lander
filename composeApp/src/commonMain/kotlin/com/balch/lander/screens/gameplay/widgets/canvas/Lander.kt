@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.dp
 import com.balch.lander.GameConfig
 import com.balch.lander.core.game.models.ThrustStrength
+import com.balch.lander.screens.gameplay.FlightStatus
 import com.balch.lander.screens.gameplay.LanderState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -77,6 +78,7 @@ fun DrawScope.drawLander(
 fun LanderPreview() {
     val landerState = LanderState(
         thrustStrength = ThrustStrength.MEDIUM,
+        flightStatus = FlightStatus.WARNING,
     )
     val config = GameConfig()
 
