@@ -33,26 +33,28 @@ fun DrawScope.drawLander(
     // Determine lander color based on game state
     val landerColor = landerState.flightStatus.color
 
+    val offset = config.landerSize / 2
+
     // Draw lander
     rotate(landerState.rotation, Offset(landerX, landerY)) {
         // Lander body
         drawRect(
             color = landerColor,
-            topLeft = Offset(landerX - config.landerOffset, landerY - config.landerOffset),
+            topLeft = Offset(landerX - offset, landerY - offset),
             size = Size(config.landerSize, config.landerSize)
         )
 
         // Lander legs
         drawLine(
             color = landerColor,
-            start = Offset(landerX - config.landerOffset, landerY + config.landerOffset),
+            start = Offset(landerX - offset, landerY + offset),
             end = Offset(landerX - config.landerSize, landerY + config.landerSize),
             strokeWidth = 2f
         )
 
         drawLine(
             color = landerColor,
-            start = Offset(landerX + config.landerOffset, landerY + config.landerOffset),
+            start = Offset(landerX + offset, landerY + offset),
             end = Offset(landerX + config.landerSize, landerY + config.landerSize),
             strokeWidth = 2f
         )
@@ -61,8 +63,8 @@ fun DrawScope.drawLander(
         if (isThrusting && landerState.fuel > 0) {
             drawRect(
                 color = Color.Red,
-                topLeft = Offset(landerX - config.landerOffset / 2, landerY + config.landerOffset),
-                size = Size(config.landerOffset, config.landerSize * landerState.thrustStrength.value),
+                topLeft = Offset(landerX - offset / 2, landerY + offset),
+                size = Size(offset, config.landerSize * landerState.thrustStrength.value),
                 alpha = 0.5f
             )
         }

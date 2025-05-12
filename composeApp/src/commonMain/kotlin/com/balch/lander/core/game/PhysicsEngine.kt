@@ -212,7 +212,7 @@ class PhysicsEngine(
         terrain: Terrain,
         config: GameConfig
     ): Float =
-        terrain.getGroundHeight(position.x) - (position.y + config.landerOffset)
+        terrain.getGroundHeight(position.x) - (position.y + config.landerSize)
 
     /**
      * Calculates the distance from the lander to the sea level.
@@ -222,7 +222,7 @@ class PhysicsEngine(
         terrain: Terrain,
         config: GameConfig
     ): Float =
-        terrain.seaLevel - (position.y + config.landerOffset)
+        terrain.seaLevel - (position.y + config.landerSize)
 
     /**
      * Derives the flight status of the lander based on its current state and environmental conditions.
@@ -311,7 +311,7 @@ class PhysicsEngine(
             terrain = terrain
         )
         return when {
-            isAligned && distanceToGround.isZero(config.landerSize/2) -> FlightStatus.LANDED
+            isAligned && distanceToGround.isZero() -> FlightStatus.LANDED
             isAligned -> FlightStatus.ALIGNED
             distanceToGround <= 0.0f -> FlightStatus.CRASHED
             else -> FlightStatus.DANGER
@@ -320,7 +320,7 @@ class PhysicsEngine(
         }
     }
 
-    private fun Float.isZero(tolerance: Float = 1e-7f): Boolean =
+    private fun Float.isZero(tolerance: Float = .01f): Boolean =
         abs(this) < tolerance
 
     /**

@@ -41,7 +41,7 @@ data class GameConfig(
      * Number of stars to display in the background.
      * Controls the density of stars in the space backdrop.
      */
-    val backgoundStarCount: Int = 250,
+    val backgroundStarCount: Int = 250,
 
     /**
      * render size of the lander

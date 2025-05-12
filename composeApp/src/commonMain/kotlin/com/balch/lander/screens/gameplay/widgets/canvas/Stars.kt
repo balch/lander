@@ -16,7 +16,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 fun DrawScope.drawStars(config: GameConfig) {
     // Draw stars (simple representation)
-    repeat(config.backgoundStarCount) {
+    repeat(config.backgroundStarCount) {
         val x = (0..size.width.toInt()).random().toFloat()
         val y = (0..size.height.toInt()).random().toFloat()
         drawCircle(
