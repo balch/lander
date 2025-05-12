@@ -20,22 +20,22 @@ This repo contains my first:
 ### Introduction
 *Hello KMP World.* 
 
-I have been developing software for a loooong time and have always searched for the elusive 
-_write once, run everywhere_ solution that works for me. Kotlin is one of my fave languages 
-of all time, I really enjoy Coroutines and Flows, and am starting to wade eagerly, but 
-cautiously into the rising Compose tide. All the new build tools, plugins, libraries,
-and general support have me really excited to see what unfolds in this space.
+I've been coding for a while and have always searched for the elusive 
+_write once, run everywhere_ solution that works for me. Kotlin is my fave language 
+and I really enjoy Coroutines and Flows. I'm also starting to wade eagerly, but 
+cautiously, into the rising Compose tide. All the new build tools, plugins, libraries,
+and general support have me really excited to see what comes next.
 
-I also wanted to check out AI and saw the Junie release and figured why the hell not. 
+I also wanted to dabble with Vibe Coding so when Junie was released, I said why the hell not!?! 
 I got my hands on a new Macbook Pro, dusted off my GitHub account, and fired up 
-Android Studio to give Junie a try (that got me close).
+Android Studio to give Junie a try (that got me close). 
 
 I had much better success with IntelliJ IDEA, AI Assistant, and the Junie plugins. 
 I started up a new KMP app and told Junie what I wanted to build (a video game, of course). 
 I was kind of amazed when it wrote the first set of guidelines. After a few 
 guideline tweaks, I asked Junie to build something. 
 
-It (relatively quickly) built a couple of screens, basic app nav, a rudimentary physics engine,
+It built a couple of screens, basic app nav, a rudimentary physics engine,
 and some ViewModels. Things kind of worked, but I then stashed the code, tweaked the guidelines 
 some more, and gave it another run (or two). The next day I ran out of cloud credits.
 
@@ -52,22 +52,17 @@ Next I started on the stars and terrain as those worked but needed some attentio
 logic was good and showed me how to use the *Canvas* `@Composable`. The terrain did 
 an awesome job of laying out the landing pads, but everything else was just a bunch of
 jagged lines. I was able to get the AI to understand I wanted more mountains, craters, and
-rocks, and I am happy with the results. I have not had to touch the `TerrainGenerator`
-at all and I do consider this the biggest AI "Win" in this project. 
+rocks, and I am happy with the results. I have not touched the `TerrainGenerator`
+at all and consider this the biggest AI "Win" in the project. 
 
 The math in the PhysicsEngine is another area that worked out well. I did have
 to fix a bunch of the collision detection logic, but I'm glad I did not have to do a 
 _sin/cos_ refresher.
 
 I think the Compose structure Junie created is solid, but I'm still learning proper Compose
-layout techniques, so it's hard to know for sure. Junie was a little weak on modularization
+layout techniques, so 👀. Junie was a little weak on modularization
 and Compose Previews, but those manual cleanup sessions were instrumental in actually understanding
 the layouts that were generated.
-
-One of the surprising AI misses was the `Platform` object. Not sure where the first implementation 
-came from, but it ended up failing to build on iOS after displaying the `Platform` name in the _DebugOverlay_. 
-This required removing the AI-generated pattern and repacing it with the correct `expect class Platform()`
-pattern.
 
 ### Conclusion
 This has been the most fun coding since the last [canvas draw feature](https://youtu.be/tYU91g0-EJc) I worked on.
@@ -84,9 +79,8 @@ Learning to effectively communicate with an LLM will be a fun challenge. The ski
 of asking the right questions, validating the results, and iterating on the solution are
 still critical while using AI.
 
-I am curious how much energy is used by each "Sending to LLM..." message I see. While it 
-may be easy to use an LLM to rename a class or do a "replace in files" operation, that is
-probably not the most efficient use of AI. Keeping an eye on my
+I'm still learning to use AI effectively and don't want to use an
+LLM to rename a class or do a "replace in files" operation. Keeping an eye on my
 monthly AI Quota progress bar does help me prioritize Vibe Coding usage.
 
 So far, AI has been more useful for me when getting started and exploring new concepts and tech. 
