@@ -26,7 +26,7 @@ and I really enjoy Coroutines and Flows. I'm also starting to wade eagerly, but
 cautiously, into the rising Compose tide. All the new build tools, plugins, libraries,
 and general support have me really excited to see what comes next.
 
-I also wanted to dabble with Vibe Coding so when Junie was released, I said why the hell not!?! 
+I also wanted to start Vibe Coding so when Junie was released, I said why the hell not!?! 
 I got my hands on a new Macbook Pro, dusted off my GitHub account, and fired up 
 Android Studio to give Junie a try (that got me close). 
 
@@ -37,20 +37,19 @@ guideline tweaks, I asked Junie to build something.
 
 It built a couple of screens, basic app nav, a rudimentary physics engine,
 and some ViewModels. Things kind of worked, but I then stashed the code, tweaked the guidelines 
-some more, and gave it another run (or two). The next day I ran out of cloud credits.
+some more, and gave it another run (or two). Then I ran out of cloud credits.
 
 ### Pair Programming with Junie
 So of course I purchased the AI Pro subscription to continue my journey.
 
 Junie's initial attempt was pretty good all things considered. It built an app that
-compiled and ran on all the KMP platforms and provided a working game. It reminded
-me of when I start off a feature, I throw up a lot of code until I get something working
+compiled and ran on all the KMP platforms and provided an almost working game. It reminded
+me of how I start off a feature, I crank out a lot of code until I get something working
 that proves my idea, then I stash and start making commits one piece at a time. I used 
-this exact same process with the initial code that Junie produced.
+this process with the initial code that Junie produced.
 
-Next I started on the stars and terrain as those worked but needed some attention. The Stars
-logic was good and showed me how to use the *Canvas* `@Composable`. The terrain did 
-an awesome job of laying out the landing pads, but everything else was just a bunch of
+The Stars rendering logic was good and showed me how to use the *Canvas* `@Composable`. The terrain generation 
+algo did an awesome job of laying out the landing pads, but everything else was just a bunch of
 jagged lines. I was able to get the AI to understand I wanted more mountains, craters, and
 rocks, and I am happy with the results. I have not touched the `TerrainGenerator`
 at all and consider this the biggest AI "Win" in the project. 
@@ -87,8 +86,6 @@ So far, AI has been more useful for me when getting started and exploring new co
 It's also great to get AI validation when analyzing your code or asking
 for _free_ commit messages and comments. This functionality and code completion will be
 the first of many changes to the way I code.
-
-**I'm glad to be here for the upcoming KMP and AI Paradigm Shifts!!!** 
 
 ## ScreenShots
 | Platform | Image                                                                                                                |
