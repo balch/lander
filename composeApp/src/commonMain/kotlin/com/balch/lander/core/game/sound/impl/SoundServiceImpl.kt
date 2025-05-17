@@ -18,10 +18,13 @@ class SoundServiceImpl : SoundService {
     private val platform = Platform()
 
     private val thrustSounds: List<Audio> = listOf(
-        Audio(platform.context, Res.getUri("files/thrust-low.mp3")),
-        Audio(platform.context, Res.getUri("files/thrust-mid.mp3")),
+        Audio(platform.context, Res.getUri("files/thrust-low.mp3"))
+            .apply { load(platform.context) },
+        Audio(platform.context, Res.getUri("files/thrust-mid.mp3"))
+            .apply { load(platform.context) },
         Audio(platform.context, Res.getUri("files/thrust-high.mp3"))
-    )
+            .apply { load(platform.context) },
+        )
 
     override fun playThrustSound(thrustStrength: ThrustStrength) {
         logger.info { "Playing thrust sound for level: $thrustStrength" }
@@ -47,8 +50,7 @@ class SoundServiceImpl : SoundService {
     }
 
     override fun dispose() {
-        // Stop all sounds
-        stopThrustSound()
+        thrustSounds.forEach { it.release() }
         logger.info { "Sound service disposed" }
     }
 }
