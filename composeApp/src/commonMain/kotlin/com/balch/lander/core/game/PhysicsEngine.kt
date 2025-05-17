@@ -34,20 +34,27 @@ class PhysicsEngine(
     private val logger = logging()
 
     // Base gravity acceleration on the Moon (1.62 m/s²)
-    // Scaled for game units
-    private val baseGravity = 1.0f
-    private val baseThrust = 3.0f
+    // Accurately scaled for game units based on original Atari values
+    private val baseGravity = 1.62f
+    private val baseThrust = 4.5f
 
     // Gravity adjusted by the config
     private val gravity = baseGravity * config.gravity.value
 
     // Base thrust force
 
-    // Rotation speed in degrees per second
-    private val rotationSpeed = 12f
+    // Rotation speed in degrees per second (adjusted to match original feel)
+    private val rotationSpeed = 15f
 
-    // Fuel consumption rate per second when thrusting
-    private val fuelConsumptionRate = 5f
+    // Fuel consumption rate per second when thrusting (balanced for gameplay)
+    private val fuelConsumptionRate = 4f
+
+    // Landing pad difficulty multipliers for scoring
+    private val landingPadScoreMultipliers = mapOf(
+        "small" to 2.0f,
+        "medium" to 1.5f,
+        "large" to 1.0f
+    )
 
     /**
      * Updates the game state based on physics calculations.
@@ -254,6 +261,7 @@ class PhysicsEngine(
             position.hitTerrain(config, terrain) -> FlightStatus.CRASHED
             distanceToGround > dangerZoneConfig.distanceToGround ->
                 deriveDescentStatus(config, velocity, fuel)
+
             else -> deriveLandingStatus(
                 config = config,
                 position = position,
@@ -306,7 +314,8 @@ class PhysicsEngine(
     ): FlightStatus {
         val isAligned = isLandingAligned(
             safeLandingConfig = config.safeLandingConfig,
-            position = position, velocity = velocity,
+            position = position,
+            velocity = velocity,
             rotation = rotation,
             terrain = terrain
         )
@@ -377,8 +386,8 @@ class PhysicsEngine(
         velocity: Vector2D,
     ): Boolean =
         (fuel < lowFuel
-            || abs(velocity.x) > velocityThreshold
-            || abs(velocity.y) > velocityThreshold)
+                || abs(velocity.x) > velocityThreshold
+                || abs(velocity.y) > velocityThreshold)
             .also { dangerZone ->
                 if (dangerZone) {
                     logger.v { "Lander In Danger Zone: fuel=$fuel velocity=$velocity" }
@@ -398,6 +407,42 @@ class PhysicsEngine(
                     logger.v { "Lander Crash isOffscreen=true x=$x y=$y" }
                 }
             }
+
+    /**
+     * Calculates landing score based on original Atari lunar lander scoring mechanics
+     *
+     * @param velocity Current velocity at landing
+     * @param remainingFuel Remaining fuel at landing
+     * @param initialFuel Starting fuel amount
+     * @param landingPadType Type of landing pad (affects score multiplier)
+     * @param timeTaken Time taken to land in seconds
+     * @return The calculated score as an integer
+     */
+    fun calculateLandingScore(
+        velocity: Vector2D,
+        remainingFuel: Float,
+        initialFuel: Float,
+        landingPadType: String = "medium",
+        timeTaken: Float = 60f
+    ): Int {
+        // Base score calculation from original Atari game
+        // Lower velocities give higher scores
+        val velocityScore = 500 - ((velocity.magnitude() * 100).toInt().coerceAtMost(400))
+
+        // Remaining fuel bonus (percentage of initial fuel)
+        val fuelPercentage = (remainingFuel / initialFuel)
+
+        val fuelBonus = (fuelPercentage * 300).toInt()
+
+        // Time bonus - faster landings get more points
+        val timeBonus = ((120f - timeTaken.coerceAtMost(120f)) * 2f).toInt()
+
+        // Difficulty multiplier based on landing pad size
+        val padMultiplier = landingPadScoreMultipliers[landingPadType] ?: 1.0f
+
+        // Total score calculation with pad multiplier
+        return ((velocityScore + fuelBonus + timeBonus) * padMultiplier).toInt()
+    }
 }
 
 /**

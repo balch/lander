@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.lighthousegames.logging.KmLogging
 import org.lighthousegames.logging.logging
+import kotlin.math.abs
 
 /**
  * ViewModel for the Game Screen.
@@ -166,6 +167,7 @@ class GamePlayViewModel(
             var lastUpdateTime = timeProvider.currentTimeMillis()
             var currentGameState = initialGameState
             var controlInputs = ControlInputs()
+            var totalGameTimeSeconds = 0f
 
             while (currentGameState !is GameScreenState.GameOver) {
                 // Calculate delta time
@@ -173,8 +175,11 @@ class GamePlayViewModel(
                 val deltaTimeMs = workStartTime - lastUpdateTime
                 lastUpdateTime = workStartTime
 
+                // Update total game time (for scoring)
+                totalGameTimeSeconds += deltaTimeMs / 1000f
+
                 logger.verbose {
-                    "Game Loop - Start controlInputs=$controlInputs deltaTimeMs=$deltaTimeMs"
+                    "Game Loop - Start controlInputs=$controlInputs deltaTimeMs=$deltaTimeMs gameTime=$totalGameTimeSeconds"
                 }
 
                 // Update game state
@@ -184,6 +189,7 @@ class GamePlayViewModel(
                     currentGameState = currentGameState,
                     controlInputs = controlInputs,
                     fps = averageFps(deltaTimeMs),
+                    gameTimeSeconds = totalGameTimeSeconds,
                 )
 
                 val workEndTime = timeProvider.currentTimeMillis()
@@ -199,7 +205,7 @@ class GamePlayViewModel(
 
                 controlInputs = merge(
                     controlInputDistinctFlow.drop(1)
-                            .onEach { logger.debug { "Game Loop - Control Inputs: $it" } },
+                        .onEach { logger.debug { "Game Loop - Control Inputs: $it" } },
                     flow {
                         // Delay to maintain frame rate (60 FPS)
                         delay(sleepTimeMs)
@@ -228,6 +234,7 @@ class GamePlayViewModel(
         fps: Int,
         currentGameState: GameScreenState,
         controlInputs: ControlInputs,
+        gameTimeSeconds: Float = 0f,
     ): GameScreenState {
 
         // Skip update if game is not in playing state
@@ -244,20 +251,61 @@ class GamePlayViewModel(
             config = currentGameState.environment.config,
         )
 
+        // Calculate current score based on height and orientation (like original Atari game)
+        // This rewards maintaining control during descent
+        val heightScore = if (newLanderState.distanceToGround > 0) {
+            20 - (newLanderState.distanceToGround / 50f).toInt().coerceAtMost(20)
+        } else 0
+
+        val orientationScore = if (abs(newLanderState.rotation) < 10f) 10 else 0
+        val currentScore = currentGameState.currentScore + heightScore + orientationScore
+
         // Check if lander has landed or crashed
         return when (newLanderState.flightStatus) {
             FlightStatus.CRASHED -> {
                 val message = failureMessages.random()
                 logger.info("GameState") { "Lander crashed! Message: $message" }
                 soundService.playCrashSound()  // Play crash sound
-                GameScreenState.GameOver(false, message)
+
+                // Small score for surviving a while even if crashed
+                val survivalScore = (gameTimeSeconds * 2).toInt()
+
+                GameScreenState.GameOver(
+                    isSuccess = false,
+                    message = message,
+                    landerState = newLanderState,
+                    environmentState = currentGameState.environment,
+                    finalScore = survivalScore,
+                    timeTaken = gameTimeSeconds
+                )
             }
+
             FlightStatus.LANDED -> {
                 val message = successMessages.random()
                 logger.info("GameState") { "Lander successfully landed! Message: $message" }
                 soundService.playLandingSuccessSound()  // Play success sound
-                GameScreenState.GameOver(true, message)
+
+                // Calculate landing score using physics engine scoring method
+                val landingScore = physicsEngine.calculateLandingScore(
+                    velocity = newLanderState.velocity,
+                    remainingFuel = newLanderState.fuel,
+                    initialFuel = newLanderState.initialFuel,
+                    landingPadType = getLandingPadType(currentGameState.environment.terrain),
+                    timeTaken = gameTimeSeconds
+                )
+
+                val finalScore = currentScore + landingScore
+
+                GameScreenState.GameOver(
+                    isSuccess = true,
+                    message = message,
+                    landerState = newLanderState,
+                    environmentState = currentGameState.environment,
+                    finalScore = finalScore,
+                    timeTaken = gameTimeSeconds
+                )
             }
+
             else -> {
                 val camera = Camera.calculateCameraInfo(
                     landerState = newLanderState,
@@ -268,6 +316,8 @@ class GamePlayViewModel(
                     environment = currentGameState.environment,
                     fps = fps,
                     camera = camera,
+                    gameTimeSeconds = gameTimeSeconds,
+                    currentScore = currentScore,
                 ).also { state ->
                     if (KmLogging.isLoggingDebug) {
                         logger.d("GameState") {
@@ -287,6 +337,19 @@ class GamePlayViewModel(
     override fun onCleared() {
         soundService.dispose()
         super.onCleared()
+    }
+
+    /**
+     * Determine landing pad difficulty based on width
+     * Used for scoring calculation
+     */
+    private fun getLandingPadType(terrain: Terrain): String {
+        val padWidth = terrain.landingPadWidth ?: 0f
+        return when {
+            padWidth < 50f -> "small"
+            padWidth < 100f -> "medium"
+            else -> "large"
+        }
     }
 
     companion object {
@@ -335,6 +398,16 @@ class GamePlayViewModel(
              */
             val fps: Int = 0,
 
+            /**
+             * Game timer in seconds (for scoring)
+             */
+            val gameTimeSeconds: Float = 0f,
+
+            /**
+             * Current score based on gameplay
+             */
+            val currentScore: Int = 0,
+
             val camera: Camera = Camera(),
         ) : GameScreenState
 
@@ -350,6 +423,16 @@ class GamePlayViewModel(
              * The static state of the game environment that is generated at game start.
              */
             val environmentState: GameEnvironmentState = GameEnvironmentState(),
+
+            /**
+             * Final score at end of game
+             */
+            val finalScore: Int = 0,
+
+            /**
+             * Time taken to complete mission in seconds
+             */
+            val timeTaken: Float = 0f,
         ) : GameScreenState
     }
 }

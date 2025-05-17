@@ -51,6 +51,15 @@ class Terrain(
         (points.maxByOrNull { it.y }?.y)?.plus(50) ?: 0f
 
     /**
+     * Returns the width of landing pads if available, or null if there are no landing pads.
+     * If multiple landing pads exist, returns the width of the first one.
+     */
+    val landingPadWidth: Float? =
+        landingPads.firstOrNull()?.let { pad ->
+            pad.end.x - pad.start.x
+        }
+
+    /**
      * Checks if the given x coordinate is on a landing pad.
      */
     fun isOnLandingPad(x: Float): Boolean =

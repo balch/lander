@@ -31,6 +31,8 @@ fun ColumnScope.DebugOverlay(
     platform: String,
     landerState: LanderState,
     camera: Camera = Camera(),
+    score: Int = 0,
+    gameTimeSecs: Int = 0,
     fps: Int = 60,
     fontScaler: FontScaler = FontScaler(1f),
     initialExpand: Boolean = false,
@@ -117,6 +119,11 @@ fun ColumnScope.DebugOverlay(
                     fontSize = fontScaler.scale(12.sp)
                 )
                 Text(
+                    text = "Score: $score Time: ${gameTimeSecs}s ",
+                    color = MaterialTheme.colors.onBackground,
+                    fontSize = fontScaler.scale(12.sp),
+                )
+                Text(
                     text = "FPS: $fps",
                     color = MaterialTheme.colors.onBackground,
                     fontSize = fontScaler.scale(12.sp),
@@ -159,6 +166,8 @@ fun DebugOverlayExpandedPreview() {
                 camera = camera,
                 fps = 60,
                 initialExpand = true,
+                score = 200,
+                gameTimeSecs = 30,
             )
         }
     }

@@ -162,6 +162,8 @@ fun PlayingContent(
                 modifier = Modifier.align(Alignment.End),
                 landerState = state.landerState,
                 camera = state.camera,
+                score = state.currentScore,
+                gameTimeSecs = state.gameTimeSeconds.toInt(),
                 fps = state.fps,
                 platform = state.environment.platform.name,
                 fontScaler = fontScaler,
@@ -224,6 +226,14 @@ fun GameOverMessage(
                         Color.Green
                     else
                         Color.Red,
+                    textAlign = TextAlign.Center
+                )
+
+                // Score message
+                Text(
+                    text = "Score: ${uiState.finalScore} Time: ${uiState.timeTaken.toInt()}s",
+                    style = MaterialTheme.typography.body2,
+                    color = MaterialTheme.colors.onSurface,
                     textAlign = TextAlign.Center
                 )
 
