@@ -329,7 +329,7 @@ class PhysicsEngine(
         }
     }
 
-    private fun Float.isZero(tolerance: Float = .01f): Boolean =
+    private fun Float.isZero(tolerance: Float = .1f): Boolean =
         abs(this) < tolerance
 
     /**
