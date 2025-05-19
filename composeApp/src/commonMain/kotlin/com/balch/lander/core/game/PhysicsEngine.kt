@@ -329,8 +329,8 @@ class PhysicsEngine(
         }
     }
 
-    private fun Float.isZero(tolerance: Float = .1f): Boolean =
-        abs(this) < tolerance
+   private fun Float.isZero(tolerance: Float = .1f): Boolean =
+        this == 0f || (this < 0f && abs(this) < tolerance)
 
     /**
      * Determines whether the current position of the lander is colliding with the terrain.
