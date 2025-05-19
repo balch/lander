@@ -1,5 +1,5 @@
 [versions]
-agp = "8.9.2"
+agp = "8.9.3"
 android-compileSdk = "35"
 android-minSdk = "24"
 android-targetSdk = "35"
@@ -14,9 +14,10 @@ androidx-test-junit = "1.2.1"
 compose-multiplatform = "1.8.0"
 junit = "4.13.2"
 koinCore = "4.0.4"
-kotlin = "2.1.20"
+kotlin = "2.1.21"
 kotlinx-coroutines = "1.10.2"
 kotlinxCoroutinesCore = "1.10.2"
+kotlinx-datetime = "0.6.2"
 kmlogging = "2.0.3"
 turbine = "1.2.0"
 lexilabs-basic = "0.2.5"
@@ -39,6 +40,7 @@ androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kmlogging = { module = "org.lighthousegames:logging", version.ref = "kmlogging" }
 lexilabs-basic-sound = { module = "app.lexilabs.basic:basic-sound", version.ref = "lexilabs-basic" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }

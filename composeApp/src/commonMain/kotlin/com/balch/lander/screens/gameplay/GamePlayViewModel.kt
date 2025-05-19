@@ -193,13 +193,11 @@ class GamePlayViewModel(
                 )
 
                 val workEndTime = timeProvider.currentTimeMillis()
-                val workTimeMs =
-                    if (timeProvider.isTimeAccurate) workEndTime - workStartTime
-                    else 0
+                val workTimeMs = workEndTime - workStartTime
                 val sleepTimeMs = maxOf(0L, 16L - workTimeMs)
 
                 logger.verbose {
-                    "Game Loop - End workTimeMs=${workTimeMs.takeIf { timeProvider.isTimeAccurate } ?: "???"} sleepTimeMs=$sleepTimeMs State: $currentGameState"
+                    "Game Loop - End workTimeMs=${workTimeMs} sleepTimeMs=$sleepTimeMs State: $currentGameState"
                 }
                 emit(currentGameState)
 

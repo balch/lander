@@ -27,7 +27,7 @@ import com.balch.lander.core.game.models.ThrustStrength
 import com.balch.lander.core.game.models.Vector2D
 import com.balch.lander.core.utils.FontScaler
 import com.balch.lander.core.utils.StringFormatter
-import com.balch.lander.core.utils.impl.TimeProviderImpl
+import com.balch.lander.core.utils.impl.KotlinxDateTimeProvider
 import com.balch.lander.screens.gameplay.GamePlayViewModel.GameScreenState
 import com.balch.lander.screens.gameplay.widgets.DebugOverlay
 import com.balch.lander.screens.gameplay.widgets.DrawControlPanel
@@ -276,7 +276,7 @@ fun GameOverMessage(
 private val previewConfig: GameConfig by lazy {  GameConfig() }
 
 private val previewTerrain by lazy {
-    TerrainGeneratorImpl(TimeProviderImpl())
+    TerrainGeneratorImpl(KotlinxDateTimeProvider())
         .generateTerrain(previewConfig.screenWidth, previewConfig.screenHeight)
 }
 

@@ -9,7 +9,7 @@ import com.balch.lander.core.game.TerrainGeneratorImpl
 import com.balch.lander.core.game.sound.SoundService
 import com.balch.lander.core.game.sound.impl.SoundServiceImpl
 import com.balch.lander.core.utils.TimeProvider
-import com.balch.lander.core.utils.impl.TimeProviderImpl
+import com.balch.lander.core.utils.impl.KotlinxDateTimeProvider
 import com.balch.lander.screens.gameplay.GamePlayViewModel
 import com.balch.lander.screens.start.StartViewModel
 import org.koin.dsl.module
@@ -24,7 +24,7 @@ val appModule = module {
     single<DispatcherProvider> { DefaultDispatcherProvider() }
     single<SoundService> { SoundServiceImpl() }
     single<TerrainGenerator> { TerrainGeneratorImpl(get()) }
-    single<TimeProvider> { TimeProviderImpl() }
+    single<TimeProvider> { KotlinxDateTimeProvider() }
 
     // ViewModels
     factory { params ->

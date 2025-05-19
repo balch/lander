@@ -15,7 +15,7 @@ import com.balch.lander.GameConfig
 import com.balch.lander.core.game.TerrainGeneratorImpl
 import com.balch.lander.core.game.models.Terrain
 import com.balch.lander.core.game.models.Vector2D
-import com.balch.lander.core.utils.impl.TimeProviderImpl
+import com.balch.lander.core.utils.impl.KotlinxDateTimeProvider
 import com.balch.lander.screens.gameplay.widgets.utils.toDp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -56,7 +56,7 @@ fun DrawScope.drawTerrain(terrain: Terrain, config: GameConfig) {
 @Composable
 fun TerrainPreview() {
     val config = GameConfig()
-    val terrain = TerrainGeneratorImpl(TimeProviderImpl())
+    val terrain = TerrainGeneratorImpl(KotlinxDateTimeProvider())
         .generateTerrain(config.screenWidth, config.screenHeight)
 
     val (width, height) = toDp(Vector2D(config.screenWidth, config.screenHeight), config)

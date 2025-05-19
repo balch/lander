@@ -85,6 +85,9 @@ kotlin {
             // Coroutines
             implementation(libs.kotlinx.coroutines.core)
 
+            // Date and Time
+            implementation(libs.kotlinx.datetime)
+
             // LexiLabs Basic Sound
             implementation(libs.lexilabs.basic.sound)
 
