@@ -11,7 +11,6 @@ import com.balch.lander.core.utils.TimeProvider
  */
 class TestTimeProvider(
     private var currentTimeMillis: Long = 0L,
-    override val isTimeAccurate: Boolean = false,
 ): TimeProvider {
     override fun currentTimeMillis(): Long = currentTimeMillis
     fun advanceTimeBy(millis: Long = 16) {
