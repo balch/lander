@@ -78,7 +78,7 @@ kotlin {
             // Koin for dependency injection
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
-
+            implementation(libs.koin.compose.viewmodel)
             // Logging
             api(libs.kmlogging)
 

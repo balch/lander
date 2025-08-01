@@ -12,6 +12,7 @@ import com.balch.lander.core.utils.TimeProvider
 import com.balch.lander.core.utils.impl.KotlinxDateTimeProvider
 import com.balch.lander.screens.gameplay.GamePlayViewModel
 import com.balch.lander.screens.start.StartViewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 /**
@@ -27,15 +28,6 @@ val appModule = module {
     single<TimeProvider> { KotlinxDateTimeProvider() }
 
     // ViewModels
-    factory { params ->
-        GamePlayViewModel(
-            terrainGenerator = get(),
-            timeProvider = get(),
-            soundService = get(),
-            dispatcherProvider = get(),
-            scopeProvider = get(),
-            platform = get(),
-        )
-    }
-    factory { StartViewModel(get(), get()) }
+    viewModelOf(::GamePlayViewModel)
+    viewModelOf(::StartViewModel)
 }

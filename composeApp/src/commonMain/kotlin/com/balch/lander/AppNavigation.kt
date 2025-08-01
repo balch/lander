@@ -1,11 +1,17 @@
 package com.balch.lander
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.balch.lander.screens.gameplay.GamePlayScreen
 import com.balch.lander.screens.gameplay.GamePlayViewModel
 import com.balch.lander.screens.start.StartScreen
 import com.balch.lander.screens.start.StartViewModel
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * Navigation component for the Lunar Lander application.
@@ -44,7 +50,7 @@ fun GameScreenLauncher(
     gameConfig: GameConfig,
     onBackToStartClicked: () -> Unit,
 ) {
-    val gamePlayViewModel = koinInject<GamePlayViewModel>()
+    val gamePlayViewModel = koinViewModel<GamePlayViewModel>()
 
     val gameScreenState by gamePlayViewModel.uiState.collectAsState()
     GamePlayScreen(
@@ -65,7 +71,7 @@ fun StartScreenLauncher(
     gameConfig: GameConfig,
     onStartGameClicked: (GameConfig) -> Unit,
 ) {
-    val startViewModel = koinInject<StartViewModel>()
+    val startViewModel = koinViewModel<StartViewModel>()
 
     // Collect UI state only when on this screen for better performance
     val startScreenState by startViewModel.uiState.collectAsState()
